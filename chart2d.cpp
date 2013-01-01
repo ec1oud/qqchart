@@ -4,8 +4,9 @@
 #include <QtGui/QOpenGLShaderProgram>
 #include <QtGui/QOpenGLContext>
 
-Chart2D::Chart2D()
-    : m_program(0)
+Chart2D::Chart2D() :
+    m_program(0),
+    m_hzoom(0.1)
 {
 }
 
@@ -66,33 +67,44 @@ void Chart2D::paint()
     int matrixLocation = m_program->uniformLocation("matrix");
     int colorLocation = m_program->uniformLocation("color");
     GLfloat *values = m_model->columnValues(0);
-    qDebug("%f %f %f %f ...", values[0], values[1], values[2], values[3]);
+    qDebug("%f %f %f %f %f %f ...", values[0], values[1], values[2], values[3], values[4], values[5]);
 
     QColor color(255, 255, 255, 255);
 
     QMatrix4x4 pmvMatrix;
-    pmvMatrix.ortho(QRect(QPoint(0,0), window()->size()));
-    qDebug() << "matrix" << pmvMatrix;
+    /*
+      0.003125         0         0        -1
+             0  -0.00625         0         1
+             0         0        -1         0
+             0         0         0         1
+    */
+//    pmvMatrix.ortho(QRect(QPoint(0,0), window()->size()));
+    /*
+      0.003125         0         0        -1
+             0   0.00625         0        -1
+             0         0        -1         0
+             0         0         0         1
+    */
+    pmvMatrix.ortho(0, window()->width(), 0, window()->height(), -1, 1);
+    float vrange = m_model->columnMaxValue(0) - m_model->columnMinValue(0);
+    float vscale = 0.9 * window()->height() / vrange;
+    pmvMatrix.scale(m_hzoom, vscale, 1.0);
+    pmvMatrix.translate(0, 0.05 * vrange - m_model->columnMinValue(0), 0);
+    qDebug() << "matrix" << pmvMatrix << "min" << m_model->columnMinValue(0)
+             << "max" << m_model->columnMaxValue(0) ;
 
     m_program->enableAttributeArray(vertexLocation);
     m_program->setAttributeArray(vertexLocation, values, 2);
     m_program->setUniformValue(matrixLocation, pmvMatrix);
     m_program->setUniformValue(colorLocation, color);
 
-    glClearColor(0, 0, 0.1, 1);
+    glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);
     glDisable(GL_DEPTH_TEST);
     glDrawArrays(GL_LINE_STRIP, 0, m_model->rowCount());
 
     m_program->disableAttributeArray(vertexLocation);
-
-
-
-//    m_program->setUniformValue("hscale", GL_FLOAT, 1.0 / 5000.0);
-//    m_program->setUniformValue("vscale", GL_FLOAT, 1.0 / 40.0);
-//    m_program->setAttributeArray(vertexLocation, values, 2);
 //    glViewport(0, 0, window()->width(), window()->height());
-
 }
 
 void Chart2D::cleanup()
