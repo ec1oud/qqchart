@@ -6,7 +6,7 @@
 
 Chart2D::Chart2D() :
     m_program(0),
-    m_hzoom(0.1)
+    m_hzoom(0.05)
 {
 }
 
@@ -85,13 +85,14 @@ void Chart2D::paint()
              0         0        -1         0
              0         0         0         1
     */
-    pmvMatrix.ortho(0, window()->width(), 0, window()->height(), -1, 1);
+    pmvMatrix.ortho(0, width(), 0, height(), -1, 1);
     float vrange = m_model->columnMaxValue(0) - m_model->columnMinValue(0);
-    float vscale = 0.9 * window()->height() / vrange;
+    float vscale = height() / vrange / 2.0;
     pmvMatrix.scale(m_hzoom, vscale, 1.0);
-    pmvMatrix.translate(0, 0.05 * vrange - m_model->columnMinValue(0), 0);
-    qDebug() << "matrix" << pmvMatrix << "min" << m_model->columnMinValue(0)
-             << "max" << m_model->columnMaxValue(0) ;
+    pmvMatrix.translate(x() / m_hzoom, y() / vscale - m_model->columnMinValue(0), 0);
+    qDebug() << "x" << x() << "height" << height() << "window height" << window()->height()
+             << "matrix" << pmvMatrix << "min" << m_model->columnMinValue(0)
+             << "max" << m_model->columnMaxValue(0) << "vrange" << vrange << "vscale" << vscale;
 
     m_program->enableAttributeArray(vertexLocation);
     m_program->setAttributeArray(vertexLocation, values, 2);
