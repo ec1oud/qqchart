@@ -2,6 +2,7 @@
 #include <QByteArray>
 #include <QDebug>
 #include <QFile>
+#include <math.h>
 
 /*!
  * \brief A data model providing one or more sequences of values (often time-based)
@@ -53,7 +54,7 @@ void DataSequenceModel::readCSV(QIODevice &io)
     m_dataTimestamps.clear();
 
     QByteArray firstLine = io.readLine();
-    QList<QByteArray> labels = firstLine.split(',');
+//    QList<QByteArray> labels = firstLine.split(',');
     QByteArray line(firstLine.length() * 4, 0);
     while (!io.atEnd()) {
         // TODO less stupid, avoid overflow, always read a whole line
@@ -76,5 +77,16 @@ void DataSequenceModel::readCSV(QIODevice &io)
 //        else
 //            qDebug() << colNumbers;
         m_data.append(colNumbers);
+        if (m_maxValues.count() == 0) {
+            m_maxValues = QVector<float>(colNumbers.count(), -INFINITY);
+            m_minValues = QVector<float>(colNumbers.count(), +INFINITY);
+        }
+        for (int i = 0; i < colNumbers.count(); ++i) {
+            if (colNumbers[i] > m_maxValues[i])
+                m_maxValues[i] = colNumbers[i];
+            if (colNumbers[i] < m_minValues[i])
+                m_minValues[i] = colNumbers[i];
+        }
     }
+    qDebug() << "mins" << m_minValues << "maxes" << m_maxValues;
 }

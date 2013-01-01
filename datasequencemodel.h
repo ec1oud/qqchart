@@ -21,6 +21,8 @@ public:
 
     float *columnValues(int col);
     float *columnTimeValues(int col);
+    float columnMinValue(int col) { return m_minValues[col]; }
+    float columnMaxValue(int col) { return m_maxValues[col]; }
 
 signals:
 
@@ -35,6 +37,8 @@ protected:
 protected:
     QVector<QVector<float> > m_data;
     QVector<QDateTime> m_dataTimestamps;
+    QVector<float> m_maxValues;
+    QVector<float> m_minValues;
     float *m_columnValuesCache;
 };
 
