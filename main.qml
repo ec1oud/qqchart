@@ -13,5 +13,27 @@ Item {
 
     Chart2D {
         model: tableModel
+        anchors.fill: parent
+        anchors.margins: 100
+        anchors.topMargin: 50
+        clip: true
+        Rectangle {
+            border.color: "blue"
+            color: "transparent"
+            anchors.fill: parent
+        }
     }
+//    Chart2D {
+//        model: tableModel
+//        anchors.fill: parent
+//        anchors.leftMargin: 100
+//        anchors.rightMargin: 100
+//        anchors.topMargin: 170
+//        clip: true
+//        Rectangle {
+//            border.color: "cyan"
+//            color: "transparent"
+//            anchors.fill: parent
+//        }
+//    }
 }
