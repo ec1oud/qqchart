@@ -3,11 +3,14 @@
 #include <QtQuick/qquickwindow.h>
 #include <QtGui/QOpenGLShaderProgram>
 #include <QtGui/QOpenGLContext>
+#include <QtQuick/qsgnode.h>
+#include <QtQuick/qsgflatcolormaterial.h>
 
 Chart2D::Chart2D() :
     m_program(0),
     m_hzoom(0.05)
 {
+    setFlag(ItemHasContents, true);
 }
 
 void Chart2D::setHorizontalZoom(qreal t)
@@ -20,23 +23,36 @@ void Chart2D::setHorizontalZoom(qreal t)
         window()->update();
 }
 
-void Chart2D::itemChange(ItemChange change, const ItemChangeData &)
+QSGNode *Chart2D::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
 {
-    // The ItemSceneChange event is sent when we are first attached to a window.
-    if (change == ItemSceneChange) {
-        QQuickWindow *c = window();
-        if (!c)
-            return;
+    QSGGeometryNode *node = 0;
+    QSGGeometry *geometry = 0;
 
-        // Connect the beforeRendering signal to our paint function.
-        // Since this call is executed on the rendering thread it must be
-        // a Qt::DirectConnection
-        connect(c, SIGNAL(beforeRendering()), this, SLOT(paint()), Qt::DirectConnection);
-
-        // If we allow QML to do the clearing, they would clear what we paint
-        // and nothing would show.
-        c->setClearBeforeRendering(false);
+    if (!oldNode) {
+        node = new QSGGeometryNode;
+        geometry = new QSGGeometry(QSGGeometry::defaultAttributes_Point2D(), m_model->rowCount());
+        geometry->setLineWidth(2);
+        geometry->setDrawingMode(GL_LINE_STRIP);
+        node->setGeometry(geometry);
+        node->setFlag(QSGNode::OwnsGeometry);
+        QSGFlatColorMaterial *material = new QSGFlatColorMaterial;
+        material->setColor(QColor(255, 0, 0));
+        node->setMaterial(material);
+        node->setFlag(QSGNode::OwnsMaterial);
+    } else {
+        node = static_cast<QSGGeometryNode *>(oldNode);
+        geometry = node->geometry();
+        geometry->allocate(m_model->rowCount());
     }
+
+//    QRectF bounds = boundingRect();
+    QSGGeometry::Point2D *vertices = geometry->vertexDataAsPoint2D();
+    GLfloat *values = m_model->columnValues(0);
+    for (int i = 0; i < m_model->rowCount(); ++i) {
+        vertices[i].set(values[i * 2] * 0.1, values[i * 2 + 1]);
+    }
+
+    return node;
 }
 
 void Chart2D::paint()
