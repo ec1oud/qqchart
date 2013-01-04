@@ -21,11 +21,10 @@ public:
     void setModel(DataSequenceModel *m) { m_model = m; }
     DataSequenceModel *model() { return m_model; }
 
+    QSGNode *updatePaintNode(QSGNode *, UpdatePaintNodeData *);
+
 signals:
     void horizontalZoomChanged();
-
-protected:
-    void itemChange(ItemChange change, const ItemChangeData &);
 
 public slots:
     void paint();
