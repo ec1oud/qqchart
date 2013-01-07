@@ -2,7 +2,7 @@ import QtQuick 2.0
 import QQChart 1.0
 
 Item {
-
+    id: root
     width: 640
     height: 320
 
@@ -11,30 +11,40 @@ Item {
         csvSourceFile: "table.csv"
     }
 
-    Chart2D {
-        model: tableModel
+    Column {
         anchors.fill: parent
-        anchors.margins: 100
-        anchors.topMargin: 50
-//        clip: true
+        anchors.leftMargin: 10
+
         Rectangle {
-            border.color: "blue"
-            color: "transparent"
-            anchors.fill: parent
+            width: 10
+            height: 10
         }
-    }
-    Chart2D {
-        model: tableModel
-        anchors.fill: parent
-        anchors.leftMargin: 100
-        anchors.rightMargin: 100
-        anchors.topMargin: 230
-        anchors.bottomMargin: 3
-        clip: true
+
+        Chart2D {
+            model: tableModel
+            x:50
+            height: 50; width: 600
+            //        clip: true
+            Rectangle {
+                border.color: "black"
+                color: "transparent"
+                anchors.fill: parent
+            }
+        }
         Rectangle {
-            border.color: "cyan"
-            color: "transparent"
-            anchors.fill: parent
+            width: 10
+            height: 10
+        }
+        Chart2D {
+            model: tableModel
+            height: root.height / 2; width: 600
+            color: "blue"
+            //        clip: true
+            Rectangle {
+                border.color: "cyan"
+                color: "transparent"
+                anchors.fill: parent
+            }
         }
     }
 }

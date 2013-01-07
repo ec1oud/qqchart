@@ -1,4 +1,5 @@
 QT += qml quick
+CONFIG += debug
 
 HEADERS += chart2d.h \
     datasequencemodel.h
