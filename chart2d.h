@@ -27,7 +27,7 @@ public:
     };
 
 public:
-    Chart2D();
+    Chart2D(QQuickItem * parent = 0);
 
     qreal horizontalZoom() const { return m_hzoom; }
     void setHorizontalZoom(qreal hz);
