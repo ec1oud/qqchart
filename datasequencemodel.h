@@ -20,7 +20,7 @@ public:
     QVariant data ( const QModelIndex & index, int role = Qt::DisplayRole ) const;
 
     float *columnValues(int col);
-    float *columnTimeValues(int col);
+//    float *columnTimeValues(int col);
     float columnMinValue(int col) { return m_minValues[col]; }
     float columnMaxValue(int col) { return m_maxValues[col]; }
 

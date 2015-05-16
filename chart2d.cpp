@@ -14,10 +14,11 @@ public:
     const char *vertexShader() const {
         return
             "attribute highp vec4 vertex;\n"
+            "uniform highp mat4 data_transform;\n"
             "uniform highp mat4 qt_Matrix;\n"
             "void main(void)\n"
             "{\n"
-            "   gl_Position = qt_Matrix * vertex;\n"
+            "   gl_Position = qt_Matrix * data_transform * vertex;\n"
             "}";
     }
     const char *fragmentShader() const {
@@ -34,12 +35,12 @@ public:
 
     void updateState(const Chart2D::TimeValueShaderParams *p, const Chart2D::TimeValueShaderParams *) {
         program()->setUniformValue(m_uColor, p->color);
-//        program()->setUniformValue(m_uMatrix, p->pmvMatrix);
+        program()->setUniformValue(m_uMatrix, p->pmvMatrix);
     }
 
     void resolveUniforms() {
         m_uColor = program()->uniformLocation("color");
-        m_uMatrix = program()->uniformLocation(uniformMatrixName());
+        m_uMatrix = program()->uniformLocation("data_transform");
     }
 
 private:
@@ -49,9 +50,10 @@ private:
 
 
 
-Chart2D::Chart2D() :
+Chart2D::Chart2D(QQuickItem *parent) :
+    QQuickItem(parent),
     m_program(0),
-    m_hzoom(0.05)
+    m_hzoom(0.1)
 {
     setFlag(ItemHasContents, true);
     m_material = TimeValueShader::createMaterial();
@@ -63,8 +65,7 @@ void Chart2D::setHorizontalZoom(qreal t)
         return;
     m_hzoom = t;
     emit horizontalZoomChanged();
-    if (window())
-        window()->update();
+    update();
 }
 
 QSGNode *Chart2D::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
@@ -72,6 +73,7 @@ QSGNode *Chart2D::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
     QSGGeometryNode *node = 0;
     QSGGeometry *geometry = 0;
 
+    // TODO avoid updating vertices unnecessarily
     if (!oldNode) {
         node = new QSGGeometryNode;
         geometry = new QSGGeometry(QSGGeometry::defaultAttributes_Point2D(), m_model->rowCount());
@@ -84,6 +86,7 @@ QSGNode *Chart2D::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
         QSGGeometry::Point2D *vertices = geometry->vertexDataAsPoint2D();
         GLfloat *values = m_model->columnValues(0);
         for (int i = 0; i < m_model->rowCount(); ++i) {
+//qDebug() << i << values[i * 2] << values[i * 2 + 1];
             vertices[i].set(values[i * 2], values[i * 2 + 1]);
         }
     } else {
@@ -93,6 +96,8 @@ QSGNode *Chart2D::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
     }
     node->markDirty(QSGNode::DirtyMaterial | QSGNode::DirtyForceUpdate);
 
+    float vrange = m_model->columnMaxValue(0) - m_model->columnMinValue(0);
+    float vscale = height() / vrange;
     /*
       0.003125         0         0        -1
              0   0.00625         0        -1
@@ -100,11 +105,8 @@ QSGNode *Chart2D::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
              0         0         0         1
     */
     QMatrix4x4 matrix;
-    matrix.ortho(x(), width(), y() + height(), y(), -1, 1);
-    float vrange = m_model->columnMaxValue(0) - m_model->columnMinValue(0);
-    float vscale = height() / vrange / 2.0;
-    matrix.translate(0, - m_model->columnMinValue(0));
     matrix.scale(m_hzoom, vscale, 1.0);
+    matrix.translate(0, m_model->columnMinValue(0) * -vscale);
     m_material->state()->pmvMatrix = matrix;
     m_material->state()->color = m_color;
     qDebug() << "bounds" << boundingRect()

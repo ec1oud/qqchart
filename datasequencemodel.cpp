@@ -55,22 +55,31 @@ void DataSequenceModel::readCSV(QIODevice &io)
 
     QByteArray firstLine = io.readLine();
 //    QList<QByteArray> labels = firstLine.split(',');
-    QByteArray line(firstLine.length() * 4, 0);
     while (!io.atEnd()) {
         // TODO less stupid, avoid overflow, always read a whole line
-        qint64 len = io.readLine(line.data(), line.capacity());
-        QList<QByteArray> cols = line.split(',');
+        QByteArray line = io.readLine(firstLine.length() * 4);
+        QList<QByteArray> cols = line.trimmed().split(',');
+//qDebug() << cols;
         QVector<float> colNumbers;
+        bool allOK = true;
         foreach(QByteArray val, cols) {
+            val = val.trimmed();
             bool ok = false;
             double dv = val.toDouble(&ok);
             if (ok)
                 colNumbers.append(dv);
             else {
                 QDateTime dt = QDateTime::fromString(val, "yyyy-MM-dd");
-                if (dt.isValid())
+                ok = dt.isValid();
+                if (ok)
                     m_dataTimestamps.append(dt);
             }
+            if (!ok)
+                allOK = false;
+        }
+        if (!allOK) {
+            qDebug() << "ignoring line" << line;
+            continue;
         }
 //        if (!m_dataTimestamps.isEmpty())
 //            qDebug() << m_dataTimestamps.last() << colNumbers;
@@ -88,5 +97,5 @@ void DataSequenceModel::readCSV(QIODevice &io)
                 m_minValues[i] = colNumbers[i];
         }
     }
-    qDebug() << "mins" << m_minValues << "maxes" << m_maxValues;
+    qDebug() << "rows" << m_data.count() << "mins" << m_minValues << "maxes" << m_maxValues;
 }

@@ -1,50 +1,32 @@
 import QtQuick 2.0
 import QQChart 1.0
 
-Item {
+Rectangle {
     id: root
-    width: 640
-    height: 320
+    color: "black"
+    width: chart.width + 12
+    height: chart.height + 12
 
     DataSequenceModel {
         id: tableModel
-        csvSourceFile: "table.csv"
+        csvSourceFile: "aapl.csv"
     }
 
-    Column {
-        anchors.fill: parent
-        anchors.leftMargin: 10
-
+    Chart2D {
+        id: chart
+        model: tableModel
+        width: 815.6; height: 702.41
+        anchors.centerIn: parent
+        color: "cyan"
+        //        clip: true
         Rectangle {
-            width: 10
-            height: 10
+            border.color: "yellow"
+            color: "transparent"
+            anchors.fill: parent
         }
-
-        Chart2D {
-            model: tableModel
-            x:50
-            height: 50; width: 600
-            //        clip: true
-            Rectangle {
-                border.color: "black"
-                color: "transparent"
-                anchors.fill: parent
-            }
-        }
-        Rectangle {
-            width: 10
-            height: 10
-        }
-        Chart2D {
-            model: tableModel
-            height: root.height / 2; width: 600
-            color: "blue"
-            //        clip: true
-            Rectangle {
-                border.color: "cyan"
-                color: "transparent"
-                anchors.fill: parent
-            }
+        MouseArea {
+            anchors.fill: parent
+            onWheel: chart.horizontalZoom += chart.horizontalZoom * (wheel.angleDelta.y / 120 * 0.1)
         }
     }
 }
