@@ -97,7 +97,7 @@ QSGNode *Chart2D::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
     node->markDirty(QSGNode::DirtyMaterial | QSGNode::DirtyForceUpdate);
 
     float vrange = m_model->columnMaxValue(0) - m_model->columnMinValue(0);
-    float vscale = height() / vrange;
+    float vscale = height() / m_model->columnMaxValue(0);
     /*
       0.003125         0         0        -1
              0   0.00625         0        -1
@@ -105,13 +105,17 @@ QSGNode *Chart2D::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
              0         0         0         1
     */
     QMatrix4x4 matrix;
+    // flip horizontally because latest data comes first,
+    // and flip vertically because we are graphing data in the first quadrant
+    matrix.scale(-1.0, -1.0, 1.0);
+    matrix.translate(-width(), -height());
+    // scale to fit
     matrix.scale(m_hzoom, vscale, 1.0);
-    matrix.translate(0, m_model->columnMinValue(0) * -vscale);
     m_material->state()->pmvMatrix = matrix;
     m_material->state()->color = m_color;
     qDebug() << "bounds" << boundingRect()
              << "matrix" << m_material->state()->pmvMatrix << "min" << m_model->columnMinValue(0)
-             << "max" << m_model->columnMaxValue(0) << "vrange" << vrange << "vscale" << vscale << "node" << node;
+             << "max" << m_model->columnMaxValue(0) << "vrange" << vrange << "vscale" << vscale << "hzoom" << m_hzoom;
 
     return node;
 }
