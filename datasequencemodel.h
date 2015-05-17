@@ -45,6 +45,8 @@ protected:
     QVector<float> m_minValues;
     float m_minTime;
     float m_maxTime;
+
+friend class Chart2D;
 };
 
 #endif // DATASEQUENCEMODEL_H

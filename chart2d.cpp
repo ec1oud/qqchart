@@ -14,11 +14,21 @@ public:
     const char *vertexShader() const {
         return
             "attribute highp vec4 vertex;\n"
+            "uniform highp vec4 xclip;\n"
             "uniform highp mat4 data_transform;\n"
             "uniform highp mat4 qt_Matrix;\n"
             "void main(void)\n"
             "{\n"
-            "   gl_Position = qt_Matrix * data_transform * vertex;\n"
+            "   vec4 vtx = vertex;\n"
+            "   if (vertex.x > xclip.z) {\n"
+            "     vtx.x = xclip.z;\n"
+            "     vtx.y = xclip.w;\n"
+            "   }\n"
+            "   if (vertex.x < xclip.x) {\n"
+            "     vtx.x = xclip.x;\n"
+            "     vtx.y = xclip.y;\n"
+            "   }\n"
+            "   gl_Position = qt_Matrix * data_transform * vtx;\n"
             "}";
     }
     const char *fragmentShader() const {
@@ -34,16 +44,20 @@ public:
     QList<QByteArray> attributes() const { return QList<QByteArray>() << "vertex"; }
 
     void updateState(const Chart2D::TimeValueShaderParams *p, const Chart2D::TimeValueShaderParams *) {
+//qDebug() << "xclip" << p->xclip;
+        program()->setUniformValue(m_uXClip, p->xclip);
         program()->setUniformValue(m_uColor, p->color);
         program()->setUniformValue(m_uMatrix, p->pmvMatrix);
     }
 
     void resolveUniforms() {
+        m_uXClip = program()->uniformLocation("xclip");
         m_uColor = program()->uniformLocation("color");
         m_uMatrix = program()->uniformLocation("data_transform");
     }
 
 private:
+    int m_uXClip;
     int m_uColor;
     int m_uMatrix;
 };
@@ -116,12 +130,16 @@ QSGNode *Chart2D::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
     matrix.translate(0., -height());
     // scale to fit
     matrix.scale(m_hzoom, vscale, 1.0);
+    float rightClipTime = width() / m_hzoom;
+    int nearestIndex = std::lower_bound(m_model->m_times.begin(), m_model->m_times.end(), rightClipTime) - m_model->m_times.begin();
+    m_material->state()->xclip = QVector4D(0., m_model->columnValues(0)[0], rightClipTime, m_model->columnValues(0)[nearestIndex]);
     m_material->state()->pmvMatrix = matrix;
     m_material->state()->color = m_color;
     qDebug() << "bounds" << boundingRect()
              << "matrix" << m_material->state()->pmvMatrix << "min" << m_model->columnMinValue(0)
              << "max" << m_model->columnMaxValue(0) << "vrange" << vrange << "vscale" << vscale
-             << "time range" << m_model->maxTime() - m_model->minTime() << "hzoom" << m_hzoom;
+             << "time range" << m_model->m_times[0] << m_model->minTime() << "->" << m_model->maxTime() << "hzoom" << m_hzoom
+             << "right clip at time" << rightClipTime << "index" << nearestIndex << "value" << m_material->state()->xclip.w();
 
     return node;
 }
