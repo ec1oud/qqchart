@@ -1,0 +1,4 @@
+don't send all data if it can't fit; clip dynamically
+zoom dynamically
+find y(x) in both pixels and real data
+send x and y vectors separately to vertex shader if possible
