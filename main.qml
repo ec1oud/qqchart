@@ -15,7 +15,7 @@ Rectangle {
     Chart2D {
         id: chart
         model: tableModel
-        width: 815.6; height: 702.41
+        width: 600; height: 400
         anchors.centerIn: parent
         color: "cyan"
         //        clip: true
