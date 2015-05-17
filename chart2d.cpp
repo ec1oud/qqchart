@@ -53,7 +53,7 @@ private:
 Chart2D::Chart2D(QQuickItem *parent) :
     QQuickItem(parent),
     m_program(0),
-    m_hzoom(7e-07)
+    m_hzoom(1.)
 {
     setFlag(ItemHasContents, true);
     m_material = TimeValueShader::createMaterial();
@@ -66,6 +66,11 @@ void Chart2D::setHorizontalZoom(qreal t)
     m_hzoom = t;
     emit horizontalZoomChanged();
     update();
+}
+
+void Chart2D::fitAll()
+{
+    m_hzoom = width() / (m_model->maxTime() - m_model->minTime());
 }
 
 QSGNode *Chart2D::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
@@ -90,6 +95,7 @@ QSGNode *Chart2D::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
             vertices[i].set(times[i] - minTime, values[i]);
 //qDebug() << vertices[i].x << vertices[i].y;
         }
+        fitAll();
     } else {
         node = static_cast<QSGGeometryNode *>(oldNode);
         geometry = node->geometry();

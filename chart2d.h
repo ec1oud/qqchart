@@ -32,6 +32,8 @@ public:
     qreal horizontalZoom() const { return m_hzoom; }
     void setHorizontalZoom(qreal hz);
 
+    Q_INVOKABLE void fitAll();
+
     void setModel(DataSequenceModel *m) { m_model = m; }
     DataSequenceModel *model() { return m_model; }
 
