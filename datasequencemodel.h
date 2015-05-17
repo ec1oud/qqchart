@@ -16,9 +16,12 @@ public:
     explicit DataSequenceModel(QObject *parent = 0);
     static DataSequenceModel *fromCSV(const char* filepath);
     
-    int rowCount ( const QModelIndex & parent = QModelIndex() ) const { return m_data.count(); }
+    int rowCount ( const QModelIndex & parent = QModelIndex() ) const { return m_times.count(); }
     QVariant data ( const QModelIndex & index, int role = Qt::DisplayRole ) const;
 
+    float *times() { return m_times.data(); }
+    float minTime() { return m_minTime; }
+    float maxTime() { return m_maxTime; }
     float *columnValues(int col);
 //    float *columnTimeValues(int col);
     float columnMinValue(int col) { return m_minValues[col]; }
@@ -35,11 +38,13 @@ protected:
     void readCSV(QIODevice &io);
 
 protected:
-    QVector<QVector<float> > m_data;
+    QVector<QVector<float> > m_data; // columns
+    QVector<float> m_times;
     QVector<QDateTime> m_dataTimestamps;
     QVector<float> m_maxValues;
     QVector<float> m_minValues;
-    float *m_columnValuesCache;
+    float m_minTime;
+    float m_maxTime;
 };
 
 #endif // DATASEQUENCEMODEL_H
