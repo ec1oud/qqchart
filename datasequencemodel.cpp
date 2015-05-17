@@ -9,11 +9,11 @@
  * \param parent
  */
 DataSequenceModel::DataSequenceModel(QObject *parent) :
-    QAbstractListModel(parent), m_columnValuesCache(0)
+    QAbstractListModel(parent), m_minTime(0.), m_maxTime(0.)
 {
 }
 
-QVariant DataSequenceModel::data ( const QModelIndex & index, int role ) const
+QVariant DataSequenceModel::data ( const QModelIndex & index, int /*role*/ ) const
 {
 //    if (index.column() > 0) {
         QVector<float> row = m_data[index.row()];
@@ -24,21 +24,15 @@ QVariant DataSequenceModel::data ( const QModelIndex & index, int role ) const
 
 float *DataSequenceModel::columnValues(int col)
 {
-    int rowCount = m_data.count();
-    if (!m_columnValuesCache)
-        m_columnValuesCache = (float *)malloc(rowCount * 2 * sizeof(float));
-    // TODO avoid this if the same col is requested twice
-    // or maybe just store data in cols in the first place
-    for (int i = 0; i < rowCount; ++i) {
-        int j = i * 2;
-        m_columnValuesCache[j] = i;
-        m_columnValuesCache[j + 1] = m_data[i][col];
-    }
-    return m_columnValuesCache;
+    return m_data[col].data();
 }
 
 void DataSequenceModel::setCSVSource(QUrl sourcePath)
 {
+    if (sourcePath.isLocalFile())
+        setCSVFile(sourcePath.toLocalFile());
+    else
+        qDebug() << "opening non-local files is unimplemented:" << sourcePath;
 }
 
 void DataSequenceModel::setCSVFile(QString filePath)
@@ -54,7 +48,8 @@ void DataSequenceModel::readCSV(QIODevice &io)
     m_dataTimestamps.clear();
 
     QByteArray firstLine = io.readLine();
-//    QList<QByteArray> labels = firstLine.split(',');
+    QList<QByteArray> labels = firstLine.split(',');
+    m_data.resize(labels.length() - 1); // assume one column is time, which is stored separately
     while (!io.atEnd()) {
         // TODO less stupid, avoid overflow, always read a whole line
         QByteArray line = io.readLine(firstLine.length() * 4);
@@ -62,6 +57,7 @@ void DataSequenceModel::readCSV(QIODevice &io)
 //qDebug() << cols;
         QVector<float> colNumbers;
         bool allOK = true;
+        QDateTime dt;
         foreach(QByteArray val, cols) {
             val = val.trimmed();
             bool ok = false;
@@ -69,10 +65,8 @@ void DataSequenceModel::readCSV(QIODevice &io)
             if (ok)
                 colNumbers.append(dv);
             else {
-                QDateTime dt = QDateTime::fromString(val, "yyyy-MM-dd");
+                dt = QDateTime::fromString(val, "yyyy-MM-dd");
                 ok = dt.isValid();
-                if (ok)
-                    m_dataTimestamps.append(dt);
             }
             if (!ok)
                 allOK = false;
@@ -85,7 +79,16 @@ void DataSequenceModel::readCSV(QIODevice &io)
 //            qDebug() << m_dataTimestamps.last() << colNumbers;
 //        else
 //            qDebug() << colNumbers;
-        m_data.append(colNumbers);
+        m_dataTimestamps.append(dt);
+        float time = dt.toMSecsSinceEpoch() / 1000.0;
+        m_times.append(time);
+        int vi = 0;
+        foreach (float v, colNumbers)
+            m_data[vi++].append(v);
+        if (time < m_minTime || m_minTime == 0.)
+            m_minTime = time;
+        if (time > m_maxTime)
+            m_maxTime = time;
         if (m_maxValues.count() == 0) {
             m_maxValues = QVector<float>(colNumbers.count(), -INFINITY);
             m_minValues = QVector<float>(colNumbers.count(), +INFINITY);
@@ -97,5 +100,6 @@ void DataSequenceModel::readCSV(QIODevice &io)
                 m_minValues[i] = colNumbers[i];
         }
     }
-    qDebug() << "rows" << m_data.count() << "mins" << m_minValues << "maxes" << m_maxValues;
+    qDebug() << "cols" << m_data.count() << "rows" << m_data[0].count()
+             << "mins" << m_minValues << "maxes" << m_maxValues;
 }

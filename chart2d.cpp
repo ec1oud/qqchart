@@ -53,7 +53,7 @@ private:
 Chart2D::Chart2D(QQuickItem *parent) :
     QQuickItem(parent),
     m_program(0),
-    m_hzoom(0.1)
+    m_hzoom(7e-07)
 {
     setFlag(ItemHasContents, true);
     m_material = TimeValueShader::createMaterial();
@@ -73,7 +73,6 @@ QSGNode *Chart2D::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
     QSGGeometryNode *node = 0;
     QSGGeometry *geometry = 0;
 
-    // TODO avoid updating vertices unnecessarily
     if (!oldNode) {
         node = new QSGGeometryNode;
         geometry = new QSGGeometry(QSGGeometry::defaultAttributes_Point2D(), m_model->rowCount());
@@ -84,15 +83,16 @@ QSGNode *Chart2D::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
         node->setFlag(QSGNode::OwnsMaterial);
         node->setMaterial(m_material);
         QSGGeometry::Point2D *vertices = geometry->vertexDataAsPoint2D();
+        GLfloat *times = m_model->times();
         GLfloat *values = m_model->columnValues(0);
+        float minTime = m_model->minTime();
         for (int i = 0; i < m_model->rowCount(); ++i) {
-//qDebug() << i << values[i * 2] << values[i * 2 + 1];
-            vertices[i].set(values[i * 2], values[i * 2 + 1]);
+            vertices[i].set(times[i] - minTime, values[i]);
+//qDebug() << vertices[i].x << vertices[i].y;
         }
     } else {
         node = static_cast<QSGGeometryNode *>(oldNode);
         geometry = node->geometry();
-//        geometry->allocate(m_model->rowCount());
     }
     node->markDirty(QSGNode::DirtyMaterial | QSGNode::DirtyForceUpdate);
 
@@ -105,17 +105,17 @@ QSGNode *Chart2D::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
              0         0         0         1
     */
     QMatrix4x4 matrix;
-    // flip horizontally because latest data comes first,
-    // and flip vertically because we are graphing data in the first quadrant
-    matrix.scale(-1.0, -1.0, 1.0);
-    matrix.translate(-width(), -height());
+    // Flip vertically because we are graphing data in the first quadrant
+    matrix.scale(1.0, -1.0, 1.0);
+    matrix.translate(0., -height());
     // scale to fit
     matrix.scale(m_hzoom, vscale, 1.0);
     m_material->state()->pmvMatrix = matrix;
     m_material->state()->color = m_color;
     qDebug() << "bounds" << boundingRect()
              << "matrix" << m_material->state()->pmvMatrix << "min" << m_model->columnMinValue(0)
-             << "max" << m_model->columnMaxValue(0) << "vrange" << vrange << "vscale" << vscale << "hzoom" << m_hzoom;
+             << "max" << m_model->columnMaxValue(0) << "vrange" << vrange << "vscale" << vscale
+             << "time range" << m_model->maxTime() - m_model->minTime() << "hzoom" << m_hzoom;
 
     return node;
 }
