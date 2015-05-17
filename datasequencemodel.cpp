@@ -51,7 +51,6 @@ void DataSequenceModel::readCSV(QIODevice &io)
     QList<QByteArray> labels = firstLine.split(',');
     m_data.resize(labels.length() - 1); // assume one column is time, which is stored separately
     while (!io.atEnd()) {
-        // TODO less stupid, avoid overflow, always read a whole line
         QByteArray line = io.readLine(firstLine.length() * 4);
         QList<QByteArray> cols = line.trimmed().split(',');
 //qDebug() << cols;
@@ -75,10 +74,6 @@ void DataSequenceModel::readCSV(QIODevice &io)
             qDebug() << "ignoring line" << line;
             continue;
         }
-//        if (!m_dataTimestamps.isEmpty())
-//            qDebug() << m_dataTimestamps.last() << colNumbers;
-//        else
-//            qDebug() << colNumbers;
         m_dataTimestamps.append(dt);
         float time = dt.toMSecsSinceEpoch() / 1000.0;
         m_times.append(time);
@@ -100,6 +95,13 @@ void DataSequenceModel::readCSV(QIODevice &io)
                 m_minValues[i] = colNumbers[i];
         }
     }
+    // Reverse the data, assuming the newest values came first.
+    // It doesn't matter for rendering, but Chart2D uses std::lower_bound,
+    // which only works if time is in ascending order.
+    for (int i = 0; i < m_data.size(); ++i)
+        std::reverse(m_data[i].begin(), m_data[i].end());
+    std::reverse(m_times.begin(), m_times.end());
+
     qDebug() << "cols" << m_data.count() << "rows" << m_data[0].count()
              << "mins" << m_minValues << "maxes" << m_maxValues;
 }

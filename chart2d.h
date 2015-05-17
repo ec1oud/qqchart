@@ -18,6 +18,7 @@ public:
     struct TimeValueShaderParams
     {
         float vscale;
+        QVector4D xclip;
         QMatrix4x4 pmvMatrix;
         QColor color;
 
