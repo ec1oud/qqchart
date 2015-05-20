@@ -71,6 +71,7 @@ Chart2D::Chart2D(QQuickItem *parent) :
 {
     setFlag(ItemHasContents, true);
     m_material = TimeValueShader::createMaterial();
+    m_gridMaterial = TimeValueShader::createMaterial();
 }
 
 void Chart2D::setHorizontalZoom(qreal t)
@@ -89,32 +90,62 @@ void Chart2D::fitAll()
 
 QSGNode *Chart2D::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
 {
-    QSGGeometryNode *node = 0;
+    QSGNode *node = 0;
     QSGGeometry *geometry = 0;
 
     if (!oldNode) {
-        node = new QSGGeometryNode;
+        node = new QSGNode;
+        int yearCount = 0;
+
+        QSGGeometryNode *graphNode = new QSGGeometryNode;
         geometry = new QSGGeometry(QSGGeometry::defaultAttributes_Point2D(), m_model->rowCount());
 //        geometry->setLineWidth(2);
         geometry->setDrawingMode(GL_LINE_STRIP);
-        node->setGeometry(geometry);
-        node->setFlag(QSGNode::OwnsGeometry);
-        node->setFlag(QSGNode::OwnsMaterial);
-        node->setMaterial(m_material);
+        graphNode->setGeometry(geometry);
+        graphNode->setFlag(QSGNode::OwnsGeometry);
+        graphNode->setFlag(QSGNode::OwnsMaterial);
+        graphNode->setMaterial(m_material);
         QSGGeometry::Point2D *vertices = geometry->vertexDataAsPoint2D();
         GLfloat *times = m_model->times();
         GLfloat *values = m_model->columnValues(0);
         float minTime = m_model->minTime();
+        int firstYear = QDateTime::fromMSecsSinceEpoch(qint64(minTime * 1000.0)).date().year();
+        float nextYear = QDateTime(QDate(firstYear, 1, 1)).toMSecsSinceEpoch() / 1000.0;
         for (int i = 0; i < m_model->rowCount(); ++i) {
             vertices[i].set(times[i] - minTime, values[i]);
+            if (times[i] >= nextYear) {
+                ++yearCount;
+                nextYear = QDateTime(QDate(firstYear + yearCount, 1, 1)).toMSecsSinceEpoch() / 1000.0;
+            }
 //qDebug() << vertices[i].x << vertices[i].y;
         }
+        node->appendChildNode(graphNode);
+        graphNode->markDirty(QSGNode::DirtyMaterial | QSGNode::DirtyGeometry | QSGNode::DirtyForceUpdate | QSGNode::DirtySubtreeBlocked);
+
+qDebug() << "data spans years" << firstYear << firstYear + yearCount;
+        QSGGeometryNode *gridNode = new QSGGeometryNode;
+        QSGGeometry *gridGeometry = new QSGGeometry(QSGGeometry::defaultAttributes_Point2D(), yearCount * 2);
+        QSGGeometry::Point2D *gridv = gridGeometry->vertexDataAsPoint2D();
+        for (int yearI = 0; yearI < yearCount; ++yearI) {
+            float t = QDateTime(QDate(firstYear + yearI, 1, 1)).toMSecsSinceEpoch() / 1000.0 - minTime;
+            gridv[yearI * 2].set(t, 0.);
+            gridv[yearI * 2 + 1].set(t, 5.);
+        }
+//        gridGeometry->setLineWidth(5);
+        gridGeometry->setDrawingMode(GL_LINES);
+        gridNode->setGeometry(gridGeometry);
+        gridNode->setFlag(QSGNode::OwnsGeometry);
+        gridNode->setFlag(QSGNode::OwnsMaterial);
+        gridNode->setMaterial(m_gridMaterial);
+        node->appendChildNode(gridNode);
+        gridNode->markDirty(QSGNode::DirtyMaterial | QSGNode::DirtyGeometry | QSGNode::DirtyForceUpdate | QSGNode::DirtySubtreeBlocked);
+
         fitAll();
+        node->markDirty(QSGNode::DirtyMatrix | QSGNode::DirtyNodeAdded | QSGNode::DirtyMaterial | QSGNode::DirtyForceUpdate | QSGNode::DirtySubtreeBlocked);
     } else {
-        node = static_cast<QSGGeometryNode *>(oldNode);
-        geometry = node->geometry();
+        node = oldNode;
+        node->markDirty(QSGNode::DirtyForceUpdate);
     }
-    node->markDirty(QSGNode::DirtyMaterial | QSGNode::DirtyForceUpdate);
 
     float vrange = m_model->columnMaxValue(0) - m_model->columnMinValue(0);
     float vscale = height() / m_model->columnMaxValue(0);
@@ -135,11 +166,24 @@ QSGNode *Chart2D::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
     m_material->state()->xclip = QVector4D(0., m_model->columnValues(0)[0], rightClipTime, m_model->columnValues(0)[nearestIndex]);
     m_material->state()->pmvMatrix = matrix;
     m_material->state()->color = m_color;
+
+    // matrix for tick marks
+    matrix = QMatrix4x4();
+    // Flip vertically because we are graphing data in the first quadrant
+    matrix.scale(1.0, -1.0, 1.0);
+    matrix.translate(0., -height());
+    // scale horizontally only
+    matrix.scale(m_hzoom, 1.0, 1.0);
+
+    m_gridMaterial->state()->xclip = QVector4D(0., m_model->columnValues(0)[0], rightClipTime, m_model->columnValues(0)[nearestIndex]);
+    m_gridMaterial->state()->pmvMatrix = matrix;
+    m_gridMaterial->state()->color = m_gridColor;
     qDebug() << "bounds" << boundingRect()
              << "matrix" << m_material->state()->pmvMatrix << "min" << m_model->columnMinValue(0)
              << "max" << m_model->columnMaxValue(0) << "vrange" << vrange << "vscale" << vscale
              << "time range" << m_model->m_times[0] << m_model->minTime() << "->" << m_model->maxTime() << "hzoom" << m_hzoom
-             << "right clip at time" << rightClipTime << "index" << nearestIndex << "value" << m_material->state()->xclip.w();
+             << "right clip at time" << rightClipTime << "index" << nearestIndex << "value" << m_material->state()->xclip.w()
+             << "colors" << m_material->state()->color << m_gridMaterial->state()->color;
 
     return node;
 }

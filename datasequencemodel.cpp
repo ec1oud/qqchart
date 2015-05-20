@@ -27,12 +27,13 @@ float *DataSequenceModel::columnValues(int col)
     return m_data[col].data();
 }
 
-void DataSequenceModel::setCSVSource(QUrl sourcePath)
+void DataSequenceModel::setCSVSource(QUrl source)
 {
-    if (sourcePath.isLocalFile())
-        setCSVFile(sourcePath.toLocalFile());
+    m_source = source;
+    if (source.isLocalFile())
+        setCSVFile(source.toLocalFile());
     else
-        qDebug() << "opening non-local files is unimplemented:" << sourcePath;
+        qDebug() << "opening non-local files is unimplemented:" << source;
 }
 
 void DataSequenceModel::setCSVFile(QString filePath)

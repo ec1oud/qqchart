@@ -10,13 +10,13 @@
 class DataSequenceModel : public QAbstractListModel
 {
     Q_OBJECT
-    Q_PROPERTY(QString csvSourceFile WRITE setCSVFile)
+    Q_PROPERTY(QUrl csvSource READ csvSource WRITE setCSVSource)
 
 public:
     explicit DataSequenceModel(QObject *parent = 0);
     static DataSequenceModel *fromCSV(const char* filepath);
     
-    int rowCount ( const QModelIndex & parent = QModelIndex() ) const { return m_times.count(); }
+    int rowCount ( const QModelIndex & = QModelIndex() ) const { return m_times.count(); }
     QVariant data ( const QModelIndex & index, int role = Qt::DisplayRole ) const;
 
     float *times() { return m_times.data(); }
@@ -27,17 +27,20 @@ public:
     float columnMinValue(int col) { return m_minValues[col]; }
     float columnMaxValue(int col) { return m_maxValues[col]; }
 
+    QUrl csvSource() const { return m_source; }
+
 signals:
 
     
 public slots:
-    void setCSVSource(QUrl sourcePath); // TODO column spec - which columns are data and where is the timestamp, if any; or else periodicity
-    void setCSVFile(QString filePath);
+    void setCSVSource(QUrl source); // TODO column spec - which columns are data and where is the timestamp, if any; or else periodicity
 
 protected:
+    void setCSVFile(QString filePath);
     void readCSV(QIODevice &io);
 
 protected:
+    QUrl m_source;
     QVector<QVector<float> > m_data; // columns
     QVector<float> m_times;
     QVector<QDateTime> m_dataTimestamps;
