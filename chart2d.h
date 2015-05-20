@@ -13,6 +13,7 @@ class Chart2D : public QQuickItem
     Q_PROPERTY(qreal horizontalZoom READ horizontalZoom WRITE setHorizontalZoom NOTIFY horizontalZoomChanged)
     Q_PROPERTY(DataSequenceModel* model READ model WRITE setModel)
     Q_PROPERTY(QColor color READ color WRITE setColor)
+    Q_PROPERTY(QColor gridColor READ gridColor WRITE setGridColor)
 
 public:
     struct TimeValueShaderParams
@@ -23,7 +24,7 @@ public:
         QColor color;
 
         int compare(const TimeValueShaderParams *p) const {
-            return p->vscale - vscale;
+            return p->color.rgba() - color.rgba();
         }
     };
 
@@ -40,6 +41,9 @@ public:
 
     void setColor(QColor c) { m_color = c; }
     QColor color() { return m_color; }
+
+    void setGridColor(QColor c) { m_gridColor = c; }
+    QColor gridColor() { return m_gridColor; }
 
     QSGNode *updatePaintNode(QSGNode *, UpdatePaintNodeData *);
 
@@ -59,8 +63,10 @@ protected:
     DataSequenceModel *m_model;
     QOpenGLShaderProgram *m_program;
     QSGSimpleMaterial<TimeValueShaderParams> *m_material;
+    QSGSimpleMaterial<TimeValueShaderParams> *m_gridMaterial;
     qreal m_hzoom;
     QColor m_color;
+    QColor m_gridColor;
 };
 
 #endif // CHART2D_H

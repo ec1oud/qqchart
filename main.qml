@@ -4,20 +4,21 @@ import QQChart 1.0
 Rectangle {
     id: root
     color: "black"
-    width: chart.width + 12
-    height: chart.height + 12
+    width: 640
+    height: 480
 
     DataSequenceModel {
         id: tableModel
-        csvSourceFile: "aapl.csv"
+        csvSource: "aapl.csv"
     }
 
     Chart2D {
         id: chart
         model: tableModel
-        width: 600; height: 400
-        anchors.centerIn: parent
+        anchors.fill: parent
+        anchors.margins: 6
         color: "cyan"
+        gridColor: "yellow"
         //        clip: true
         Rectangle {
             border.color: "yellow"
