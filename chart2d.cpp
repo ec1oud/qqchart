@@ -7,6 +7,8 @@
 #include <QtQuick/qsgnode.h>
 #include <QtQuick/qsgflatcolormaterial.h>
 
+extern bool multisample;
+
 class TimeValueShader : public QSGSimpleMaterialShader<Chart2D::TimeValueShaderParams>
 {
     QSG_DECLARE_SIMPLE_COMPARABLE_SHADER(TimeValueShader, Chart2D::TimeValueShaderParams)
@@ -99,7 +101,7 @@ QSGNode *Chart2D::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
 
         QSGGeometryNode *graphNode = new QSGGeometryNode;
         geometry = new QSGGeometry(QSGGeometry::defaultAttributes_Point2D(), m_model->rowCount());
-//        geometry->setLineWidth(2);
+//        if (subsample) geometry->setLineWidth(1.5);
         geometry->setDrawingMode(GL_LINE_STRIP);
         graphNode->setGeometry(geometry);
         graphNode->setFlag(QSGNode::OwnsGeometry);
@@ -131,7 +133,7 @@ qDebug() << "data spans years" << firstYear << firstYear + yearCount;
             gridv[yearI * 2].set(t, 0.);
             gridv[yearI * 2 + 1].set(t, 5.);
         }
-//        gridGeometry->setLineWidth(5);
+        if (multisample) gridGeometry->setLineWidth(1.5);
         gridGeometry->setDrawingMode(GL_LINES);
         gridNode->setGeometry(gridGeometry);
         gridNode->setFlag(QSGNode::OwnsGeometry);
