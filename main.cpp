@@ -4,6 +4,8 @@
 #include "chart2d.h"
 #include "datasequencemodel.h"
 
+bool multisample = false;
+
 int main(int argc, char **argv)
 {
     QGuiApplication app(argc, argv);
@@ -12,9 +14,13 @@ int main(int argc, char **argv)
     qmlRegisterType<DataSequenceModel>("QQChart", 1, 0, "DataSequenceModel");
 
     QQuickView view;
-//    QSurfaceFormat surfaceFormat = view.requestedFormat();
-//    surfaceFormat.setSamples(16);
-//    view.setFormat(surfaceFormat);
+    // fake antialiasing with multisampling
+    if (!app.arguments().contains(QLatin1String("-n"))) {
+        QSurfaceFormat surfaceFormat = view.requestedFormat();
+        surfaceFormat.setSamples(16);
+        view.setFormat(surfaceFormat);
+        multisample = true;
+    }
     view.setResizeMode(QQuickView::SizeRootObjectToView);
     view.setSource(QUrl("main.qml"));
     view.show();
