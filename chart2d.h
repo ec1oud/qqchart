@@ -14,6 +14,7 @@ class Chart2D : public QQuickItem
     Q_PROPERTY(DataSequenceModel* model READ model WRITE setModel)
     Q_PROPERTY(QColor color READ color WRITE setColor)
     Q_PROPERTY(QColor gridColor READ gridColor WRITE setGridColor)
+    Q_PROPERTY(qreal labelSpaceUnder READ labelSpaceUnder WRITE setLabelSpaceUnder NOTIFY labelSpaceUnderChanged)
 
 public:
     struct TimeValueShaderParams
@@ -47,8 +48,11 @@ public:
 
     QSGNode *updatePaintNode(QSGNode *, UpdatePaintNodeData *);
 
+    qreal labelSpaceUnder() const { return m_labelSpaceUnder; }
+
 signals:
     void horizontalZoomChanged();
+    void labelSpaceUnderChanged();
 
 public slots:
     void cleanup();
@@ -59,6 +63,8 @@ public slots:
 //        update(); QQuickItem::geometryChanged(newGeometry, oldGeometry);
 //    }
 
+    void setLabelSpaceUnder(qreal labelSpaceUnder);
+
 protected:
     DataSequenceModel *m_model;
     QOpenGLShaderProgram *m_program;
@@ -67,6 +73,7 @@ protected:
     qreal m_hzoom;
     QColor m_color;
     QColor m_gridColor;
+    qreal m_labelSpaceUnder;
 };
 
 #endif // CHART2D_H

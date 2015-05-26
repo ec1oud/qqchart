@@ -6,6 +6,10 @@
 #include <QtGui/QOpenGLContext>
 #include <QtQuick/qsgnode.h>
 #include <QtQuick/qsgflatcolormaterial.h>
+#include <private/qsgdistancefieldglyphnode_p.h>
+#include <private/qsgdistancefieldglyphnode_p_p.h>
+#include <private/qquickitem_p.h>
+#include <QTextLayout>
 
 extern bool multisample;
 
@@ -69,7 +73,8 @@ private:
 Chart2D::Chart2D(QQuickItem *parent) :
     QQuickItem(parent),
     m_program(0),
-    m_hzoom(1.)
+    m_hzoom(1.),
+    m_labelSpaceUnder(20.)
 {
     setFlag(ItemHasContents, true);
     m_material = TimeValueShader::createMaterial();
@@ -97,9 +102,11 @@ QSGNode *Chart2D::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
 
     if (!oldNode) {
         node = new QSGNode;
+        qsgnode_set_description(node, QLatin1String("Chart2D"));
         int yearCount = 0;
 
         QSGGeometryNode *graphNode = new QSGGeometryNode;
+//        qsgnode_set_description(graphNode, QLatin1String("Chart2D"));
         geometry = new QSGGeometry(QSGGeometry::defaultAttributes_Point2D(), m_model->rowCount());
 //        if (subsample) geometry->setLineWidth(1.5);
         geometry->setDrawingMode(GL_LINE_STRIP);
@@ -124,7 +131,29 @@ QSGNode *Chart2D::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
         node->appendChildNode(graphNode);
         graphNode->markDirty(QSGNode::DirtyMaterial | QSGNode::DirtyGeometry | QSGNode::DirtyForceUpdate | QSGNode::DirtySubtreeBlocked);
 
+        QQuickItemPrivate *ip = QQuickItemPrivate::get(this);
+        //        QSGDistanceFieldGlyphNode *yearLabel = new QSGDistanceFieldGlyphNode(ip->sceneGraphRenderContext());
+        float t = QDateTime(QDate(firstYear, 1, 1)).toMSecsSinceEpoch() / 1000.0 - minTime;
+        QSGGlyphNode *yearLabel = ip->sceneGraphContext()->createGlyphNode(ip->sceneGraphRenderContext(), false);
+        yearLabel->setOwnerElement(this);
+        yearLabel->setMaterial(new QSGDistanceFieldTextMaterial()); // useless? but otherwise assert fails in appendChildNode
+        QTextLayout text(QString::number(firstYear));
+        text.beginLayout();
+        QTextLine line = text.createLine();
+        line.setLineWidth(100);
+        QGlyphRun glyphs = text.glyphRuns().first();
+qDebug() << text.glyphRuns().count() << text.font() << line.width() << line.textLength() << glyphs.positions();
+        yearLabel->setGlyphs(QPointF(t, 0.), glyphs);
+        node->appendChildNode(yearLabel);
+//        yearLabel->setBoundingRect(QRectF(0, 0, 0.5, 0.1));
+        yearLabel->setBoundingRect(QRectF(t, 10, 10000000, 11));
+//    yearLabel->setBoundingRect(QRectF(1, 10, 32, 11));
+        yearLabel->setColor(Qt::white);
+        yearLabel->markDirty(QSGNode::DirtyMaterial | QSGNode::DirtyGeometry | QSGNode::DirtyForceUpdate);
+        yearLabel->update();
+
 qDebug() << "data spans years" << firstYear << firstYear + yearCount;
+        // TODO show quarters too; clip unnecessary ticks
         QSGGeometryNode *gridNode = new QSGGeometryNode;
         QSGGeometry *gridGeometry = new QSGGeometry(QSGGeometry::defaultAttributes_Point2D(), yearCount * 2);
         QSGGeometry::Point2D *gridv = gridGeometry->vertexDataAsPoint2D();
@@ -150,7 +179,7 @@ qDebug() << "data spans years" << firstYear << firstYear + yearCount;
     }
 
     float vrange = m_model->columnMaxValue(0) - m_model->columnMinValue(0);
-    float vscale = height() / m_model->columnMaxValue(0);
+    float vscale = (height() - m_labelSpaceUnder) / m_model->columnMaxValue(0);
     /*
       0.003125         0         0        -1
              0   0.00625         0        -1
@@ -160,7 +189,7 @@ qDebug() << "data spans years" << firstYear << firstYear + yearCount;
     QMatrix4x4 matrix;
     // Flip vertically because we are graphing data in the first quadrant
     matrix.scale(1.0, -1.0, 1.0);
-    matrix.translate(0., -height());
+    matrix.translate(0., m_labelSpaceUnder - height());
     // scale to fit
     matrix.scale(m_hzoom, vscale, 1.0);
     float rightClipTime = width() / m_hzoom;
@@ -173,7 +202,7 @@ qDebug() << "data spans years" << firstYear << firstYear + yearCount;
     matrix = QMatrix4x4();
     // Flip vertically because we are graphing data in the first quadrant
     matrix.scale(1.0, -1.0, 1.0);
-    matrix.translate(0., -height());
+    matrix.translate(0., m_labelSpaceUnder - height());
     // scale horizontally only
     matrix.scale(m_hzoom, 1.0, 1.0);
 
@@ -196,4 +225,13 @@ void Chart2D::cleanup()
         delete m_program;
         m_program = 0;
     }
+}
+
+void Chart2D::setLabelSpaceUnder(qreal labelSpaceUnder)
+{
+    if (m_labelSpaceUnder == labelSpaceUnder)
+        return;
+
+    m_labelSpaceUnder = labelSpaceUnder;
+    emit labelSpaceUnderChanged();
 }
