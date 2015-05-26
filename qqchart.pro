@@ -1,4 +1,4 @@
-QT += qml quick
+QT += qml quick quick-private qml-private gui-private core-private
 CONFIG += debug
 
 HEADERS += chart2d.h \
