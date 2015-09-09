@@ -11,7 +11,8 @@ class Chart2D : public QQuickItem
     Q_OBJECT
 
     Q_PROPERTY(qreal horizontalZoom READ horizontalZoom WRITE setHorizontalZoom NOTIFY horizontalZoomChanged)
-    Q_PROPERTY(DataSequenceModel* model READ model WRITE setModel)
+    Q_PROPERTY(qreal defaultHorizontalZoom READ defaultHorizontalZoom NOTIFY defaultHorizontalZoomChanged)
+    Q_PROPERTY(DataSequenceModel* model READ model WRITE setModel NOTIFY modelChanged)
     Q_PROPERTY(QColor color READ color WRITE setColor)
     Q_PROPERTY(QColor gridColor READ gridColor WRITE setGridColor)
     Q_PROPERTY(qreal labelSpaceUnder READ labelSpaceUnder WRITE setLabelSpaceUnder NOTIFY labelSpaceUnderChanged)
@@ -25,7 +26,8 @@ public:
         QColor color;
 
         int compare(const TimeValueShaderParams *p) const {
-            return p->color.rgba() - color.rgba();
+            // different matrix should preclude combining in the sg renderer, but in practice only the color does that
+            return p->color.rgba() - color.rgba(); // + 100.0 * (p->pmvMatrix.determinant() - pmvMatrix.determinant());
         }
     };
 
@@ -35,9 +37,11 @@ public:
     qreal horizontalZoom() const { return m_hzoom; }
     void setHorizontalZoom(qreal hz);
 
+    qreal defaultHorizontalZoom() const { return m_defaultHzoom; }
+
     Q_INVOKABLE void fitAll();
 
-    void setModel(DataSequenceModel *m) { m_model = m; }
+    void setModel(DataSequenceModel *m);
     DataSequenceModel *model() { return m_model; }
 
     void setColor(QColor c) { m_color = c; }
@@ -51,7 +55,9 @@ public:
     qreal labelSpaceUnder() const { return m_labelSpaceUnder; }
 
 signals:
+    void modelChanged();
     void horizontalZoomChanged();
+    void defaultHorizontalZoomChanged();
     void labelSpaceUnderChanged();
 
 public slots:
@@ -70,6 +76,7 @@ protected:
     QOpenGLShaderProgram *m_program;
     QSGSimpleMaterial<TimeValueShaderParams> *m_material;
     QSGSimpleMaterial<TimeValueShaderParams> *m_gridMaterial;
+    qreal m_defaultHzoom;
     qreal m_hzoom;
     QColor m_color;
     QColor m_gridColor;
