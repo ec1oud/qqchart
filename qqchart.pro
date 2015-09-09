@@ -6,4 +6,4 @@ HEADERS += chart2d.h \
 SOURCES += chart2d.cpp main.cpp \
     datasequencemodel.cpp
 
-OTHER_FILES += main.qml
+OTHER_FILES += main.qml gridBenchmark.qml

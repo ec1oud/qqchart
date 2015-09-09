@@ -19,6 +19,7 @@ Rectangle {
         anchors.margins: 6
         color: "cyan"
         gridColor: "yellow"
+        horizontalZoom: defaultHorizontalZoom
         //        clip: true
         Rectangle {
             border.color: "yellow"

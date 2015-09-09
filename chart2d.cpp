@@ -13,6 +13,8 @@
 
 extern bool multisample;
 
+Q_LOGGING_CATEGORY(lcChart2D, "qqchart.chart2d")
+
 class TimeValueShader : public QSGSimpleMaterialShader<Chart2D::TimeValueShaderParams>
 {
     QSG_DECLARE_SIMPLE_COMPARABLE_SHADER(TimeValueShader, Chart2D::TimeValueShaderParams)
@@ -92,7 +94,15 @@ void Chart2D::setHorizontalZoom(qreal t)
 
 void Chart2D::fitAll()
 {
-    m_hzoom = width() / (m_model->maxTime() - m_model->minTime());
+    m_defaultHzoom = width() / (m_model->maxTime() - m_model->minTime());
+    emit defaultHorizontalZoomChanged();
+}
+
+void Chart2D::setModel(DataSequenceModel *m)
+{
+    m_model = m;
+    fitAll();
+    emit modelChanged();
 }
 
 QSGNode *Chart2D::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
@@ -209,12 +219,12 @@ qDebug() << "data spans years" << firstYear << firstYear + yearCount;
     m_gridMaterial->state()->xclip = QVector4D(0., m_model->columnValues(0)[0], rightClipTime, m_model->columnValues(0)[nearestIndex]);
     m_gridMaterial->state()->pmvMatrix = matrix;
     m_gridMaterial->state()->color = m_gridColor;
-    qDebug() << "bounds" << boundingRect()
-             << "matrix" << m_material->state()->pmvMatrix << "min" << m_model->columnMinValue(0)
-             << "max" << m_model->columnMaxValue(0) << "vrange" << vrange << "vscale" << vscale
-             << "time range" << m_model->m_times[0] << m_model->minTime() << "->" << m_model->maxTime() << "hzoom" << m_hzoom
-             << "right clip at time" << rightClipTime << "index" << nearestIndex << "value" << m_material->state()->xclip.w()
-             << "colors" << m_material->state()->color << m_gridMaterial->state()->color;
+    qCDebug(lcChart2D) << "bounds" << boundingRect()
+                       << "matrix" << m_material->state()->pmvMatrix << "min" << m_model->columnMinValue(0)
+                       << "max" << m_model->columnMaxValue(0) << "vrange" << vrange << "vscale" << vscale
+                       << "time range" << m_model->m_times[0] << m_model->minTime() << "->" << m_model->maxTime() << "hzoom" << m_hzoom
+                       << "right clip at time" << rightClipTime << "index" << nearestIndex << "value" << m_material->state()->xclip.w()
+                       << "colors" << m_material->state()->color << m_gridMaterial->state()->color;
 
     return node;
 }
