@@ -21,7 +21,7 @@ Item {
 //        clip: true
 
         function newSample(i) {
-            return (Math.sin(i / 100.0 * Math.PI * 2) + 1) * 0.4 + Math.random() * 0.05;
+            return (Math.sin(i / 20.0 * Math.PI * 2) + 1) * 0.4 + Math.random() * 0.05;
         }
 
         Component.onCompleted: {
@@ -58,7 +58,7 @@ Item {
     LineGraph {
         id: plainLine
         anchors.fill: graph
-        lineWidth: 1
+        lineWidth: 0
         color: "red"
         wireframe: true
         timeScale: graph.timeScale
@@ -69,10 +69,12 @@ Item {
         id: timer
         interval: 500
         repeat: true
-//        running: true
+        running: timerRun.checked
         onTriggered: {
             graph.removeFirstSample();
-            graph.appendSample(graph.newSample(++graph.offset));
+            wireframe.removeFirstSample();
+            plainLine.removeFirstSample();
+            graph.appendSampleToAll(graph.newSample(++graph.offset));
         }
     }
 
@@ -91,7 +93,7 @@ Item {
                     width: 300
                     minimumValue: 1
                     maximumValue: 100
-                    value: 50
+                    value: 30
                 }
                 Text {
 //                    anchors.top: widthSlider.bottom
@@ -100,16 +102,21 @@ Item {
             }
             CheckBox {
                 id: aaCb
-                checked: true
                 text: "antialiasing"
             }
             CheckBox {
                 id: originalLineCb
                 text: "actual samples"
+                checked: true
             }
             CheckBox {
                 id: wireframeCb
                 text: "wireframe"
+                checked: true
+            }
+            CheckBox {
+                id: timerRun
+                text: "periodic update"
             }
         }
     }

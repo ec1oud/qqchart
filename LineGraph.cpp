@@ -189,6 +189,7 @@ QSGNode *LineGraph::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
         // Horizontally: m_timeScale is actually pixels-per-sample
         matrix.scale(m_timeScale, -vscale);
         matrix.translate(0, -m_maxValue);
+//qDebug() << "dataTransform" << matrix;
         n->line->m_material->state()->dataTransform = matrix;
     }
 
