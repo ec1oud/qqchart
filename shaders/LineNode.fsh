@@ -9,7 +9,7 @@ varying lowp vec4 color;
 
 void main(void)
 {
-    lowp float tt = smoothstep(0.0, spread, sin(vT * PI));
+    lowp float tt = smoothstep(0.0, spread, cos(vT * PI));
 
     gl_FragColor = color * qt_Opacity * tt;
 }

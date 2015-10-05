@@ -17,7 +17,7 @@ public:
     QList<QByteArray> attributes() const {  return QList<QByteArray>() << "pos" << "t" << "prevNext"; }
 
     void updateState(const LineNode::LineMaterial *m, const LineNode::LineMaterial *) {
-        program()->setUniformValue(id_lineWidth, m->lineWidth / m->dataTransform.data()[5] * 2);
+        program()->setUniformValue(id_lineWidth, m->lineWidth);
         program()->setUniformValue(id_alertBelowMinimum, m->alertMinValue);
         program()->setUniformValue(id_alertAboveMaximum, m->alertMaxValue);
         program()->setUniformValue(id_normalColor, m->color);
@@ -100,8 +100,8 @@ void LineNode::updateGeometry(const QRectF &bounds, const QList<qreal> &samples)
     LineVertex *v = (LineVertex *) m_geometry.vertexData();
     int lastI = samples.size() - 2;
     for (int i = 0; i < lastI; ++i) {
-        v[i*2  ].set(x, sample, 0, xp, samplePrev, xn, sampleNext);
-        v[i*2+1].set(x, sample, 1, xp, samplePrev, xn, sampleNext);
+        v[i*2  ].set(x, sample, -0.5, xp, samplePrev, xn, sampleNext);
+        v[i*2+1].set(x, sample, 0.5, xp, samplePrev, xn, sampleNext);
         xp = x;
         x = xn;
         xn += dx;
@@ -109,16 +109,16 @@ void LineNode::updateGeometry(const QRectF &bounds, const QList<qreal> &samples)
         sample = sampleNext;
         sampleNext = samples.at(i + 2);
     }
-    v[lastI*2  ].set(x, sample, 0, xp, samplePrev, xn, sampleNext);
-    v[lastI*2+1].set(x, sample, 1, xp, samplePrev, xn, sampleNext);
+    v[lastI*2  ].set(x, sample, -0.5, xp, samplePrev, xn, sampleNext);
+    v[lastI*2+1].set(x, sample, 0.5, xp, samplePrev, xn, sampleNext);
     xp = x;
     x = xn;
     xn += dx;
     samplePrev = sample;
     sample = sampleNext;
     ++lastI;
-    v[lastI*2  ].set(x, sample, 0, xp, samplePrev, xn, sampleNext);
-    v[lastI*2+1].set(x, sample, 1, xp, samplePrev, xn, sampleNext);
+    v[lastI*2  ].set(x, sample, -0.5, xp, samplePrev, xn, sampleNext);
+    v[lastI*2+1].set(x, sample, 0.5, xp, samplePrev, xn, sampleNext);
 
     markDirty(QSGNode::DirtyGeometry);
 }

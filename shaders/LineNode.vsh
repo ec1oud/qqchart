@@ -1,3 +1,4 @@
+#version 120
 attribute highp vec2 pos;
 attribute highp float t;
 attribute highp vec4 prevNext;
@@ -16,17 +17,18 @@ varying lowp vec4 color;
 
 void main(void)
 {
-    vec2 prev = prevNext.xy;
-    vec2 next = prevNext.zw;
-    vec2 line = normalize(next - pos);
-    float aspect = dataTransform[1][1] / dataTransform[0][0];
-    vec2 normal = normalize(vec2(line.y * aspect, line.x));
-    vec2 tangent1 = (prev == pos) ? line : normalize(normalize(pos - prev) + line);
-//    mat2 miterTransform = mat2(23.3333, 0., 0., -100.0);
-    vec2 miter = vec2(-tangent1.y, tangent1.x);
+    mat2 dataScalingTransform = mat2(dataTransform);
+    vec2 prev = dataScalingTransform * prevNext.xy;
+    vec2 next = dataScalingTransform * prevNext.zw;
+    vec2 posPx = dataScalingTransform * pos;
+    vec2 yOffset = vec2(dataTransform[3][0], dataTransform[3][1]);
+    vec2 line = normalize(next - posPx);
+    vec2 normal = normalize(vec2(line.y, -line.x));
+    vec2 tangent1 = (prev == posPx) ? line : normalize(normalize(posPx - prev) + line);
+    vec2 miter = normalize(vec2(-tangent1.y, tangent1.x));
     float miterLength = lineWidth / dot(normal, miter);
 
-    gl_Position = qt_Matrix * dataTransform * vec4(pos + t * miterLength * miter, 0.0, 1.0);
+    gl_Position = qt_Matrix * vec4(posPx + yOffset + t * miterLength * miter, 0.0, 1.0);
     vT = t;
     color = pos.y > alertAboveMaximum ? alertMaxColor :
             pos.y < alertBelowMinimum ? alertMinColor : normalColor;
