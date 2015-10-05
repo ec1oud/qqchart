@@ -92,27 +92,28 @@ Item {
                     id: widthSlider
                     width: 300
                     minimumValue: 1
-                    maximumValue: 100
-                    value: 30
+                    maximumValue: 5
+                    value: 3
                 }
                 Text {
 //                    anchors.top: widthSlider.bottom
-                    text: "line width " + Math.round(widthSlider.value)
+                    text: "line width " + widthSlider.value.toFixed(2)
                 }
             }
             CheckBox {
                 id: aaCb
                 text: "antialiasing"
+                checked: true
             }
             CheckBox {
                 id: originalLineCb
                 text: "actual samples"
-                checked: true
+//                checked: true
             }
             CheckBox {
                 id: wireframeCb
                 text: "wireframe"
-                checked: true
+//                checked: true
             }
             CheckBox {
                 id: timerRun
