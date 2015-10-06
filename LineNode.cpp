@@ -25,6 +25,7 @@ public:
         program()->setUniformValue(id_alertMaxColor, m->alertMaxColor);
         program()->setUniformValue(id_dataTransform, m->dataTransform);
         program()->setUniformValue(id_spread, m->spread);
+qDebug() << "colors" << m->color << m->alertMinColor << m->alertMaxColor;
     }
 
     void resolveUniforms() {

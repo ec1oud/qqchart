@@ -3,5 +3,6 @@
         <file>main.qml</file>
         <file>shaders/LineNode.vsh</file>
         <file>shaders/LineNode.fsh</file>
+        <file>GraphStack.qml</file>
     </qresource>
 </RCC>

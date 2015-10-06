@@ -7,22 +7,12 @@ Item {
     width: 800
     height: 400
 
-    LineGraph {
-        id: graph
+    GraphStack {
+        id: graphs
         anchors.fill: parent
         anchors.margins: 50
         anchors.bottomMargin: 250
-        lineWidth: widthSlider.value
         color: "lightsteelblue"
-        wireframe: false
-        antialiasing: aaCb.checked
-        opacity: 0.8
-        timeScale: width / 30
-//        clip: true
-
-        function newSample(i) {
-            return (Math.sin(i / 20.0 * Math.PI * 2) + 1) * 0.4 + Math.random() * 0.05;
-        }
 
         Component.onCompleted: {
             for (var i=0; i<2; ++i)
@@ -36,50 +26,32 @@ Item {
                 appendSampleToAll(newSample(i));
         }
 
-        function appendSampleToAll(s) {
-            appendSample(s);
-            wireframe.appendSample(s);
-            plainLine.appendSample(s);
-        }
-
-        property int offset: 100;
     }
 
-    LineGraph {
-        id: wireframe
-        anchors.fill: graph
-        lineWidth: widthSlider.value
-        color: "black"
-        wireframe: true
-        timeScale: graph.timeScale
-        visible: wireframeCb.checked
-    }
-
-    LineGraph {
-        id: plainLine
-        anchors.fill: graph
-        lineWidth: 0
+    GraphStack {
+        anchors.fill: graphs
         color: "red"
-        wireframe: true
-        timeScale: graph.timeScale
-        visible: originalLineCb.checked
+
+        Component.onCompleted: {
+            for (var i=0; i<20; ++i)
+                appendSampleToAll(newSample(i));
+        }
+
     }
 
-    Timer {
-        id: timer
-        interval: 500
-        repeat: true
-        running: timerRun.checked
-        onTriggered: {
-            graph.removeFirstSample();
-            wireframe.removeFirstSample();
-            plainLine.removeFirstSample();
-            graph.appendSampleToAll(graph.newSample(++graph.offset));
+    GraphStack {
+        anchors.fill: graphs
+        color: "green"
+
+        Component.onCompleted: {
+            for (var i=0; i<100; ++i)
+                appendSampleToAll(newSample(i));
         }
+
     }
 
     Rectangle {
-        anchors.fill: graph
+        anchors.fill: graphs
         color: "transparent"
         border.color: "black"
         border.width: 2
