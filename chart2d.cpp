@@ -1,14 +1,9 @@
 #include "chart2d.h"
 
-#include <QtQuick/qquickwindow.h>
-#include <QtGui/QOpenGLShaderProgram>
 #include <QtQuick/QSGSimpleMaterialShader>
-#include <QtGui/QOpenGLContext>
 #include <QtQuick/qsgnode.h>
-#include <QtQuick/qsgflatcolormaterial.h>
-#include <private/qsgdistancefieldglyphnode_p.h>
-#include <private/qsgdistancefieldglyphnode_p_p.h>
 #include <private/qquickitem_p.h>
+#include <private/qquicktextnode_p.h>
 #include <QTextLayout>
 
 extern bool multisample;
@@ -141,26 +136,15 @@ QSGNode *Chart2D::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
         node->appendChildNode(graphNode);
         graphNode->markDirty(QSGNode::DirtyMaterial | QSGNode::DirtyGeometry | QSGNode::DirtyForceUpdate | QSGNode::DirtySubtreeBlocked);
 
-        QQuickItemPrivate *ip = QQuickItemPrivate::get(this);
-        //        QSGDistanceFieldGlyphNode *yearLabel = new QSGDistanceFieldGlyphNode(ip->sceneGraphRenderContext());
-        float t = QDateTime(QDate(firstYear, 1, 1)).toMSecsSinceEpoch() / 1000.0 - minTime;
-        QSGGlyphNode *yearLabel = ip->sceneGraphContext()->createGlyphNode(ip->sceneGraphRenderContext(), false);
-        yearLabel->setOwnerElement(this);
-        yearLabel->setMaterial(new QSGDistanceFieldTextMaterial()); // useless? but otherwise assert fails in appendChildNode
-        QTextLayout text(QString::number(firstYear));
-        text.beginLayout();
-        QTextLine line = text.createLine();
-        line.setLineWidth(100);
-        QGlyphRun glyphs = text.glyphRuns().first();
-qDebug() << text.glyphRuns().count() << text.font() << line.width() << line.textLength() << glyphs.positions();
-        yearLabel->setGlyphs(QPointF(t, 0.), glyphs);
-        node->appendChildNode(yearLabel);
-//        yearLabel->setBoundingRect(QRectF(0, 0, 0.5, 0.1));
-        yearLabel->setBoundingRect(QRectF(t, 10, 10000000, 11));
-//    yearLabel->setBoundingRect(QRectF(1, 10, 32, 11));
-        yearLabel->setColor(Qt::white);
-        yearLabel->markDirty(QSGNode::DirtyMaterial | QSGNode::DirtyGeometry | QSGNode::DirtyForceUpdate);
-        yearLabel->update();
+        // TODO do this for each year; maybe use transform node to transform label positions and grid together
+        QQuickTextNode *text = new QQuickTextNode(this);
+        QTextLayout *tl = new QTextLayout(QString::number(firstYear));
+        tl->beginLayout();
+        /* QTextLine line = */ tl->createLine();
+//qDebug() << "line" << line.naturalTextRect() << "glyph runs" << line.glyphRuns().count();
+        tl->endLayout();
+        text->addTextLayout(QPointF(0, height() - 14), tl, Qt::white);
+        node->appendChildNode(text);
 
 qDebug() << "data spans years" << firstYear << firstYear + yearCount;
         // TODO show quarters too; clip unnecessary ticks
