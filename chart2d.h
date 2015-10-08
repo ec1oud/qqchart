@@ -6,6 +6,8 @@
 #include <QtQuick/QSGSimpleMaterial>
 #include "datasequencemodel.h"
 
+class QQuickTextNode;
+
 class Chart2D : public QQuickItem
 {
     Q_OBJECT
@@ -76,6 +78,7 @@ protected:
     QOpenGLShaderProgram *m_program;
     QSGSimpleMaterial<TimeValueShaderParams> *m_material;
     QSGSimpleMaterial<TimeValueShaderParams> *m_gridMaterial;
+    QVector<QQuickTextNode *> m_horizontalAxisLabels;
     qreal m_defaultHzoom;
     qreal m_hzoom;
     QColor m_color;

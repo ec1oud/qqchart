@@ -104,11 +104,14 @@ QSGNode *Chart2D::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
 {
     QSGNode *node = 0;
     QSGGeometry *geometry = 0;
+    static int yearCount = 0;
+    float minTime = m_model->minTime();
+    int firstYear = QDateTime::fromMSecsSinceEpoch(qint64(minTime * 1000.0)).date().year();
 
     if (!oldNode) {
         node = new QSGNode;
         qsgnode_set_description(node, QLatin1String("Chart2D"));
-        int yearCount = 0;
+        yearCount = 0;
 
         QSGGeometryNode *graphNode = new QSGGeometryNode;
 //        qsgnode_set_description(graphNode, QLatin1String("Chart2D"));
@@ -122,8 +125,6 @@ QSGNode *Chart2D::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
         QSGGeometry::Point2D *vertices = geometry->vertexDataAsPoint2D();
         GLfloat *times = m_model->times();
         GLfloat *values = m_model->columnValues(0);
-        float minTime = m_model->minTime();
-        int firstYear = QDateTime::fromMSecsSinceEpoch(qint64(minTime * 1000.0)).date().year();
         float nextYear = QDateTime(QDate(firstYear, 1, 1)).toMSecsSinceEpoch() / 1000.0;
         for (int i = 0; i < m_model->rowCount(); ++i) {
             vertices[i].set(times[i] - minTime, values[i]);
@@ -136,15 +137,6 @@ QSGNode *Chart2D::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
         node->appendChildNode(graphNode);
         graphNode->markDirty(QSGNode::DirtyMaterial | QSGNode::DirtyGeometry | QSGNode::DirtyForceUpdate | QSGNode::DirtySubtreeBlocked);
 
-        // TODO do this for each year; maybe use transform node to transform label positions and grid together
-        QQuickTextNode *text = new QQuickTextNode(this);
-        QTextLayout *tl = new QTextLayout(QString::number(firstYear));
-        tl->beginLayout();
-        /* QTextLine line = */ tl->createLine();
-//qDebug() << "line" << line.naturalTextRect() << "glyph runs" << line.glyphRuns().count();
-        tl->endLayout();
-        text->addTextLayout(QPointF(0, height() - 14), tl, Qt::white);
-        node->appendChildNode(text);
 
 qDebug() << "data spans years" << firstYear << firstYear + yearCount;
         // TODO show quarters too; clip unnecessary ticks
@@ -155,6 +147,10 @@ qDebug() << "data spans years" << firstYear << firstYear + yearCount;
             float t = QDateTime(QDate(firstYear + yearI, 1, 1)).toMSecsSinceEpoch() / 1000.0 - minTime;
             gridv[yearI * 2].set(t, 0.);
             gridv[yearI * 2 + 1].set(t, 5.);
+
+            QQuickTextNode *text = new QQuickTextNode(this);
+            node->appendChildNode(text);
+            m_horizontalAxisLabels.insert(yearI, text);
         }
         if (multisample) gridGeometry->setLineWidth(1.5);
         gridGeometry->setDrawingMode(GL_LINES);
@@ -209,6 +205,19 @@ qDebug() << "data spans years" << firstYear << firstYear + yearCount;
                        << "time range" << m_model->m_times[0] << m_model->minTime() << "->" << m_model->maxTime() << "hzoom" << m_hzoom
                        << "right clip at time" << rightClipTime << "index" << nearestIndex << "value" << m_material->state()->xclip.w()
                        << "colors" << m_material->state()->color << m_gridMaterial->state()->color;
+
+    for (int yearI = 0; yearI < yearCount; ++yearI) {
+        float t = QDateTime(QDate(firstYear + yearI, 1, 1)).toMSecsSinceEpoch() / 1000.0 - minTime;
+        QQuickTextNode *text = m_horizontalAxisLabels[yearI];
+        text->deleteContent();
+        QTextLayout *tl = new QTextLayout(QString::number(firstYear + yearI));
+qDebug() << tl->text() << "@" << t << t * m_hzoom;
+        tl->beginLayout();
+        /* QTextLine line = */ tl->createLine();
+//qDebug() << "line" << line.naturalTextRect() << "glyph runs" << line.glyphRuns().count();
+        tl->endLayout();
+        text->addTextLayout(QPointF(t * m_hzoom, height() - 14), tl, Qt::white);
+    }
 
     return node;
 }
