@@ -72,7 +72,7 @@ Item {
     Rectangle {
         anchors.fill: graphs
         color: "transparent"
-        border.color: "black"
+        border.color: "#40000000"
         border.width: 2
         Row {
             anchors.top: parent.bottom
