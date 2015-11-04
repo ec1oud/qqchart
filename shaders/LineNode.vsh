@@ -31,17 +31,23 @@ void main(void)
     float halfLineWidth = lineWidth / 2.0;
     float miterLength = halfLineWidth / dot(normal, miter);
 
-    vec2 upToCap = miter * sign(lineToward.y) * lineWidth;
-    vec2 capDeviation = averageTangent * halfLineWidth * t;
+    vec2 upToCap = miter * sign(lineToward.y) * lineWidth * t;
+    vec2 capDeviation = averageTangent * halfLineWidth * clamp(i - 2.0, -1.0, 1.0);
 
 //    float tAdj = t;
 //    if (t == 0 && miterLength < halfLineWidth)
 //        tAdj = -1.0;
 
-    vec2 miterOff = (t == 0.0 ? sign(lineToward.y) * miterLength * miter : upToCap + capDeviation);
+//    vec2 miterOff = sign(lineToward.y) * t * miterLength * miter;
+
+    // if sign(lineToward.y) is positive, the knee is between i = 0 and i = 2; otherwise, between i = 1 and i = 3
+    float kneeGate = mod(i, 2.0); // sign(lineToward.y) * magic
+
+    vec2 miterOff = miterLength > halfLineWidth && kneeGate < 0.5 ? sign(lineToward.y) * (upToCap + capDeviation) : t * miterLength * miter;
+    miterOff = sign(lineToward.y) * (upToCap + capDeviation);
     gl_Position = qt_Matrix * vec4(posPx + yOffset + miterOff, 0, 1.0);
 
-//    gl_Position = qt_Matrix * vec4(posPx + yOffset + (t == 0 ? -1.0 : t) * miterLength * miter, 0.0, 1.0); // old unlimited mitering
+//    gl_Position = qt_Matrix * vec4(posPx + yOffset + t * miterLength * miter, 0.0, 1.0); // old unlimited mitering
 
     vT = t * 0.5;
     color = pos.y > alertAboveMaximum ? alertMaxColor :
