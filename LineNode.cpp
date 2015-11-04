@@ -88,8 +88,9 @@ LineNode::LineNode()
 
 void LineNode::updateGeometry(const QRectF &bounds, const QList<qreal> &samples)
 {
+    static const int verticesPerSample = 3;
     m_geometry.setDrawingMode(m_wireframe ? GL_LINE_STRIP : GL_TRIANGLE_STRIP);
-    m_geometry.allocate(samples.size() * 2);
+    m_geometry.allocate(samples.size() * verticesPerSample);
 
     float dx = 1.0;
     float x = 0;
@@ -99,27 +100,30 @@ void LineNode::updateGeometry(const QRectF &bounds, const QList<qreal> &samples)
     float sampleNext = samples.at(1);
     float samplePrev = sample;
     LineVertex *v = (LineVertex *) m_geometry.vertexData();
-    int lastI = samples.size() - 2;
+    int lastI = samples.size() - verticesPerSample;
     for (int i = 0; i < lastI; ++i) {
-        v[i*2  ].set(x, sample, -0.5, xp, samplePrev, xn, sampleNext);
-        v[i*2+1].set(x, sample, 0.5, xp, samplePrev, xn, sampleNext);
+        v[i*verticesPerSample  ].set(x, sample, -1, xp, samplePrev, xn, sampleNext);
+        v[i*verticesPerSample+1].set(x, sample, 0, xp, samplePrev, xn, sampleNext);
+        v[i*verticesPerSample+2].set(x, sample, 1, xp, samplePrev, xn, sampleNext);
         xp = x;
         x = xn;
         xn += dx;
         samplePrev = sample;
         sample = sampleNext;
-        sampleNext = samples.at(i + 2);
+        sampleNext = samples.at(i + verticesPerSample);
     }
-    v[lastI*2  ].set(x, sample, -0.5, xp, samplePrev, xn, sampleNext);
-    v[lastI*2+1].set(x, sample, 0.5, xp, samplePrev, xn, sampleNext);
+    v[lastI*verticesPerSample  ].set(x, sample, -1, xp, samplePrev, xn, sampleNext);
+    v[lastI*verticesPerSample+1].set(x, sample, 0, xp, samplePrev, xn, sampleNext);
+    v[lastI*verticesPerSample+2].set(x, sample, 1, xp, samplePrev, xn, sampleNext);
     xp = x;
     x = xn;
     xn += dx;
     samplePrev = sample;
     sample = sampleNext;
     ++lastI;
-    v[lastI*2  ].set(x, sample, -0.5, xp, samplePrev, xn, sampleNext);
-    v[lastI*2+1].set(x, sample, 0.5, xp, samplePrev, xn, sampleNext);
+    v[lastI*verticesPerSample  ].set(x, sample, -1, xp, samplePrev, xn, sampleNext);
+    v[lastI*verticesPerSample+1].set(x, sample, 0, xp, samplePrev, xn, sampleNext);
+    v[lastI*verticesPerSample+2].set(x, sample, 1, xp, samplePrev, xn, sampleNext);
 
     markDirty(QSGNode::DirtyGeometry);
 }
