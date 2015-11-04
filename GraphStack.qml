@@ -23,6 +23,7 @@ Item {
         color: "lightsteelblue"
         wireframe: false
         antialiasing: aaCb.checked
+        visible: fillCb.checked
         opacity: 0.8
         timeScale: width / 30
 //        clip: true
