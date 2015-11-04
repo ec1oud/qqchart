@@ -1,6 +1,5 @@
 #version 120
-attribute highp vec2 pos;
-attribute highp float t;
+attribute highp vec4 pos; // x, y, i, t
 attribute highp vec4 prevNext;
 
 uniform lowp float lineWidth;
@@ -17,10 +16,12 @@ varying lowp vec4 color;
 
 void main(void)
 {
+    float i = pos.z;
+    float t = pos.w;
     mat2 dataScalingTransform = mat2(dataTransform);
     vec2 prev = dataScalingTransform * prevNext.xy;
     vec2 next = dataScalingTransform * prevNext.zw;
-    vec2 posPx = dataScalingTransform * pos;
+    vec2 posPx = dataScalingTransform * pos.xy;
     vec2 yOffset = vec2(dataTransform[3][0], dataTransform[3][1]);
     vec2 lineToward = normalize(posPx - prev);
     vec2 lineAway = normalize(next - posPx);

@@ -14,7 +14,7 @@ public:
         setShaderSourceFile(QOpenGLShader::Fragment, ":/shaders/LineNode.fsh");
     }
 
-    QList<QByteArray> attributes() const {  return QList<QByteArray>() << "pos" << "t" << "prevNext"; }
+    QList<QByteArray> attributes() const {  return QList<QByteArray>() << "pos" << "prevNext"; }
 
     void updateState(const LineNode::LineMaterial *m, const LineNode::LineMaterial *) {
         program()->setUniformValue(id_lineWidth, m->lineWidth);
@@ -53,13 +53,14 @@ private:
 struct LineVertex {
     float x;
     float y;
+    float i;
     float t;
     float prevX;
     float prevY;
     float nextX;
     float nextY;
-    inline void set(float xx, float yy, float tt, float px ,float py, float nx, float ny) {
-        x = xx; y = yy; t = tt;
+    inline void set(int ii, float tt, float xx, float yy, float px, float py, float nx, float ny) {
+        x = xx; y = yy; i = ii; t = tt;
         prevX = px; prevY = py; nextX = nx; nextY = ny;
     }
 };
@@ -67,11 +68,10 @@ struct LineVertex {
 static const QSGGeometry::AttributeSet &attributes()
 {
     static QSGGeometry::Attribute attr[] = {
-        QSGGeometry::Attribute::create(0, 2, GL_FLOAT),
-        QSGGeometry::Attribute::create(1, 1, GL_FLOAT),
-        QSGGeometry::Attribute::create(2, 4, GL_FLOAT)
+        QSGGeometry::Attribute::create(0, 4, GL_FLOAT),
+        QSGGeometry::Attribute::create(1, 4, GL_FLOAT)
     };
-    static QSGGeometry::AttributeSet set = { 2, 7 * sizeof(float), attr };
+    static QSGGeometry::AttributeSet set = { 2, 8 * sizeof(float), attr };
     return set;
 }
 
@@ -102,9 +102,9 @@ void LineNode::updateGeometry(const QRectF &bounds, const QList<qreal> &samples)
     LineVertex *v = (LineVertex *) m_geometry.vertexData();
     int lastI = samples.size() - verticesPerSample;
     for (int i = 0; i < lastI; ++i) {
-        v[i*verticesPerSample  ].set(x, sample, -1, xp, samplePrev, xn, sampleNext);
-        v[i*verticesPerSample+1].set(x, sample, 0, xp, samplePrev, xn, sampleNext);
-        v[i*verticesPerSample+2].set(x, sample, 1, xp, samplePrev, xn, sampleNext);
+        v[i*verticesPerSample  ].set(i, -1, x, sample, xp, samplePrev, xn, sampleNext);
+        v[i*verticesPerSample+1].set(i, 0, x, sample, xp, samplePrev, xn, sampleNext);
+        v[i*verticesPerSample+2].set(i, 1, x, sample, xp, samplePrev, xn, sampleNext);
         xp = x;
         x = xn;
         xn += dx;
@@ -112,18 +112,18 @@ void LineNode::updateGeometry(const QRectF &bounds, const QList<qreal> &samples)
         sample = sampleNext;
         sampleNext = samples.at(i + verticesPerSample);
     }
-    v[lastI*verticesPerSample  ].set(x, sample, -1, xp, samplePrev, xn, sampleNext);
-    v[lastI*verticesPerSample+1].set(x, sample, 0, xp, samplePrev, xn, sampleNext);
-    v[lastI*verticesPerSample+2].set(x, sample, 1, xp, samplePrev, xn, sampleNext);
+    v[lastI*verticesPerSample  ].set(lastI, -1, x, sample, xp, samplePrev, xn, sampleNext);
+    v[lastI*verticesPerSample+1].set(lastI, 0, x, sample, xp, samplePrev, xn, sampleNext);
+    v[lastI*verticesPerSample+2].set(lastI, 1, x, sample, xp, samplePrev, xn, sampleNext);
     xp = x;
     x = xn;
     xn += dx;
     samplePrev = sample;
     sample = sampleNext;
     ++lastI;
-    v[lastI*verticesPerSample  ].set(x, sample, -1, xp, samplePrev, xn, sampleNext);
-    v[lastI*verticesPerSample+1].set(x, sample, 0, xp, samplePrev, xn, sampleNext);
-    v[lastI*verticesPerSample+2].set(x, sample, 1, xp, samplePrev, xn, sampleNext);
+    v[lastI*verticesPerSample  ].set(lastI, -1, x, sample, xp, samplePrev, xn, sampleNext);
+    v[lastI*verticesPerSample+1].set(lastI, 0, xp, x, sample, samplePrev, xn, sampleNext);
+    v[lastI*verticesPerSample+2].set(lastI, 1, x, sample, xp, samplePrev, xn, sampleNext);
 
     markDirty(QSGNode::DirtyGeometry);
 }
