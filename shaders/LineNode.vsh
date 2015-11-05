@@ -37,7 +37,15 @@ void main(void)
         miterOff = -t * miterLength * miter;
     } else { // angle is acute: make a knee
         vec2 upToCap = miter * sign(lineToward.y) * lineWidth * t;
-        float dxNorm = averageTangent.x < 0 ? sign(i - 2.0) * mod(i - 2.0, 2.0) : sign(i - 1.0) * mod(i - 1.0, 2.0);
+        float dxNorm;
+//        float dxNorm = upToCap.y > 0 ? sign(i - 2.0) * mod(i - 2.0, 2.0) : sign(i - 1.0) * mod(i - 1.0, 2.0); // bottom : top
+        if (pos.y < 0.1) {
+            dxNorm = sign(i - 2.0) * mod(i - 2.0, 2.0); // bottom knee
+            upToCap.y = -upToCap.y;
+        }
+        else
+            dxNorm = sign(i - 1.0) * mod(i - 1.0, 2.0); // top knee - good
+
         vec2 capDeviation = averageTangent * halfLineWidth;
         capDeviation.x *= dxNorm;
 //        capDeviation.y *= sign(averageTangent.x);
