@@ -25,7 +25,7 @@ public:
         program()->setUniformValue(id_alertMaxColor, m->alertMaxColor);
         program()->setUniformValue(id_dataTransform, m->dataTransform);
         program()->setUniformValue(id_spread, m->spread);
-qDebug() << "colors" << m->color << m->alertMinColor << m->alertMaxColor;
+//qDebug() << "colors" << m->color << m->alertMinColor << m->alertMaxColor;
     }
 
     void resolveUniforms() {
@@ -61,6 +61,7 @@ struct LineVertex {
     float nextY;
     inline void set(int ii, float tt, float xx, float yy, float px, float py, float nx, float ny) {
         x = xx; y = yy; i = ii; t = tt;
+qDebug() << "x" << xx << "y" << yy << "i" << ii << "t" << tt;
         prevX = px; prevY = py; nextX = nx; nextY = ny;
     }
 };
@@ -91,7 +92,7 @@ void LineNode::updateGeometry(const QRectF &bounds, const QList<qreal> &samples)
     static const int verticesPerSample = 4;
     m_geometry.setDrawingMode(m_wireframe ? GL_LINE_STRIP : GL_TRIANGLE_STRIP);
     m_geometry.allocate(samples.size() * verticesPerSample);
-
+qDebug() << m_material->state()->dataTransform;
     float dx = 1.0;
     float x = 0;
     float xp = 0;

@@ -16,9 +16,10 @@ Item {
         color: "lightsteelblue"
 
         Component.onCompleted: {
-            for (var i = 0; i < 2; ++i)
-                appendSampleToAll(newSample(i));
+            appendSampleToAll(0.3);
             appendSampleToAll(0.5);
+            appendSampleToAll(0);
+            appendSampleToAll(1);
             appendSampleToAll(0);
             appendSampleToAll(1);
             appendSampleToAll(0);
