@@ -41,9 +41,9 @@ void main(void)
         vec2 capDeviation = averageTangent * halfLineWidth;
         float dxNorm;
         if (lineToward.y > 0) {
-            capDeviation.x *= sign(i - 2.0) * mod(i - 2.0, 2.0); // lower knee
+            capDeviation *= sign(i - 2.0) * mod(i - 2.0, 2.0); // lower knee
         } else {
-            capDeviation.x *= sign(i - 1.0) * mod(i - 1.0, 2.0); // upper knee
+            capDeviation *= sign(i - 1.0) * mod(i - 1.0, 2.0); // upper knee
         }
         miterOff = upToCap + capDeviation;
     }
