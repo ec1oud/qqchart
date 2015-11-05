@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
     LineGraph::registerMetaType();
 
     QQuickView view;
-    view.resize(1800, 900);
+    view.resize(1600, 900);
     view.setResizeMode(QQuickView::SizeRootObjectToView);
     view.setSource(QUrl("qrc:///main.qml"));
     view.show();

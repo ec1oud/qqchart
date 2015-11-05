@@ -21,6 +21,8 @@ Item {
         anchors.fill: parent
         lineWidth: widthSlider.value
         color: "lightsteelblue"
+        alertMinColor: "yellow"
+        alertMaxColor: "orange"
         wireframe: false
         antialiasing: aaCb.checked
         visible: fillCb.checked
@@ -36,6 +38,8 @@ Item {
         anchors.fill: graph
         lineWidth: widthSlider.value
         color: "black"
+        alertMinColor: "black"
+        alertMaxColor: "black"
         wireframe: true
         timeScale: graph.timeScale
         visible: wireframeCb.checked
@@ -46,6 +50,8 @@ Item {
         anchors.fill: graph
         lineWidth: 0
         color: "red"
+        alertMinColor: "red"
+        alertMaxColor: "red"
         wireframe: true
         timeScale: graph.timeScale
         visible: originalLineCb.checked
