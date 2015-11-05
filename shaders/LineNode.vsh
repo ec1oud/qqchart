@@ -22,7 +22,6 @@ void main(void)
     vec2 prev = dataScalingTransform * prevNext.xy;
     vec2 next = dataScalingTransform * prevNext.zw;
     vec2 posPx = dataScalingTransform * pos.xy;
-    vec2 yOffset = vec2(dataTransform[3][0], dataTransform[3][1]);
     vec2 lineToward = normalize(posPx - prev);
     vec2 lineAway = normalize(next - posPx);
     vec2 normal = vec2(lineAway.y, -lineAway.x);
@@ -33,28 +32,24 @@ void main(void)
     float miterLength = halfLineWidth / dot(normal, miter);
 
     vec2 miterOff;
-    if (dot(lineToward, lineAway) >= 0) { // angle is right or obtuse: OK to use ordinary miter
+    if (dot(lineToward, lineAway) >= 0) {
+        // angle is right or obtuse: OK to use ordinary miter
         miterOff = -t * miterLength * miter;
-    } else { // angle is acute: make a knee
-        vec2 upToCap = miter * sign(lineToward.y) * lineWidth * t;
-        float dxNorm;
-//        float dxNorm = upToCap.y > 0 ? sign(i - 2.0) * mod(i - 2.0, 2.0) : sign(i - 1.0) * mod(i - 1.0, 2.0); // bottom : top
-        if (pos.y < 0.1) {
-            dxNorm = sign(i - 2.0) * mod(i - 2.0, 2.0); // bottom knee
-            upToCap.y = -upToCap.y;
-        }
-        else
-            dxNorm = sign(i - 1.0) * mod(i - 1.0, 2.0); // top knee - good
-
+    } else {
+        // angle is acute: make a knee
+        vec2 upToCap = miter * lineWidth * t;
         vec2 capDeviation = averageTangent * halfLineWidth;
-        capDeviation.x *= dxNorm;
-//        capDeviation.y *= sign(averageTangent.x);
-//        capDeviation.y *= dxNorm;
-//        capDeviation = averageTangent * halfLineWidth * i;
-
-        miterOff = - upToCap + capDeviation;
+        float dxNorm;
+        if (lineToward.y > 0) {
+            capDeviation.x *= sign(i - 2.0) * mod(i - 2.0, 2.0); // lower knee
+        } else {
+            capDeviation.x *= sign(i - 1.0) * mod(i - 1.0, 2.0); // upper knee
+        }
+        miterOff = upToCap + capDeviation;
     }
-    gl_Position = qt_Matrix * vec4(posPx + yOffset + miterOff, 0, 1.0);
+    // offset the y
+    posPx.y += dataTransform[3][1];
+    gl_Position = qt_Matrix * vec4(posPx + miterOff, 0, 1.0);
 
 //    gl_Position = qt_Matrix * vec4(posPx + yOffset + t * miterLength * miter, 0.0, 1.0); // old unlimited mitering
 
