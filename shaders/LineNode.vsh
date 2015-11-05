@@ -32,33 +32,16 @@ void main(void)
     float halfLineWidth = lineWidth / 2.0;
     float miterLength = halfLineWidth / dot(normal, miter);
 
-
-//    float tAdj = t;
-//    if (t == 0 && miterLength < halfLineWidth)
-//        tAdj = -1.0;
-
-//    vec2 miterOff = sign(lineToward.y) * t * miterLength * miter;
-
-    // if sign(lineToward.y) is positive, the knee is between i = 0 and i = 2; otherwise, between i = 1 and i = 3
-//    float kneeGate = mod(i, 2.0); // sign(lineToward.y) * magic  // kneeGate > 0.5
-
     vec2 miterOff;
     if (dot(lineToward, lineAway) >= 0) { // angle is right or obtuse: OK to use ordinary miter
         miterOff = -t * miterLength * miter;
     } else { // angle is acute: make a knee
-//        float capDeviationSign = sign(lineToward.y);
-//        float kneeDeviation = i / 2.0 - 1.0;
-//        if (lineToward.y < 0.0 && i == 1.0)
-//            capDeviationSign = -capDeviationSign;
         vec2 upToCap = miter * sign(lineToward.y) * lineWidth * t;
-//        vec2 capDeviation = averageTangent * halfLineWidth * capDeviationSign * clamp(i - 1.5, -1.0, 1.0);
-//        vec2 capDeviation = averageTangent * halfLineWidth * clamp(i + sign(lineToward.y) / 2.0 - 1.5, -1.0, 1.0);
-        vec2 capDeviation = averageTangent * halfLineWidth * (averageTangent.x > 0 ? mod(i - 2.0, 2.0) : -mod(i - 1.0, 2.0));
+        vec2 capDeviation = averageTangent * halfLineWidth * (averageTangent.x > 0 ? sign(i - 2.0) * mod(i - 2.0, 2.0) : sign(i - 2.0) * -mod(i - 1.0, 2.0));
 //        capDeviation = averageTangent * halfLineWidth * i;
 
         miterOff = upToCap + capDeviation;
     }
-//    vec2 miterOff = abs(miterLength) > halfLineWidth && i == 1.0 && sign(lineToward.y) < 0 ? -t * miterLength * miter : sign(lineToward.y) * (upToCap + capDeviation);
     gl_Position = qt_Matrix * vec4(posPx + yOffset + miterOff, 0, 1.0);
 
 //    gl_Position = qt_Matrix * vec4(posPx + yOffset + t * miterLength * miter, 0.0, 1.0); // old unlimited mitering
