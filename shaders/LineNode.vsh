@@ -37,7 +37,7 @@ void main(void)
         miterOff = -t * miterLength * miter;
     } else {
         // angle is acute: make a knee
-        vec2 upToCap = miter * lineWidth * t;
+        vec2 upToCap = miter * halfLineWidth * t;
         vec2 capDeviation = averageTangent * halfLineWidth;
         float dxNorm;
         if (lineToward.y > 0) {
@@ -51,7 +51,7 @@ void main(void)
     posPx.y += dataTransform[3][1];
     gl_Position = qt_Matrix * vec4(posPx + miterOff, 0, 1.0);
 
-//    gl_Position = qt_Matrix * vec4(posPx + yOffset + t * miterLength * miter, 0.0, 1.0); // old unlimited mitering
+//    gl_Position = qt_Matrix * vec4(posPx + yOffset + t * miterLength * miter, 0.0, 1.0); // unlimited mitering
 
     vT = t * 0.5;
     color = pos.y > alertAboveMaximum ? alertMaxColor :
