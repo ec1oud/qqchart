@@ -37,10 +37,14 @@ void main(void)
         miterOff = -t * miterLength * miter;
     } else { // angle is acute: make a knee
         vec2 upToCap = miter * sign(lineToward.y) * lineWidth * t;
-        vec2 capDeviation = averageTangent * halfLineWidth * (averageTangent.x > 0 ? sign(i - 2.0) * mod(i - 2.0, 2.0) : sign(i - 2.0) * -mod(i - 1.0, 2.0));
+        float dxNorm = averageTangent.x < 0 ? sign(i - 2.0) * mod(i - 2.0, 2.0) : sign(i - 1.0) * mod(i - 1.0, 2.0);
+        vec2 capDeviation = averageTangent * halfLineWidth;
+        capDeviation.x *= dxNorm;
+//        capDeviation.y *= sign(averageTangent.x);
+//        capDeviation.y *= dxNorm;
 //        capDeviation = averageTangent * halfLineWidth * i;
 
-        miterOff = upToCap + capDeviation;
+        miterOff = - upToCap + capDeviation;
     }
     gl_Position = qt_Matrix * vec4(posPx + yOffset + miterOff, 0, 1.0);
 
