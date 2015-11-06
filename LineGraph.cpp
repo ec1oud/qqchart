@@ -82,7 +82,9 @@ void LineGraph::setMinValue(qreal minValue)
         return;
 
     m_minValue = minValue;
+    m_geometryChanged = true;
     emit minValueChanged();
+    update();
 }
 
 void LineGraph::setMaxValue(qreal maxValue)
@@ -91,7 +93,9 @@ void LineGraph::setMaxValue(qreal maxValue)
         return;
 
     m_maxValue = maxValue;
+    m_geometryChanged = true;
     emit maxValueChanged();
+    update();
 }
 
 void LineGraph::setAlertMinValue(qreal alertMinValue)
@@ -101,6 +105,7 @@ void LineGraph::setAlertMinValue(qreal alertMinValue)
 
     m_alertMinValue = alertMinValue;
     emit alertMinValueChanged();
+    update();
 }
 
 void LineGraph::setAlertMaxValue(qreal alertMaxValue)
@@ -110,6 +115,7 @@ void LineGraph::setAlertMaxValue(qreal alertMaxValue)
 
     m_alertMaxValue = alertMaxValue;
     emit alertMaxValueChanged();
+    update();
 }
 
 void LineGraph::setTimeScale(qreal timeScale)
@@ -120,6 +126,7 @@ void LineGraph::setTimeScale(qreal timeScale)
     m_timeScale = timeScale;
     m_geometryChanged = true;
     emit timeScaleChanged();
+    update();
 }
 
 qreal LineGraph::valueAtX(qreal x)
@@ -159,7 +166,7 @@ public:
 
 QSGNode *LineGraph::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
 {
-    GraphNode *n= static_cast<GraphNode *>(oldNode);
+    GraphNode *n = static_cast<GraphNode *>(oldNode);
 
     QRectF rect = boundingRect();
 
