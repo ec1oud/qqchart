@@ -4,6 +4,7 @@ import QtQuick.Controls 1.4
 import LineGraph 1.0
 
 Item {
+    id: root
     property alias color: graph.color
 
     function appendSampleToAll(s) {
@@ -13,8 +14,11 @@ Item {
     }
 
     function newSample(i) {
-        return (Math.sin(i / 20.0 * Math.PI * 2) + 1) * 0.4 + Math.random() * 0.05;
+        return (Math.sin(i / 20.0 * Math.PI * 2) + 1) * 0.4;
+//        return (Math.sin(i / 20.0 * Math.PI * 2) + 1) * 0.4 + Math.random() * 0.05;
     }
+
+    property int offset: 25;
 
     LineGraph {
         id: graph
@@ -30,7 +34,6 @@ Item {
         timeScale: width / 30
 //        clip: true
 
-        property int offset: 100;
     }
 
     LineGraph {
@@ -66,7 +69,7 @@ Item {
             graph.removeFirstSample();
             wireframe.removeFirstSample();
             plainLine.removeFirstSample();
-            graph.appendSampleToAll(graph.newSample(++graph.offset));
+            root.appendSampleToAll(root.newSample(++root.offset));
         }
     }
 }

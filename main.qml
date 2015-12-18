@@ -18,15 +18,15 @@ Rectangle {
         color: "lightsteelblue"
 
         Component.onCompleted: {
-            appendSampleToAll(0.3);
-            appendSampleToAll(0.5);
-            appendSampleToAll(0);
-            appendSampleToAll(1);
-            appendSampleToAll(0);
-            appendSampleToAll(1);
-            appendSampleToAll(0);
-            appendSampleToAll(1.0);
-            appendSampleToAll(0.9);
+            appendSampleToAll(0.3); // 0
+            appendSampleToAll(0.5); // 1
+            appendSampleToAll(0);   // 2
+            appendSampleToAll(1);   // 3
+            appendSampleToAll(0);   // 4
+            appendSampleToAll(1);   // 5
+            appendSampleToAll(0);   // 6
+            appendSampleToAll(1);   // 7
+            appendSampleToAll(0.9); // 8
             appendSampleToAll(1.01);
             appendSampleToAll(0.98);
             appendSampleToAll(0.9);
@@ -49,19 +49,6 @@ Rectangle {
             appendSampleToAll(0.02);
             appendSampleToAll(0);
             appendSampleToAll(0.1);
-            appendSampleToAll(0);
-            appendSampleToAll(0.2);
-            appendSampleToAll(0);
-            appendSampleToAll(0.3);
-            appendSampleToAll(0);
-            appendSampleToAll(0.4);
-            appendSampleToAll(0);
-            appendSampleToAll(0.5);
-            appendSampleToAll(0);
-            appendSampleToAll(0.6);
-
-            for (var i = 0; i < 100; ++i)
-                appendSampleToAll(newSample(i));
         }
 
     }
