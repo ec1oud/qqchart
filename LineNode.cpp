@@ -87,8 +87,9 @@ LineNode::LineNode()
     setFlag(OwnsMaterial);
 }
 
-void LineNode::updateGeometry(const QRectF &bounds, const QList<qreal> &samples)
+void LineNode::updateGeometry(const QRectF &bounds, const QVector<qreal> &samples)
 {
+    Q_UNUSED(bounds)
     static const int verticesPerSample = 4;
     m_geometry.setDrawingMode(m_wireframe ? GL_LINE_STRIP : GL_TRIANGLE_STRIP);
     m_geometry.allocate(samples.size() * verticesPerSample);

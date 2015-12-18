@@ -10,7 +10,7 @@ class LineNode : public QSGGeometryNode
 public:
     LineNode();
 
-    void updateGeometry(const QRectF &bounds, const QList<qreal> &samples);
+    void updateGeometry(const QRectF &bounds, const QVector<qreal> &samples);
     void setLineWidth(float width);
     void setColor(QColor color);
     void setAlertMinColor(QColor color);

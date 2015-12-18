@@ -12,6 +12,7 @@ LineGraph::LineGraph()
     , m_alertMaxValue(1)
     , m_timeScale(1)
 {
+    m_samples.reserve(30);
     setFlag(ItemHasContents, true);
     setAcceptHoverEvents(true);
 }

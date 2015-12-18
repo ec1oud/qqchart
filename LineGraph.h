@@ -69,7 +69,7 @@ signals:
     void wireframeChanged();
 
 protected:
-    QList<qreal> m_samples;
+    QVector<qreal> m_samples;
 
     bool m_samplesChanged;
     bool m_geometryChanged;
