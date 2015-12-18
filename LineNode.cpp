@@ -61,7 +61,7 @@ struct LineVertex {
     float nextY;
     inline void set(int ii, float tt, float xx, float yy, float px, float py, float nx, float ny) {
         x = xx; y = yy; i = ii; t = tt;
-qDebug() << "x" << xx << "y" << yy << "i" << ii << "t" << tt;
+//qDebug() << "x" << xx << "y" << yy << "i" << ii << "t" << tt;
         prevX = px; prevY = py; nextX = nx; nextY = ny;
     }
 };
@@ -91,9 +91,11 @@ void LineNode::updateGeometry(const QRectF &bounds, const QList<qreal> &samples)
 {
     static const int verticesPerSample = 4;
     m_geometry.setDrawingMode(m_wireframe ? GL_LINE_STRIP : GL_TRIANGLE_STRIP);
-    m_geometry.allocate(samples.size() * verticesPerSample);
-qDebug() << m_material->state()->dataTransform;
+    m_geometry.allocate((samples.size() + 1) * verticesPerSample);
+qDebug() << "samples" << samples.size() << "transform" << m_material->state()->dataTransform;
+qDebug() << samples;
     float dx = 1.0;
+
     float x = 0;
     float xp = 0;
     float xn = x + dx;
@@ -101,8 +103,9 @@ qDebug() << m_material->state()->dataTransform;
     float sampleNext = samples.at(1);
     float samplePrev = sample;
     LineVertex *v = (LineVertex *) m_geometry.vertexData();
-    int lastI = samples.size() - verticesPerSample;
-    for (int i = 0; i < lastI; ++i) {
+    int lastI = samples.size() - 1;
+    for (int i = 1; i < lastI; ++i) {
+qDebug() << "x" << x << "y" << sample << "i" << i;
         v[i*verticesPerSample  ].set(0, -1, x, sample, xp, samplePrev, xn, sampleNext);
         v[i*verticesPerSample+1].set(1, 1, x, sample, xp, samplePrev, xn, sampleNext);
         v[i*verticesPerSample+2].set(2, -1, x, sample, xp, samplePrev, xn, sampleNext);
@@ -112,8 +115,9 @@ qDebug() << m_material->state()->dataTransform;
         xn += dx;
         samplePrev = sample;
         sample = sampleNext;
-        sampleNext = samples.at(i + verticesPerSample);
+        sampleNext = samples.at(i + 1);
     }
+qDebug() << "x" << x << "y" << sample << "i" << lastI;
     v[lastI*verticesPerSample  ].set(0, -1, x, sample, xp, samplePrev, xn, sampleNext);
     v[lastI*verticesPerSample+1].set(1, 1, x, sample, xp, samplePrev, xn, sampleNext);
     v[lastI*verticesPerSample+2].set(2, -1, x, sample, xp, samplePrev, xn, sampleNext);
@@ -124,8 +128,10 @@ qDebug() << m_material->state()->dataTransform;
     samplePrev = sample;
     sample = sampleNext;
     ++lastI;
+qDebug() << "lastI ends at" << lastI << "so we are populating samples" << lastI * verticesPerSample << "->" << lastI * verticesPerSample + 3 << "of" << samples.size() * verticesPerSample;
+qDebug() << "last sample: x" << x << "y" << sample << "i" << lastI;
     v[lastI*verticesPerSample  ].set(0, -1, x, sample, xp, samplePrev, xn, sampleNext);
-    v[lastI*verticesPerSample+1].set(1, 1, xp, x, sample, samplePrev, xn, sampleNext);
+    v[lastI*verticesPerSample+1].set(1, 1, x, sample, xp, samplePrev, xn, sampleNext);
     v[lastI*verticesPerSample+2].set(2, -1, x, sample, xp, samplePrev, xn, sampleNext);
     v[lastI*verticesPerSample+3].set(3, 1, x, sample, xp, samplePrev, xn, sampleNext);
 
