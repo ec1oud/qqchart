@@ -30,7 +30,7 @@ public:
         float lineWidth;
         float alertMinValue;
         float alertMaxValue;
-        float spread;
+        float aa;
         QMatrix4x4 dataTransform;
     };
 

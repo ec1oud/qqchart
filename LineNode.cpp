@@ -24,7 +24,7 @@ public:
         program()->setUniformValue(id_alertMinColor, m->alertMinColor);
         program()->setUniformValue(id_alertMaxColor, m->alertMaxColor);
         program()->setUniformValue(id_dataTransform, m->dataTransform);
-        program()->setUniformValue(id_spread, m->spread);
+        program()->setUniformValue(id_aa, m->aa);
 //qDebug() << "colors" << m->color << m->alertMinColor << m->alertMaxColor;
     }
 
@@ -36,7 +36,7 @@ public:
         id_alertMinColor = program()->uniformLocation("alertMinColor");
         id_alertMaxColor = program()->uniformLocation("alertMaxColor");
         id_dataTransform = program()->uniformLocation("dataTransform");
-        id_spread = program()->uniformLocation("spread");
+        id_aa = program()->uniformLocation("aa");
     }
 
 private:
@@ -47,7 +47,7 @@ private:
     int id_alertMinColor;
     int id_alertMaxColor;
     int id_dataTransform;
-    int id_spread;
+    int id_aa;
 };
 
 struct LineVertex {
@@ -179,7 +179,7 @@ void LineNode::setAlertMaxValue(qreal v)
 
 void LineNode::setSpread(qreal v)
 {
-    m_material->state()->spread = v;
+    m_material->state()->aa = v;
     markDirty(QSGNode::DirtyMaterial);
 }
 

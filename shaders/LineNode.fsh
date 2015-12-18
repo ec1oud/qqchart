@@ -1,6 +1,5 @@
 uniform lowp float qt_Opacity;
-uniform lowp float spread;  // used to control whether we anti-alias or not
-                            // which wasn't the original purpose...
+uniform lowp float aa;
 
 varying lowp float vT;
 varying lowp vec4 color;
@@ -9,7 +8,7 @@ varying lowp vec4 color;
 
 void main(void)
 {
-    lowp float tt = smoothstep(0.0, spread, cos(vT * PI));
+    lowp float tt = abs(aa - 1.0) + aa * cos(vT * PI);
 
     gl_FragColor = color * qt_Opacity * tt;
 }
