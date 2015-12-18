@@ -40,18 +40,21 @@ void main(void)
         vec2 upToCap = miter * halfLineWidth * t;
         vec2 capDeviation = averageTangent * halfLineWidth;
         float dxNorm;
+        float oddMult = mod(i, 2.0);
+        float evenMult = mod(i + 1.0, 2.0);
         if (lineToward.y > 0) {
             capDeviation *= sign(i - 2.0) * mod(i - 2.0, 2.0); // lower knee
+            miterOff = oddMult * (upToCap + capDeviation) + evenMult * (-t * miterLength * miter);
         } else {
             capDeviation *= sign(i - 1.0) * mod(i - 1.0, 2.0); // upper knee
+            miterOff = evenMult * (upToCap + capDeviation) + oddMult * (-t * miterLength * miter);
         }
-        miterOff = upToCap + capDeviation;
     }
     // offset the y
     posPx.y += dataTransform[3][1];
     gl_Position = qt_Matrix * vec4(posPx + miterOff, 0, 1.0);
 
-//    gl_Position = qt_Matrix * vec4(posPx + yOffset + t * miterLength * miter, 0.0, 1.0); // unlimited mitering
+//    gl_Position = qt_Matrix * vec4(posPx + vec2(dataTransform[3][0], dataTransform[3][1]) + -t * miterLength * miter, 0.0, 1.0); // unlimited mitering
 
     vT = t * 0.5;
     color = pos.y > alertAboveMaximum ? alertMaxColor :
