@@ -69,9 +69,9 @@ Rectangle {
                 Slider {
                     id: widthSlider
                     width: 300
-                    minimumValue: 1.5
+                    minimumValue: 1
                     maximumValue: 25
-                    value: 1.75
+                    value: 1
                 }
                 Text {
 //                    anchors.top: widthSlider.bottom

@@ -17,7 +17,7 @@ public:
     QList<QByteArray> attributes() const {  return QList<QByteArray>() << "pos" << "prevNext"; }
 
     void updateState(const LineNode::LineMaterial *m, const LineNode::LineMaterial *) {
-        program()->setUniformValue(id_lineWidth, m->lineWidth);
+        program()->setUniformValue(id_lineWidth, GLfloat(m->aa ? m->lineWidth * 1.7 : m->lineWidth));
         program()->setUniformValue(id_alertBelowMinimum, m->alertMinValue);
         program()->setUniformValue(id_alertAboveMaximum, m->alertMaxValue);
         program()->setUniformValue(id_normalColor, m->color);
