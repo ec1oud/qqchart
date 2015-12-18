@@ -103,11 +103,10 @@ qDebug() << samples;
     float sampleNext;
     float samplePrev = sample;
     LineVertex *v = (LineVertex *) m_geometry.vertexData();
-    int lastI = samples.size();
+    int lastI = samples.size() - 1;
     for (int i = 0; i < lastI; ++i) {
 qDebug() << "x" << x << "y" << sample << "i" << i;
-        if (i + 1 < lastI)
-            sampleNext = samples.at(i + 1);
+        sampleNext = samples.at(i + 1);
         v[i*verticesPerSample  ].set(0, -1, x, sample, xp, samplePrev, xn, sampleNext);
         v[i*verticesPerSample+1].set(1, 1, x, sample, xp, samplePrev, xn, sampleNext);
         v[i*verticesPerSample+2].set(2, -1, x, sample, xp, samplePrev, xn, sampleNext);
@@ -118,12 +117,13 @@ qDebug() << "x" << x << "y" << sample << "i" << i;
         samplePrev = sample;
         sample = sampleNext;
     }
-//qDebug() << "lastI ends at" << lastI << "so we are populating samples" << lastI * verticesPerSample << "->" << lastI * verticesPerSample + 3 << "of" << samples.size() * verticesPerSample;
-//qDebug() << "last sample: x" << x << "y" << sample << "i" << lastI;
-//    v[lastI*verticesPerSample  ].set(0, -1, x, sample, xp, samplePrev, xn, sampleNext);
-//    v[lastI*verticesPerSample+1].set(1, 1, x, sample, xp, samplePrev, xn, sampleNext);
-//    v[lastI*verticesPerSample+2].set(2, -1, x, sample, xp, samplePrev, xn, sampleNext);
-//    v[lastI*verticesPerSample+3].set(3, 1, x, sample, xp, samplePrev, xn, sampleNext);
+    sampleNext = sample;
+qDebug() << "lastI ends at" << lastI << "so we are populating samples" << lastI * verticesPerSample << "->" << lastI * verticesPerSample + 3 << "of" << samples.size() * verticesPerSample;
+qDebug() << "last sample: x" << x << "y" << sample << "i" << lastI;
+    v[lastI*verticesPerSample  ].set(0, -1, x, sample, xp, samplePrev, xn, sampleNext);
+    v[lastI*verticesPerSample+1].set(1, 1, x, sample, xp, samplePrev, xn, sampleNext);
+    v[lastI*verticesPerSample+2].set(2, -1, x, sample, xp, samplePrev, xn, sampleNext);
+    v[lastI*verticesPerSample+3].set(3, 1, x, sample, xp, samplePrev, xn, sampleNext);
 
     markDirty(QSGNode::DirtyGeometry);
 }
