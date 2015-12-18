@@ -39,7 +39,6 @@ void main(void)
         // angle is acute: make a knee
         vec2 upToCap = miter * halfLineWidth * t;
         vec2 capDeviation = averageTangent * halfLineWidth;
-        float dxNorm;
         float oddMult = mod(i, 2.0);
         float evenMult = mod(i + 1.0, 2.0);
         if (lineToward.y > 0) {

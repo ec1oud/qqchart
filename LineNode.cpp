@@ -92,8 +92,8 @@ void LineNode::updateGeometry(const QRectF &bounds, const QList<qreal> &samples)
     static const int verticesPerSample = 4;
     m_geometry.setDrawingMode(m_wireframe ? GL_LINE_STRIP : GL_TRIANGLE_STRIP);
     m_geometry.allocate(samples.size() * verticesPerSample);
-qDebug() << "samples" << samples.size() << "transform" << m_material->state()->dataTransform;
-qDebug() << samples;
+//qDebug() << "samples" << samples.size() << "transform" << m_material->state()->dataTransform;
+//qDebug() << samples;
     float dx = 1.0;
 
     float x = 0;
@@ -105,7 +105,7 @@ qDebug() << samples;
     LineVertex *v = (LineVertex *) m_geometry.vertexData();
     int lastI = samples.size() - 1;
     for (int i = 0; i < lastI; ++i) {
-qDebug() << "x" << x << "y" << sample << "i" << i;
+//qDebug() << "x" << x << "y" << sample << "i" << i;
         sampleNext = samples.at(i + 1);
         v[i*verticesPerSample  ].set(0, -1, x, sample, xp, samplePrev, xn, sampleNext);
         v[i*verticesPerSample+1].set(1, 1, x, sample, xp, samplePrev, xn, sampleNext);
@@ -118,8 +118,8 @@ qDebug() << "x" << x << "y" << sample << "i" << i;
         sample = sampleNext;
     }
     sampleNext = sample;
-qDebug() << "lastI ends at" << lastI << "so we are populating samples" << lastI * verticesPerSample << "->" << lastI * verticesPerSample + 3 << "of" << samples.size() * verticesPerSample;
-qDebug() << "last sample: x" << x << "y" << sample << "i" << lastI;
+//qDebug() << "lastI ends at" << lastI << "so we are populating samples" << lastI * verticesPerSample << "->" << lastI * verticesPerSample + 3 << "of" << samples.size() * verticesPerSample;
+//qDebug() << "last sample: x" << x << "y" << sample << "i" << lastI;
     v[lastI*verticesPerSample  ].set(0, -1, x, sample, xp, samplePrev, xn, sampleNext);
     v[lastI*verticesPerSample+1].set(1, 1, x, sample, xp, samplePrev, xn, sampleNext);
     v[lastI*verticesPerSample+2].set(2, -1, x, sample, xp, samplePrev, xn, sampleNext);

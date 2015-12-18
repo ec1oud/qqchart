@@ -53,28 +53,6 @@ Rectangle {
 
     }
 
-//    GraphStack {
-//        anchors.fill: graphs
-//        color: "#DDFFFF"
-
-//        Component.onCompleted: {
-//            for (var i = 0; i < 20; ++i)
-//                appendSampleToAll(newSample(i));
-//        }
-
-//    }
-
-//    GraphStack {
-//        anchors.fill: graphs
-//        color: "#DDFFDD"
-
-//        Component.onCompleted: {
-//            for (var i = 0; i < 100; ++i)
-//                appendSampleToAll(newSample(i));
-//        }
-
-//    }
-
     Rectangle {
         anchors.fill: graphs
         color: "transparent"
@@ -91,9 +69,9 @@ Rectangle {
                 Slider {
                     id: widthSlider
                     width: 300
-                    minimumValue: 1
+                    minimumValue: 1.5
                     maximumValue: 50
-                    value: 35
+                    value: 1.75
                 }
                 Text {
 //                    anchors.top: widthSlider.bottom
@@ -121,19 +99,19 @@ Rectangle {
                 id: aaCb
                 text: "antialiasing"
                 style: whiteCheckboxStyle
-//                checked: true
+                checked: true
             }
             CheckBox {
                 id: originalLineCb
                 text: "actual samples"
                 style: whiteCheckboxStyle
-                checked: true
+//                checked: true
             }
             CheckBox {
                 id: wireframeCb
                 text: "wireframe"
                 style: whiteCheckboxStyle
-                checked: true
+//                checked: true
             }
             CheckBox {
                 id: timerRun

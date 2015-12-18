@@ -14,8 +14,8 @@ Item {
     }
 
     function newSample(i) {
-        return (Math.sin(i / 20.0 * Math.PI * 2) + 1) * 0.4;
-//        return (Math.sin(i / 20.0 * Math.PI * 2) + 1) * 0.4 + Math.random() * 0.05;
+//        return (Math.sin(i / 20.0 * Math.PI * 2) + 1) * 0.4;
+        return (Math.sin(i / 20.0 * Math.PI * 2) + 1) * 0.4 + Math.random() * 0.05;
     }
 
     property int offset: 25;
@@ -32,15 +32,13 @@ Item {
         visible: fillCb.checked
         opacity: 0.8
         timeScale: width / 30
-//        clip: true
-
     }
 
     LineGraph {
         id: wireframe
         anchors.fill: graph
         lineWidth: widthSlider.value
-        color: "black"
+        color: graph.visible ? "black" : "white"
         alertMinColor: "black"
         alertMaxColor: "black"
         wireframe: true
