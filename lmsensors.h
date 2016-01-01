@@ -43,16 +43,16 @@ private:
 class SensorItem : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString label READ getlabel)
-    Q_PROPERTY(QString adapter READ getadapter)
+    Q_PROPERTY(QString label READ getlabel CONSTANT)
+    Q_PROPERTY(QString adapter READ getadapter CONSTANT)
     Q_PROPERTY(QString chipname READ getchipname CONSTANT)
     Q_PROPERTY(int chipid READ getchipid CONSTANT)
-    Q_PROPERTY(QString unit READ getunit)
+    Q_PROPERTY(QString unit READ getunit CONSTANT)
     Q_PROPERTY(float value READ currentsample NOTIFY currentsampleChanged)
-    Q_PROPERTY(float minval READ getminval)
-    Q_PROPERTY(float maxval READ getmaxval)
+    Q_PROPERTY(float minval READ getminval CONSTANT)
+    Q_PROPERTY(float maxval READ getmaxval CONSTANT)
     Q_PROPERTY(qint64 tmin READ gettmin WRITE settmin NOTIFY tminChanged)
-    Q_PROPERTY(qint64 tmax READ gettmax)
+    Q_PROPERTY(qint64 tmax READ gettmax CONSTANT)
     Q_PROPERTY(qint32 max_samples READ getmax_samples WRITE setmax_samples NOTIFY max_samplesChanged)
     Q_PROPERTY(float ymin READ getymin WRITE setymin NOTIFY yminchanged)
     Q_PROPERTY(float ymax READ getymax WRITE setymax NOTIFY ymaxchanged)
