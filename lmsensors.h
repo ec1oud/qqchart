@@ -1,5 +1,5 @@
-#ifndef QLMSENSORS_H
-#define QLMSENSORS_H
+#ifndef LMSENSORS_H
+#define LMSENSORS_H
 
 #include <QObject>
 
@@ -12,10 +12,8 @@
 #include <QStringList>
 
 // LM-Sensors Library Header
-#include <sensors/sensors.h>/* Library initialization and clean-up */
-#include <sensors/error.h>/* Library initialization and clean-up */
-
-
+#include <sensors/sensors.h>
+#include <sensors/error.h>
 
 class SensorSample : public QObject
 {
@@ -56,9 +54,6 @@ class SensorItem : public QObject
     Q_PROPERTY(qint32 max_samples READ getmax_samples WRITE setmax_samples NOTIFY max_samplesChanged)
     Q_PROPERTY(float ymin READ getymin WRITE setymin NOTIFY yminchanged)
     Q_PROPERTY(float ymax READ getymax WRITE setymax NOTIFY ymaxchanged)
-    Q_PROPERTY(float width READ getwidth WRITE setwidth NOTIFY widthChanged)
-    Q_PROPERTY(QString color READ getcolor WRITE setcolor NOTIFY colorChanged)
-    Q_PROPERTY(bool checked READ getchecked WRITE setchecked NOTIFY checkChanged)
     Q_PROPERTY(QQmlListProperty<SensorSample> samples READ getSamples CONSTANT)
 
 public:
@@ -82,12 +77,6 @@ public:
     void setymin(float val){ymin=val; emit yminchanged();};
     float getymax(){return ymax;};
     void setymax(float val){ymax=val; emit ymaxchanged();};
-    QString getcolor(){return color;};
-    void setcolor(const QString &newcol){color=newcol; emit colorChanged();};
-    float getwidth(){return linewidth;};
-    void setwidth(const float &newwidth){linewidth=newwidth; emit widthChanged();};
-    bool getchecked(){return checked;};
-    void setchecked(const bool &newcheck){if(checked!=newcheck) {checked=newcheck; emit checkChanged();} };
     float currentsample(){if(m_samples.length()) return m_samples.last()->value(); else return 0;}
     float getminval(){return minval;};
     float getmaxval(){return maxval;};
@@ -100,30 +89,25 @@ public:
     bool do_sample(const qint64 &timestamp);
     void getCPULoad(double &val);
 
-    int index;
     enum SensorType { CPU, LM };
-    SensorType type;
-    const sensors_chip_name *chip;
-    const sensors_feature *feature;
-    const sensors_subfeature *sub;
-    qint64 tmin, tmax;    // visible range in ms
-    float ymin, ymax;   // min/max value y-axis
-    float minval, maxval;   // min/max values of the signal
+
+    int index = -1;
+    int chipid = 0;
+    qint32 max_samples = 32;
+    SensorType type = CPU;
+    const sensors_chip_name *chip = 0;
+    const sensors_feature *feature = 0;
+    const sensors_subfeature *sub = 0;
+    qint64 tmin = 0, tmax = 0;    // visible range in ms
+    float ymin = 0, ymax = 0;   // min/max value y-axis
+    float minval = 0, maxval = 0;   // min/max values of the signal
     QString label;
     QString adapter;
-    int chipid;
     QString chipname;
-    QString color;
     QString unit;
-    float linewidth;
-    float offset, scale;
-    qint32 max_samples;
-    bool checked;
 
 signals:
-//    void updateSamples();
     void checkChanged();
-    void colorChanged();
     void currentsampleChanged();
     void widthChanged();
     void max_samplesChanged();
@@ -135,9 +119,7 @@ public slots:
 
 private:
     QList<SensorSample*> m_samples;
-
     qint64 m_total_jiffies, m_work_jiffies;
-
 };
 
 
@@ -163,16 +145,13 @@ public:
 
     QQmlListProperty<SensorItem> getItems();
 
-    QStringList palette;
-
-
 signals:
     void updateItems();
 
 public slots:
 
 private:
-    bool Init();
+    bool init();
 
     QList<SensorItem*> m_sensorItems;
 
@@ -180,4 +159,4 @@ private:
     bool m_initialized;
 };
 
-#endif // QLMSENSORS_H
+#endif // LMSENSORS_H

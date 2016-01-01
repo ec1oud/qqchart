@@ -31,7 +31,6 @@ public:
         qmlRegisterType<LineGraph>(uri, 1, 0, "LineGraph");
         qmlRegisterType<LmSensors>(uri, 1, 0, "LmSensors");
         qmlRegisterUncreatableType<SensorItem>(uri, 1, 0, "Sensor", "objects of type Sensor are provided by LmSensors");
-        qmlRegisterUncreatableType<SensorSample>(uri, 1, 0, "SensorSample", "objects of type SensorSample are provided by SensorItem");
     }
 };
 
