@@ -17,14 +17,14 @@
 
 
 
-class QSensorSample : public QObject
+class SensorSample : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(qint64 time READ time CONSTANT)
     Q_PROPERTY(float value READ value CONSTANT)
 public:
-    explicit QSensorSample(QObject *parent = 0):QObject(parent){m_time=0;m_value=0;};
-    explicit QSensorSample(qint64 t, float v, QObject *parent = 0):QObject(parent){m_time=t;m_value=v;};
+    explicit SensorSample(QObject *parent = 0):QObject(parent){m_time=0;m_value=0;};
+    explicit SensorSample(qint64 t, float v, QObject *parent = 0):QObject(parent){m_time=t;m_value=v;};
 
     qint64 time() {return(m_time);}
     float value() {return(m_value);}
@@ -40,7 +40,7 @@ private:
 
 
 
-class QSensorItem : public QObject
+class SensorItem : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString label READ getlabel)
@@ -59,10 +59,10 @@ class QSensorItem : public QObject
     Q_PROPERTY(float width READ getwidth WRITE setwidth NOTIFY widthChanged)
     Q_PROPERTY(QString color READ getcolor WRITE setcolor NOTIFY colorChanged)
     Q_PROPERTY(bool checked READ getchecked WRITE setchecked NOTIFY checkChanged)
-    Q_PROPERTY(QQmlListProperty<QSensorSample> samples READ getSamples CONSTANT)
+    Q_PROPERTY(QQmlListProperty<SensorSample> samples READ getSamples CONSTANT)
 
 public:
-    explicit QSensorItem(QObject *parent = 0);
+    explicit SensorItem(QObject *parent = 0);
 
     Q_INVOKABLE float getvalue();
     Q_INVOKABLE float valueAt(const qint64 &timestamp);
@@ -93,8 +93,8 @@ public:
     float getmaxval(){return maxval;};
 
 
-    QQmlListProperty<QSensorSample> getSamples();
-    QList<QSensorSample*> samples(){return m_samples;};
+    QQmlListProperty<SensorSample> getSamples();
+    QList<SensorSample*> samples(){return m_samples;};
 
 
     bool do_sample(const qint64 &timestamp);
@@ -134,7 +134,7 @@ signals:
 public slots:
 
 private:
-    QList<QSensorSample*> m_samples;
+    QList<SensorSample*> m_samples;
 
     qint64 m_total_jiffies, m_work_jiffies;
 
@@ -142,16 +142,16 @@ private:
 
 
 
-class QLmSensors : public QObject
+class LmSensors : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(qint64 timestamp READ timestamp)
     Q_PROPERTY(bool initialized READ initialized)
     Q_PROPERTY(QString errorMessage READ errorMessage)
-    Q_PROPERTY(QQmlListProperty<QSensorItem> items READ getItems NOTIFY updateItems)
+    Q_PROPERTY(QQmlListProperty<SensorItem> items READ getItems NOTIFY updateItems)
 
 public:
-    explicit QLmSensors(QObject *parent = 0);
+    explicit LmSensors(QObject *parent = 0);
 
     Q_INVOKABLE bool do_sampleValues();
 
@@ -159,9 +159,9 @@ public:
     bool initialized(){return m_initialized;};
     QString errorMessage(){return m_errorMessage;};
 
-    QList<QSensorItem*> items(){return m_sensorItems;};
+    QList<SensorItem*> items(){return m_sensorItems;};
 
-    QQmlListProperty<QSensorItem> getItems();
+    QQmlListProperty<SensorItem> getItems();
 
     QStringList palette;
 
@@ -174,7 +174,7 @@ public slots:
 private:
     bool Init();
 
-    QList<QSensorItem*> m_sensorItems;
+    QList<SensorItem*> m_sensorItems;
 
     QString m_errorMessage;
     bool m_initialized;

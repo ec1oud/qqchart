@@ -1,6 +1,6 @@
-#include "qlmsensors.h"
+#include "lmsensors.h"
 
-QLmSensors::QLmSensors(QObject *parent) :
+LmSensors::LmSensors(QObject *parent) :
     QObject(parent)
 {
 //    http://www.w3.org/TR/SVG/types.html#ColorKeywords
@@ -10,34 +10,34 @@ QLmSensors::QLmSensors(QObject *parent) :
 }
 
 
-void appendItems(QQmlListProperty<QSensorItem> *property, QSensorItem *item)
+void appendItems(QQmlListProperty<SensorItem> *property, SensorItem *item)
 {
 Q_UNUSED(property);
 Q_UNUSED(item);
 //Do nothing. can't add to a directory using this method
 }
 
-int itemSize(QQmlListProperty<QSensorItem> *property)
+int itemSize(QQmlListProperty<SensorItem> *property)
 {
-return static_cast< QList<QSensorItem *> *>(property->data)->size();
+return static_cast< QList<SensorItem *> *>(property->data)->size();
 }
 
-QSensorItem *itemAt(QQmlListProperty<QSensorItem> *property, int index)
+SensorItem *itemAt(QQmlListProperty<SensorItem> *property, int index)
 {
-return static_cast< QList<QSensorItem *> *>(property->data)->at(index);
+return static_cast< QList<SensorItem *> *>(property->data)->at(index);
 }
 
-void clearitemPtr(QQmlListProperty<QSensorItem> *property)
+void clearitemPtr(QQmlListProperty<SensorItem> *property)
 {
-return static_cast< QList<QSensorItem *> *>(property->data)->clear();
+return static_cast< QList<SensorItem *> *>(property->data)->clear();
 }
 
-QQmlListProperty<QSensorItem> QLmSensors::getItems()
+QQmlListProperty<SensorItem> LmSensors::getItems()
 {
-    return QQmlListProperty<QSensorItem>(this, &m_sensorItems, &appendItems, &itemSize, &itemAt, &clearitemPtr);
+    return QQmlListProperty<SensorItem>(this, &m_sensorItems, &appendItems, &itemSize, &itemAt, &clearitemPtr);
 }
 
-bool QLmSensors::Init()
+bool LmSensors::Init()
 {
 #define BUF_SIZE 200
 static char buf[BUF_SIZE];
@@ -51,7 +51,7 @@ const char *adap=NULL;
 
 // add CPU load
 
-    QSensorItem *new_item = new QSensorItem();
+    SensorItem *new_item = new SensorItem();
     new_item->type = new_item->CPU;
     new_item->index = m_sensorItems.count();
     new_item->label = "CPU Load";
@@ -88,7 +88,7 @@ else
         while ((feature = sensors_get_features(chip, &a)))
             {
 //                qDebug() << "  " << sensors_get_label(chip, feature);
-            QSensorItem *new_item = new QSensorItem();
+            SensorItem *new_item = new SensorItem();
 
             sub = sensors_get_subfeature(chip, feature, (sensors_subfeature_type)(((int)feature->type) << 8));
 
@@ -152,10 +152,10 @@ return true;
 }
 
 
-bool QLmSensors::do_sampleValues()
+bool LmSensors::do_sampleValues()
 {
 qint64 timestamp = QDateTime().currentDateTime().toMSecsSinceEpoch();
-    foreach (QSensorItem* item, m_sensorItems)
+    foreach (SensorItem* item, m_sensorItems)
         {
         item->do_sample(timestamp);
         }
@@ -163,7 +163,7 @@ qint64 timestamp = QDateTime().currentDateTime().toMSecsSinceEpoch();
 }
 
 
-QSensorItem::QSensorItem(QObject *parent) :
+SensorItem::SensorItem(QObject *parent) :
     QObject(parent)
 {
     index=-1;
@@ -192,7 +192,7 @@ QSensorItem::QSensorItem(QObject *parent) :
 }
 
 
-bool QSensorItem::do_sample(const qint64 &timestamp)
+bool SensorItem::do_sample(const qint64 &timestamp)
 {
 double val;
 
@@ -208,7 +208,7 @@ double val;
     if(val<minval) minval=val;
     if(val>maxval) maxval=val;
 
-    m_samples.append(new QSensorSample(timestamp, (float)val));
+    m_samples.append(new SensorSample(timestamp, (float)val));
     emit currentsampleChanged();
 
     if(m_samples.size() > max_samples)
@@ -228,7 +228,7 @@ double val;
 
 
 
-void QSensorItem::getCPULoad(double &val)
+void SensorItem::getCPULoad(double &val)
 {
 // http://stackoverflow.com/questions/3017162/how-to-get-total-cpu-usage-in-linux-c
 // http://www.linuxhowtos.org/System/procstat.htm
@@ -259,7 +259,7 @@ void QSensorItem::getCPULoad(double &val)
 }
 
 
-float QSensorItem::valueAt(const qint64 &timestamp)
+float SensorItem::valueAt(const qint64 &timestamp)
 {
     for(int x=0;x<m_samples.size();x++)
         if(m_samples.at(x)->time()>=timestamp) return m_samples.at(x)->value();
@@ -267,7 +267,7 @@ float QSensorItem::valueAt(const qint64 &timestamp)
     return (m_samples.length())?m_samples.at(m_samples.length()-1)->value():0;
 }
 
-QPointF QSensorItem::map2canvas(const QRectF &bounds, const qint64 &timestamp, const float &val)
+QPointF SensorItem::map2canvas(const QRectF &bounds, const qint64 &timestamp, const float &val)
 {
     float scale_y = bounds.height() / (ymax-ymin);
     float scale_x = -bounds.width() / tmin;
@@ -280,7 +280,7 @@ QPointF QSensorItem::map2canvas(const QRectF &bounds, const qint64 &timestamp, c
 }
 
 
-float QSensorItem::getvalue()
+float SensorItem::getvalue()
 {
 double val;
 
@@ -294,28 +294,28 @@ double val;
 }
 
 
-void appendSample(QQmlListProperty<QSensorSample> *property, QSensorSample *item)
+void appendSample(QQmlListProperty<SensorSample> *property, SensorSample *item)
 {
 Q_UNUSED(property);
 Q_UNUSED(item);
 }
 
-int sampleSize(QQmlListProperty<QSensorSample> *property)
+int sampleSize(QQmlListProperty<SensorSample> *property)
 {
-return static_cast< QList<QSensorSample *> *>(property->data)->size();
+return static_cast< QList<SensorSample *> *>(property->data)->size();
 }
 
-QSensorSample *sampleAt(QQmlListProperty<QSensorSample> *property, int index)
+SensorSample *sampleAt(QQmlListProperty<SensorSample> *property, int index)
 {
-return static_cast< QList<QSensorSample *> *>(property->data)->at(index);
+return static_cast< QList<SensorSample *> *>(property->data)->at(index);
 }
 
-void clearSamplePtr(QQmlListProperty<QSensorSample> *property)
+void clearSamplePtr(QQmlListProperty<SensorSample> *property)
 {
-return static_cast< QList<QSensorSample *> *>(property->data)->clear();
+return static_cast< QList<SensorSample *> *>(property->data)->clear();
 }
 
-QQmlListProperty<QSensorSample> QSensorItem::getSamples()
+QQmlListProperty<SensorSample> SensorItem::getSamples()
 {
-    return QQmlListProperty<QSensorSample>(this, &m_samples, &appendSample, &sampleSize, &sampleAt, &clearSamplePtr);
+    return QQmlListProperty<SensorSample>(this, &m_samples, &appendSample, &sampleSize, &sampleAt, &clearSamplePtr);
 }

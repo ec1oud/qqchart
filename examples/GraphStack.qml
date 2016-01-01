@@ -1,7 +1,7 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.4
 
-import LineGraph 1.0
+import org.ecloud.charts 1.0
 
 Item {
     id: root

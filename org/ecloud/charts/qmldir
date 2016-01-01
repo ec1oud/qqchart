@@ -1,0 +1,4 @@
+module org.ecloud.charts
+plugin chartsplugin
+classname ChartsPlugin
+typeinfo plugins.qmltypes
