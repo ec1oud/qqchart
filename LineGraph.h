@@ -2,6 +2,7 @@
 #define LINEGRAPH_H
 
 #include <QQuickItem>
+#include "LineNode.h"
 
 class LineGraph : public QQuickItem
 {
@@ -40,6 +41,7 @@ protected:
 public slots:
     void appendSample(qreal value);
     virtual void removeFirstSample();
+    void setVertices(const QVector<LineNode::LineVertex> *v);
 
     void setLineWidth(qreal lineWidth);
     void setColor(QColor color);
@@ -70,12 +72,13 @@ signals:
 
 protected:
     QVector<qreal> m_samples;
+    const QVector<LineNode::LineVertex> *m_vertices;
 
     bool m_samplesChanged;
     bool m_geometryChanged;
     bool m_wireframe;
     qreal m_lineWidth;
-    QColor m_color;
+    QColor m_color = Qt::gray;
     QColor m_alertMinColor;
     QColor m_alertMaxColor;
     qreal m_minValue;

@@ -49,7 +49,8 @@ void main(void)
             miterOff = evenMult * (upToCap + capDeviation) + oddMult * (-t * miterLength * miter);
         }
     }
-    // offset the y
+    // offset the x and y
+    posPx.x += dataTransform[3][0];
     posPx.y += dataTransform[3][1];
     gl_Position = qt_Matrix * vec4(posPx + miterOff, 0, 1.0);
 

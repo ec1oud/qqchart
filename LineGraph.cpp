@@ -1,20 +1,27 @@
 #include "LineGraph.h"
 #include "LineNode.h"
+#include <QDateTime>
 
 LineGraph::LineGraph()
-    : m_samplesChanged(false)
+    : m_vertices(Q_NULLPTR)
+    , m_samplesChanged(false)
     , m_geometryChanged(false)
     , m_wireframe(false)
-    , m_lineWidth(2)
+    , m_lineWidth(1.3)
     , m_minValue(0)
     , m_maxValue(1)
     , m_alertMinValue(0)
     , m_alertMaxValue(1)
     , m_timeScale(1)
 {
-    m_samples.reserve(30);
     setFlag(ItemHasContents, true);
-    setAcceptHoverEvents(true);
+}
+
+void LineGraph::setVertices(const QVector<LineNode::LineVertex> *v)
+{
+    m_vertices = v;
+    m_samplesChanged = true;
+    update();
 }
 
 void LineGraph::registerMetaType()
@@ -190,19 +197,25 @@ QSGNode *LineGraph::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
     n->line->setSpread(antialiasing() && !m_wireframe ? 1.0 : 0.0);
     n->line->setWireframe(m_wireframe);
 
-    if (m_geometryChanged) {
+    // TODO only adjust the x offset each frame
+//    if (m_geometryChanged) {
         float vscale = height() / (m_maxValue - m_minValue);
         QMatrix4x4 matrix;
         // Scale to fit vertically, flipped for first quadrant
         // Horizontally: m_timeScale is actually pixels-per-sample
+//        matrix.translate(QDateTime::currentMSecsSinceEpoch() / -1000.0, 0);
         matrix.scale(m_timeScale, -vscale);
-        matrix.translate(0, -m_maxValue);
-//qDebug() << "dataTransform" << matrix;
+        float lastTime = m_vertices ? m_vertices->last().x : 0;
+        matrix.translate(width() / m_timeScale - lastTime, -m_maxValue);
+//qDebug() << "dataTransform" << matrix << "last" << lastTime;
         n->line->m_material->state()->dataTransform = matrix;
-    }
+//    }
 
     if (m_geometryChanged || m_samplesChanged) {
-        n->line->updateGeometry(rect, m_samples);
+        if (m_vertices)
+            n->line->updateGeometry(rect, *m_vertices);
+        else if (m_samples.length() > 0)
+            n->line->updateGeometry(rect, m_samples);
     }
 
     m_geometryChanged = false;

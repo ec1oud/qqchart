@@ -10,7 +10,28 @@ class LineNode : public QSGGeometryNode
 public:
     LineNode();
 
+    struct LineVertex {
+        float x;
+        float y;
+        float i;
+        float t;
+        float prevX;
+        float prevY;
+        float nextX;
+        float nextY;
+        inline void set(int ii, float tt, float xx, float yy, float px, float py, float nx, float ny) {
+            x = xx; y = yy; i = ii; t = tt;
+    //qDebug() << "x" << xx << "y" << yy << "i" << ii << "t" << tt;
+            prevX = px; prevY = py; nextX = nx; nextY = ny;
+        }
+    };
+
+    static const int verticesPerSample = 4;
+
+    static void appendVertices(QVector<LineNode::LineVertex> &v, float time, float value);
+
     void updateGeometry(const QRectF &bounds, const QVector<qreal> &samples);
+    void updateGeometry(const QRectF &bounds, const QVector<LineNode::LineVertex> &v);
     void setLineWidth(float width);
     void setColor(QColor color);
     void setAlertMinColor(QColor color);

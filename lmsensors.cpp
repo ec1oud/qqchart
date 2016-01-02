@@ -59,7 +59,6 @@ bool LmSensors::init()
     new_item->unit = "%";
     m_sensorItems.append(new_item);
 
-
     // add lm-sensors
 
     if(int err = sensors_init(NULL))
@@ -175,20 +174,15 @@ bool SensorItem::do_sample(const qint64 &timestamp)
     if(val<minval) minval=val;
     if(val>maxval) maxval=val;
 
-    m_samples.append(new SensorSample(timestamp, (float)val));
-    emit currentsampleChanged();
+//qDebug() << "new sample @" << timestamp << timestamp / 1000.0 << "have" << m_vertices.size() << "max" << max_samples;
+    // make time values smaller; TODO why does this even matter?
+    static qint64 startTime = QDateTime::currentMSecsSinceEpoch();
+    LineNode::appendVertices(m_vertices, (timestamp - startTime) / 1000.0, float(val));
+    emit currentsampleChanged(&m_vertices);
 
-    if(m_samples.size() > max_samples)
-    {
-        int i=0;
+    if (m_vertices.size() > max_samples * LineNode::verticesPerSample)
+        m_vertices.remove(0, m_vertices.size() - max_samples * LineNode::verticesPerSample);
 
-        for (int j = 0; j < m_samples.size(); ++j)
-        {
-            if(i < (m_samples.size() - max_samples))  delete m_samples.takeFirst();
-            else break;
-            i++;
-        }
-    }
     return true;
 }
 
@@ -224,10 +218,10 @@ void SensorItem::getCPULoad(double &val)
 
 float SensorItem::valueAt(const qint64 &timestamp)
 {
-    for(int x=0;x<m_samples.size();x++)
-        if(m_samples.at(x)->time()>=timestamp) return m_samples.at(x)->value();
+    for(int x=0; x<m_vertices.size(); x += LineNode::verticesPerSample)
+        if (m_vertices.at(x).x >= timestamp) return m_vertices.at(x).y;
 
-    return (m_samples.length())?m_samples.at(m_samples.length()-1)->value():0;
+    return (m_vertices.length())?m_vertices.at(m_vertices.length()-1).y:0;
 }
 
 QPointF SensorItem::map2canvas(const QRectF &bounds, const qint64 &timestamp, const float &val)
@@ -253,30 +247,4 @@ float SensorItem::getvalue()
     default: val=0;
     }
     return (float) val;
-}
-
-void appendSample(QQmlListProperty<SensorSample> *property, SensorSample *item)
-{
-    Q_UNUSED(property);
-    Q_UNUSED(item);
-}
-
-int sampleSize(QQmlListProperty<SensorSample> *property)
-{
-    return static_cast< QList<SensorSample *> *>(property->data)->size();
-}
-
-SensorSample *sampleAt(QQmlListProperty<SensorSample> *property, int index)
-{
-    return static_cast< QList<SensorSample *> *>(property->data)->at(index);
-}
-
-void clearSamplePtr(QQmlListProperty<SensorSample> *property)
-{
-    return static_cast< QList<SensorSample *> *>(property->data)->clear();
-}
-
-QQmlListProperty<SensorSample> SensorItem::getSamples()
-{
-    return QQmlListProperty<SensorSample>(this, &m_samples, &appendSample, &sampleSize, &sampleAt, &clearSamplePtr);
 }

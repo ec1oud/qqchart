@@ -50,22 +50,6 @@ private:
     int id_aa;
 };
 
-struct LineVertex {
-    float x;
-    float y;
-    float i;
-    float t;
-    float prevX;
-    float prevY;
-    float nextX;
-    float nextY;
-    inline void set(int ii, float tt, float xx, float yy, float px, float py, float nx, float ny) {
-        x = xx; y = yy; i = ii; t = tt;
-//qDebug() << "x" << xx << "y" << yy << "i" << ii << "t" << tt;
-        prevX = px; prevY = py; nextX = nx; nextY = ny;
-    }
-};
-
 static const QSGGeometry::AttributeSet &attributes()
 {
     static QSGGeometry::Attribute attr[] = {
@@ -90,7 +74,6 @@ LineNode::LineNode()
 void LineNode::updateGeometry(const QRectF &bounds, const QVector<qreal> &samples)
 {
     Q_UNUSED(bounds)
-    static const int verticesPerSample = 4;
     m_geometry.setDrawingMode(m_wireframe ? GL_LINE_STRIP : GL_TRIANGLE_STRIP);
     m_geometry.allocate(samples.size() * verticesPerSample);
 //qDebug() << "samples" << samples.size() << "transform" << m_material->state()->dataTransform;
@@ -126,6 +109,16 @@ void LineNode::updateGeometry(const QRectF &bounds, const QVector<qreal> &sample
     v[lastI*verticesPerSample+2].set(2, -1, x, sample, xp, samplePrev, xn, sampleNext);
     v[lastI*verticesPerSample+3].set(3, 1, x, sample, xp, samplePrev, xn, sampleNext);
 
+    markDirty(QSGNode::DirtyGeometry);
+}
+
+void LineNode::updateGeometry(const QRectF &bounds, const QVector<LineVertex> &v)
+{
+    Q_UNUSED(bounds)
+    m_geometry.setDrawingMode(m_wireframe ? GL_LINE_STRIP : GL_TRIANGLE_STRIP);
+    if (m_geometry.vertexCount() != v.size())
+        m_geometry.allocate(v.size());
+    memcpy(m_geometry.vertexData(), v.constData(), sizeof(LineVertex) * v.size());
     markDirty(QSGNode::DirtyGeometry);
 }
 
@@ -186,4 +179,28 @@ void LineNode::setSpread(qreal v)
 void LineNode::setWireframe(bool v)
 {
     m_wireframe = v;
+}
+
+void LineNode::appendVertices(QVector<LineNode::LineVertex> &v, float time, float value)
+{
+    int i = v.size() - verticesPerSample;
+    if (i >= 0) {
+        v[i].nextX = time;
+        v[i++].nextY = value;
+        v[i].nextX = time;
+        v[i++].nextY = value;
+        v[i].nextX = time;
+        v[i++].nextY = value;
+        v[i].nextX = time;
+        v[i++].nextY = value;
+    }
+    i = v.size();
+    v.resize(i + verticesPerSample);
+    float tp = i > 0 ? v[i - 1].x : time;
+    float samplePrev = i > 0 ? v[i - 1].y : value;
+    v[i++].set(0, -1, time, value, tp, samplePrev, time + 0.01, value);
+    v[i++].set(1,  1, time, value, tp, samplePrev, time + 0.01, value);
+    v[i++].set(2, -1, time, value, tp, samplePrev, time + 0.01, value);
+    v[i++].set(3,  1, time, value, tp, samplePrev, time + 0.01, value);
+    Q_ASSERT(i == v.size());
 }

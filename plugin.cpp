@@ -7,6 +7,7 @@
 
 #include "lmsensors.h"
 #include "LineGraph.h"
+#include "sensorgraph.h"
 
 Q_LOGGING_CATEGORY(lcRegistration, "org.ecloud.charts.registration")
 
@@ -30,6 +31,7 @@ public:
         Q_ASSERT(uri == QLatin1String(ModuleName));
         qmlRegisterType<LineGraph>(uri, 1, 0, "LineGraph");
         qmlRegisterType<LmSensors>(uri, 1, 0, "LmSensors");
+        qmlRegisterType<SensorGraph>(uri, 1, 0, "SensorGraph");
         qmlRegisterUncreatableType<SensorItem>(uri, 1, 0, "Sensor", "objects of type Sensor are provided by LmSensors");
     }
 };

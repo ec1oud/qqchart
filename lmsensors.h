@@ -14,29 +14,7 @@
 // LM-Sensors Library Header
 #include <sensors/sensors.h>
 #include <sensors/error.h>
-
-class SensorSample : public QObject
-{
-    Q_OBJECT
-    Q_PROPERTY(qint64 time READ time CONSTANT)
-    Q_PROPERTY(float value READ value CONSTANT)
-public:
-    explicit SensorSample(QObject *parent = 0):QObject(parent){m_time=0;m_value=0;};
-    explicit SensorSample(qint64 t, float v, QObject *parent = 0):QObject(parent){m_time=t;m_value=v;};
-
-    qint64 time() {return(m_time);}
-    float value() {return(m_value);}
-
-signals:
-
-public slots:
-
-private:
-    qint64 m_time;
-    float m_value;
-};
-
-
+#include "LineNode.h"
 
 class SensorItem : public QObject
 {
@@ -54,7 +32,6 @@ class SensorItem : public QObject
     Q_PROPERTY(qint32 max_samples READ getmax_samples WRITE setmax_samples NOTIFY max_samplesChanged)
     Q_PROPERTY(float ymin READ getymin WRITE setymin NOTIFY yminchanged)
     Q_PROPERTY(float ymax READ getymax WRITE setymax NOTIFY ymaxchanged)
-    Q_PROPERTY(QQmlListProperty<SensorSample> samples READ getSamples CONSTANT)
 
 public:
     explicit SensorItem(QObject *parent = 0);
@@ -77,13 +54,12 @@ public:
     void setymin(float val){ymin=val; emit yminchanged();};
     float getymax(){return ymax;};
     void setymax(float val){ymax=val; emit ymaxchanged();};
-    float currentsample(){if(m_samples.length()) return m_samples.last()->value(); else return 0;}
+    float currentsample(){if(m_vertices.length()) return m_vertices.last().y; else return 0;}
     float getminval(){return minval;};
     float getmaxval(){return maxval;};
 
 
-    QQmlListProperty<SensorSample> getSamples();
-    QList<SensorSample*> samples(){return m_samples;};
+    const QVector<LineNode::LineVertex> &samples() { return m_vertices; }
 
 
     bool do_sample(const qint64 &timestamp);
@@ -108,7 +84,7 @@ public:
 
 signals:
     void checkChanged();
-    void currentsampleChanged();
+    void currentsampleChanged(const QVector<LineNode::LineVertex> * v);
     void widthChanged();
     void max_samplesChanged();
     void yminchanged();
@@ -118,7 +94,7 @@ signals:
 public slots:
 
 private:
-    QList<SensorSample*> m_samples;
+    QVector<LineNode::LineVertex> m_vertices;
     qint64 m_total_jiffies, m_work_jiffies;
 };
 

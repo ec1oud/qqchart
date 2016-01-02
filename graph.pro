@@ -5,12 +5,14 @@ TEMPLATE = lib
 SOURCES += plugin.cpp \
     LineGraph.cpp \
     LineNode.cpp \
-    lmsensors.cpp
+    lmsensors.cpp \
+    sensorgraph.cpp
 
 HEADERS += \
     LineGraph.h \
     LineNode.h \
-    lmsensors.h
+    lmsensors.h \
+    sensorgraph.h
 
 RESOURCES += graph.qrc
 
