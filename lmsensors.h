@@ -10,15 +10,17 @@
 #include <QRectF>
 #include <QFile>
 #include <QStringList>
+#include <QtQml>
 
 // LM-Sensors Library Header
 #include <sensors/sensors.h>
 #include <sensors/error.h>
 #include "LineNode.h"
 
-class SensorItem : public QObject
+class Sensor : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(SensorType type READ type CONSTANT)
     Q_PROPERTY(QString label READ label CONSTANT)
     Q_PROPERTY(QString adapter READ adapter CONSTANT)
     Q_PROPERTY(QString chipName READ chipName CONSTANT)
@@ -34,11 +36,16 @@ class SensorItem : public QObject
     Q_PROPERTY(qreal normalMax READ normalMax WRITE setNormalMax NOTIFY normalMaxChanged)
 
 public:
-    explicit SensorItem(QObject *parent = 0);
+    enum SensorType { Unknown = 0, Cpu,
+                      Input = 0x100, Fan, Temperature, Power, Energy, Current, Humidity, Vid, Intrusion };
+    Q_ENUM(SensorType)
+
+    explicit Sensor(QObject *parent = 0);
 
     Q_INVOKABLE qreal sample();
     Q_INVOKABLE qreal valueAt(const qint64 &timestamp);
 
+    SensorType type() { return m_type; }
     QString label() { return m_label; }
     QString adapter() { return m_adapter; }
     QString chipName() { return m_chipName; }
@@ -60,7 +67,6 @@ public:
 
     const QVector<LineNode::LineVertex> &samples() { return m_vertices; }
 
-    enum SensorType { CPU, LM };
 
 signals:
     void checkChanged();
@@ -82,7 +88,7 @@ private:
     int m_index = -1;
     int m_chipId = 0;
     qint32 m_maxSamples = 1000;
-    SensorType m_type = CPU;
+    SensorType m_type = SensorType::Unknown;
     const sensors_chip_name *m_chip = 0;
     const sensors_feature *m_feature = 0;
     const sensors_subfeature *m_subfeature = 0;
@@ -105,9 +111,10 @@ class LmSensors : public QObject
     Q_OBJECT
     Q_PROPERTY(bool initialized READ initialized NOTIFY itemsChanged)
     Q_PROPERTY(QString errorMessage READ errorMessage NOTIFY errorMessageChanged)
-    Q_PROPERTY(QQmlListProperty<SensorItem> items READ items NOTIFY itemsChanged)
+    Q_PROPERTY(QQmlListProperty<Sensor> items READ items NOTIFY itemsChanged)
 
 public:
+
     explicit LmSensors(QObject *parent = 0);
 
     Q_INVOKABLE bool sampleAllValues();
@@ -116,7 +123,9 @@ public:
     bool initialized() { return m_initialized; }
     QString errorMessage() { return m_errorMessage; }
 
-    QQmlListProperty<SensorItem> items();
+    QQmlListProperty<Sensor> items();
+
+    Q_INVOKABLE QList<QObject*> byType(int type); // really Sensor::SensorType
 
 signals:
     void itemsChanged();
@@ -126,9 +135,13 @@ private:
     bool init();
 
 private:
-    QList<SensorItem *> m_sensorItems;
+    QList<Sensor *> m_sensorItems;
     QString m_errorMessage;
     bool m_initialized;
 };
+
+//QML_DECLARE_TYPE(LmSensors *)
+//QML_DECLARE_TYPE(Sensor *)
+
 
 #endif // LMSENSORS_H

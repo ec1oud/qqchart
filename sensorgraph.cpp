@@ -6,7 +6,7 @@ SensorGraph::SensorGraph()
     m_timeScale = 1;
 }
 
-void SensorGraph::setSensor(SensorItem *sensor)
+void SensorGraph::setSensor(Sensor *sensor)
 {
     if (m_sensor == sensor || !sensor)
         return;

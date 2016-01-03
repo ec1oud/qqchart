@@ -8,21 +8,21 @@
 class SensorGraph : public LineGraph
 {
     Q_OBJECT
-    Q_PROPERTY(SensorItem * sensor READ sensor WRITE setSensor NOTIFY sensorChanged)
+    Q_PROPERTY(Sensor * sensor READ sensor WRITE setSensor NOTIFY sensorChanged)
 
 public:
     SensorGraph();
-    SensorItem * sensor() const { return m_sensor; }
-    void setSensor(SensorItem * sensor);
+    Sensor * sensor() const { return m_sensor; }
+    void setSensor(Sensor * sensor);
 
 signals:
-    void sensorChanged(SensorItem * sensor);
+    void sensorChanged(Sensor * sensor);
 
 private slots:
     void onMinMaxChanged();
 
 private:
-    SensorItem *m_sensor = Q_NULLPTR;
+    Sensor *m_sensor = Q_NULLPTR;
 };
 
 #endif // SENSORGRAPH_H

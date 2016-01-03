@@ -5,25 +5,25 @@ LmSensors::LmSensors(QObject *parent) : QObject(parent)
     m_initialized = init();
 }
 
-void appendItems(QQmlListProperty<SensorItem> *property, SensorItem *item)
+void appendItems(QQmlListProperty<Sensor> *property, Sensor *item)
 {
     Q_UNUSED(property);
     Q_UNUSED(item);
     // Do nothing. can't add to a directory using this method
 }
 
-int itemSize(QQmlListProperty<SensorItem> *property) { return static_cast<QList<SensorItem *> *>(property->data)->size(); }
+int itemSize(QQmlListProperty<Sensor> *property) { return static_cast<QList<Sensor *> *>(property->data)->size(); }
 
-SensorItem *itemAt(QQmlListProperty<SensorItem> *property, int index)
+Sensor *itemAt(QQmlListProperty<Sensor> *property, int index)
 {
-    return static_cast<QList<SensorItem *> *>(property->data)->at(index);
+    return static_cast<QList<Sensor *> *>(property->data)->at(index);
 }
 
-void clearitemPtr(QQmlListProperty<SensorItem> *property) { return static_cast<QList<SensorItem *> *>(property->data)->clear(); }
+void clearitemPtr(QQmlListProperty<Sensor> *property) { return static_cast<QList<Sensor *> *>(property->data)->clear(); }
 
-QQmlListProperty<SensorItem> LmSensors::items()
+QQmlListProperty<Sensor> LmSensors::items()
 {
-    return QQmlListProperty<SensorItem>(this, &m_sensorItems, &appendItems, &itemSize, &itemAt, &clearitemPtr);
+    return QQmlListProperty<Sensor>(this, &m_sensorItems, &appendItems, &itemSize, &itemAt, &clearitemPtr);
 }
 
 bool LmSensors::init()
@@ -39,8 +39,8 @@ bool LmSensors::init()
 
     // add CPU load
 
-    SensorItem *new_item = new SensorItem();
-    new_item->m_type = new_item->CPU;
+    Sensor *new_item = new Sensor();
+    new_item->m_type = Sensor::SensorType::Cpu;
     new_item->m_index = m_sensorItems.count();
     new_item->m_label = "CPU Load";
     new_item->m_adapter = "proc-stat";
@@ -68,11 +68,10 @@ bool LmSensors::init()
             a = 0;
             while ((feature = sensors_get_features(chip, &a))) {
                 //                qDebug() << "  " << sensors_get_label(chip, feature) << "type" << feature->type;
-                SensorItem *new_item = new SensorItem();
+                Sensor *new_item = new Sensor();
 
                 sub = sensors_get_subfeature(chip, feature, (sensors_subfeature_type)(((int)feature->type) << 8));
 
-                new_item->m_type = new_item->LM;
                 new_item->m_index = m_sensorItems.count();
                 new_item->m_label = sensors_get_label(chip, feature);
                 if (adap)
@@ -89,7 +88,11 @@ bool LmSensors::init()
 
                 switch (new_item->m_feature->type) {
                 case SENSORS_FEATURE_IN:
+                    new_item->m_type = Sensor::SensorType::Input;
+                    // fallthrough
                 case SENSORS_FEATURE_VID:
+                    if (new_item->m_type == Sensor::SensorType::Unknown)
+                        new_item->m_type = Sensor::SensorType::Vid;
                     new_item->m_valueMin = 0;
                     new_item->m_valueMax = 15;
                     new_item->m_unit = "V";
@@ -99,6 +102,7 @@ bool LmSensors::init()
                     sensors_get_value(chip, limitSub->number, &new_item->m_normalMax);
                     break;
                 case SENSORS_FEATURE_FAN:
+                    new_item->m_type = Sensor::SensorType::Fan;
                     new_item->m_valueMin = 0;
                     new_item->m_valueMax = 3000;
                     new_item->m_unit = "RPM";
@@ -108,6 +112,7 @@ bool LmSensors::init()
                     if (limitSub) sensors_get_value(chip, limitSub->number, &new_item->m_normalMax);
                     break;
                 case SENSORS_FEATURE_TEMP:
+                    new_item->m_type = Sensor::SensorType::Temperature;
                     new_item->m_unit = "°C";
                     limitSub = sensors_get_subfeature(chip, feature, SENSORS_SUBFEATURE_TEMP_MIN);
                     if (limitSub) sensors_get_value(chip, limitSub->number, &new_item->m_normalMin);
@@ -115,14 +120,17 @@ bool LmSensors::init()
                     if (limitSub) sensors_get_value(chip, limitSub->number, &new_item->m_normalMax);
                     break;
                 case SENSORS_FEATURE_POWER:
+                    new_item->m_type = Sensor::SensorType::Power;
                     new_item->m_unit = "W";
                     limitSub = sensors_get_subfeature(chip, feature, SENSORS_SUBFEATURE_POWER_MAX);
                     if (limitSub) sensors_get_value(chip, limitSub->number, &new_item->m_normalMax);
                     break;
                 case SENSORS_FEATURE_ENERGY:
+                    new_item->m_type = Sensor::SensorType::Energy;
                     new_item->m_unit = "J";
                     break;
                 case SENSORS_FEATURE_CURR:
+                    new_item->m_type = Sensor::SensorType::Current;
                     new_item->m_unit = "A";
                     limitSub = sensors_get_subfeature(chip, feature, SENSORS_SUBFEATURE_CURR_MIN);
                     if (limitSub) sensors_get_value(chip, limitSub->number, &new_item->m_normalMin);
@@ -130,9 +138,11 @@ bool LmSensors::init()
                     if (limitSub) sensors_get_value(chip, limitSub->number, &new_item->m_normalMax);
                     break;
                 case SENSORS_FEATURE_HUMIDITY:
+                    new_item->m_type = Sensor::SensorType::Humidity;
                     new_item->m_unit = "%";
                     break;
                 case SENSORS_FEATURE_INTRUSION:
+                    new_item->m_type = Sensor::SensorType::Intrusion;
                     new_item->m_valueMin = 0;
                     new_item->m_valueMax = 12;
                     break;
@@ -152,27 +162,36 @@ bool LmSensors::init()
 bool LmSensors::sampleAllValues()
 {
     qint64 timestamp = QDateTime().currentDateTime().toMSecsSinceEpoch();
-    foreach (SensorItem *item, m_sensorItems) {
+    foreach (Sensor *item, m_sensorItems) {
         item->recordSample(timestamp);
     }
     return true;
 }
 
-SensorItem::SensorItem(QObject *parent) : QObject(parent) {}
+QList<QObject *> LmSensors::byType(int t)
+{
+    Sensor::SensorType type = static_cast<Sensor::SensorType>(t);
+    QList<QObject *> ret;
+    foreach (Sensor * item, m_sensorItems)
+        if (item->type() == type)
+            ret << item;
+//qDebug() << "found" << ret.count() << "of type" << type;
+    return ret;
+}
 
-bool SensorItem::recordSample(const qint64 &timestamp)
+Sensor::Sensor(QObject *parent) : QObject(parent) {}
+
+bool Sensor::recordSample(const qint64 &timestamp)
 {
     qreal val;
 
     switch (m_type) {
-    case LM:
-        sensors_get_value(m_chip, m_subfeature->number, &val);
-        break;
-    case CPU:
+    case Sensor::SensorType::Cpu:
         getCPULoad(val);
         break;
-    default:
-        val = 0;
+    default: // LM sensors
+        sensors_get_value(m_chip, m_subfeature->number, &val);
+        break;
     }
 
     if (val < m_minValue) {
@@ -196,7 +215,7 @@ bool SensorItem::recordSample(const qint64 &timestamp)
     return true;
 }
 
-void SensorItem::getCPULoad(qreal &val)
+void Sensor::getCPULoad(qreal &val)
 {
     // http://stackoverflow.com/questions/3017162/how-to-get-total-cpu-usage-in-linux-c
     // http://www.linuxhowtos.org/System/procstat.htm
@@ -229,7 +248,7 @@ void SensorItem::getCPULoad(qreal &val)
         val = 0;
 }
 
-qreal SensorItem::valueAt(const qint64 &timestamp)
+qreal Sensor::valueAt(const qint64 &timestamp)
 {
     for (int x = 0; x < m_vertices.size(); x += LineNode::verticesPerSample)
         if (m_vertices.at(x).x >= timestamp)
@@ -238,19 +257,19 @@ qreal SensorItem::valueAt(const qint64 &timestamp)
     return (m_vertices.length()) ? m_vertices.at(m_vertices.length() - 1).y : 0;
 }
 
-void SensorItem::setValueMin(qreal val)
+void Sensor::setValueMin(qreal val)
 {
     m_valueMin = val;
     emit valueMinChanged();
 }
 
-void SensorItem::setValueMax(qreal val)
+void Sensor::setValueMax(qreal val)
 {
     m_valueMax = val;
     emit valueMaxChanged();
 }
 
-qreal SensorItem::currentSample()
+qreal Sensor::currentSample()
 {
     if (m_vertices.length())
         return m_vertices.last().y;
@@ -258,7 +277,7 @@ qreal SensorItem::currentSample()
         return 0;
 }
 
-void SensorItem::setNormalMin(qreal normalMin)
+void Sensor::setNormalMin(qreal normalMin)
 {
     if (m_normalMin == normalMin)
         return;
@@ -267,7 +286,7 @@ void SensorItem::setNormalMin(qreal normalMin)
     emit normalMinChanged();
 }
 
-void SensorItem::setNormalMax(qreal normalMax)
+void Sensor::setNormalMax(qreal normalMax)
 {
     if (m_normalMax == normalMax)
         return;
@@ -276,19 +295,17 @@ void SensorItem::setNormalMax(qreal normalMax)
     emit normalMaxChanged();
 }
 
-qreal SensorItem::sample()
+qreal Sensor::sample()
 {
     qreal val;
 
     switch (m_type) {
-    case LM:
-        sensors_get_value(m_chip, m_subfeature->number, &val);
-        break;
-    case CPU:
+    case Sensor::SensorType::Cpu:
         getCPULoad(val);
         break;
     default:
-        val = 0;
+        sensors_get_value(m_chip, m_subfeature->number, &val);
+        break;
     }
     return (qreal)val;
 }
