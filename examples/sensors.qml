@@ -9,6 +9,6 @@ ListView {
     delegate: Text { text: label + ": " + value.toFixed(2) }
     Timer {
         interval: 500; running: true; repeat: true
-        onTriggered: lmSensors.do_sampleValues()
+        onTriggered: lmSensors.sampleAllValues()
     }
 }

@@ -19,118 +19,105 @@
 class SensorItem : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString label READ getlabel CONSTANT)
-    Q_PROPERTY(QString adapter READ getadapter CONSTANT)
-    Q_PROPERTY(QString chipname READ getchipname CONSTANT)
-    Q_PROPERTY(int chipid READ getchipid CONSTANT)
-    Q_PROPERTY(QString unit READ getunit CONSTANT)
-    Q_PROPERTY(float value READ currentsample NOTIFY currentsampleChanged)
-    Q_PROPERTY(float minval READ getminval CONSTANT)
-    Q_PROPERTY(float maxval READ getmaxval CONSTANT)
-    Q_PROPERTY(qint64 tmin READ gettmin WRITE settmin NOTIFY tminChanged)
-    Q_PROPERTY(qint64 tmax READ gettmax CONSTANT)
-    Q_PROPERTY(qint32 max_samples READ getmax_samples WRITE setmax_samples NOTIFY max_samplesChanged)
-    Q_PROPERTY(float ymin READ getymin WRITE setymin NOTIFY yminchanged)
-    Q_PROPERTY(float ymax READ getymax WRITE setymax NOTIFY ymaxchanged)
+    Q_PROPERTY(QString label READ label CONSTANT)
+    Q_PROPERTY(QString adapter READ adapter CONSTANT)
+    Q_PROPERTY(QString chipName READ chipName CONSTANT)
+    Q_PROPERTY(int chipId READ chipId CONSTANT)
+    Q_PROPERTY(QString unit READ unit CONSTANT)
+    Q_PROPERTY(qreal value READ currentSample NOTIFY currentSampleChanged)
+    Q_PROPERTY(qreal minValue READ minValue NOTIFY minValueChanged)
+    Q_PROPERTY(qreal maxValue READ maxValue NOTIFY maxValueChanged)
+    Q_PROPERTY(qint32 maxSamples READ maxSamples WRITE setMaxSamples NOTIFY maxSamplesChanged)
+    Q_PROPERTY(qreal valueMin READ valueMin WRITE setValueMin NOTIFY valueMinChanged)
+    Q_PROPERTY(qreal valueMax READ valueMax WRITE setValueMax NOTIFY valueMaxChanged)
 
 public:
     explicit SensorItem(QObject *parent = 0);
 
-    Q_INVOKABLE float getvalue();
-    Q_INVOKABLE float valueAt(const qint64 &timestamp);
-    Q_INVOKABLE QPointF map2canvas(const QRectF &bounds, const qint64 &timestamp, const float &val);
+    Q_INVOKABLE qreal sample();
+    Q_INVOKABLE qreal valueAt(const qint64 &timestamp);
 
-    QString getlabel(){return label;};
-    QString getadapter(){return adapter;};
-    QString getchipname(){return chipname;};
-    int getchipid(){return chipid;};
-    QString getunit(){return unit;};
-    qint64 gettmin(){return tmin;};
-    void settmin(const qint64 &val){tmin=val; emit tminChanged();}
-    qint64 gettmax(){return tmax;};
-    qint64 getmax_samples(){return max_samples;};
-    void setmax_samples(qint64 val){max_samples=val;};
-    float getymin(){return ymin;};
-    void setymin(float val){ymin=val; emit yminchanged();};
-    float getymax(){return ymax;};
-    void setymax(float val){ymax=val; emit ymaxchanged();};
-    float currentsample(){if(m_vertices.length()) return m_vertices.last().y; else return 0;}
-    float getminval(){return minval;};
-    float getmaxval(){return maxval;};
-
+    QString label() { return m_label; }
+    QString adapter() { return m_adapter; }
+    QString chipName() { return m_chipName; }
+    int chipId() { return m_chipId; }
+    QString unit() { return m_unit; }
+    qint64 maxSamples() { return m_maxSamples; }
+    void setMaxSamples(qint64 val) { m_maxSamples = val; }
+    qreal valueMin() { return m_valueMin; }
+    void setValueMin(qreal val);
+    qreal valueMax() { return m_valueMax; }
+    void setValueMax(qreal val);
+    qreal currentSample();
+    qreal minValue() { return m_minValue; }
+    qreal maxValue() { return m_maxValue; }
 
     const QVector<LineNode::LineVertex> &samples() { return m_vertices; }
 
-
-    bool do_sample(const qint64 &timestamp);
-    void getCPULoad(double &val);
-
     enum SensorType { CPU, LM };
-
-    int index = -1;
-    int chipid = 0;
-    qint32 max_samples = 32;
-    SensorType type = CPU;
-    const sensors_chip_name *chip = 0;
-    const sensors_feature *feature = 0;
-    const sensors_subfeature *sub = 0;
-    qint64 tmin = 0, tmax = 0;    // visible range in ms
-    float ymin = 0, ymax = 0;   // min/max value y-axis
-    float minval = 0, maxval = 0;   // min/max values of the signal
-    QString label;
-    QString adapter;
-    QString chipname;
-    QString unit;
 
 signals:
     void checkChanged();
-    void currentsampleChanged(const QVector<LineNode::LineVertex> * v);
+    void currentSampleChanged(const QVector<LineNode::LineVertex> *v);
     void widthChanged();
-    void max_samplesChanged();
-    void yminchanged();
-    void ymaxchanged();
-    void tminChanged();
-
-public slots:
+    void maxSamplesChanged();
+    void valueMinChanged();
+    void valueMaxChanged();
+    void minValueChanged();
+    void maxValueChanged();
 
 private:
+    bool recordSample(const qint64 &timestamp);
+    void getCPULoad(qreal &val);
+
+private:
+    int m_index = -1;
+    int m_chipId = 0;
+    qint32 m_maxSamples = 1000;
+    SensorType m_type = CPU;
+    const sensors_chip_name *m_chip = 0;
+    const sensors_feature *m_feature = 0;
+    const sensors_subfeature *m_subfeature = 0;
+    qreal m_valueMin = 0, m_valueMax = 0; // min/max value (y-axis limits)
+    qreal m_minValue = 0, m_maxValue = 0; // min/max values that have actually been seen
+    QString m_label;
+    QString m_adapter;
+    QString m_chipName;
+    QString m_unit;
     QVector<LineNode::LineVertex> m_vertices;
     qint64 m_total_jiffies, m_work_jiffies;
-};
 
+    friend class LmSensors;
+};
 
 
 class LmSensors : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(qint64 timestamp READ timestamp)
-    Q_PROPERTY(bool initialized READ initialized)
-    Q_PROPERTY(QString errorMessage READ errorMessage)
-    Q_PROPERTY(QQmlListProperty<SensorItem> items READ getItems NOTIFY updateItems)
+    Q_PROPERTY(bool initialized READ initialized NOTIFY itemsChanged)
+    Q_PROPERTY(QString errorMessage READ errorMessage NOTIFY errorMessageChanged)
+    Q_PROPERTY(QQmlListProperty<SensorItem> items READ items NOTIFY itemsChanged)
 
 public:
     explicit LmSensors(QObject *parent = 0);
 
-    Q_INVOKABLE bool do_sampleValues();
+    Q_INVOKABLE bool sampleAllValues();
+    Q_INVOKABLE qint64 timestamp() { return (QDateTime().currentDateTime().toMSecsSinceEpoch()); }
 
-    qint64 timestamp(){return(QDateTime().currentDateTime().toMSecsSinceEpoch());};
-    bool initialized(){return m_initialized;};
-    QString errorMessage(){return m_errorMessage;};
+    bool initialized() { return m_initialized; }
+    QString errorMessage() { return m_errorMessage; }
 
-    QList<SensorItem*> items(){return m_sensorItems;};
-
-    QQmlListProperty<SensorItem> getItems();
+    QQmlListProperty<SensorItem> items();
 
 signals:
-    void updateItems();
-
-public slots:
+    void itemsChanged();
+    void errorMessageChanged();
 
 private:
     bool init();
 
-    QList<SensorItem*> m_sensorItems;
-
+private:
+    QList<SensorItem *> m_sensorItems;
     QString m_errorMessage;
     bool m_initialized;
 };

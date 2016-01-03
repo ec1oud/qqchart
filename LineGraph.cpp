@@ -15,6 +15,7 @@ LineGraph::LineGraph()
     , m_timeScale(1)
 {
     setFlag(ItemHasContents, true);
+    setAntialiasing(true);
 }
 
 void LineGraph::setVertices(const QVector<LineNode::LineVertex> *v)

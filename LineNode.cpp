@@ -118,6 +118,7 @@ void LineNode::updateGeometry(const QRectF &bounds, const QVector<LineVertex> &v
     m_geometry.setDrawingMode(m_wireframe ? GL_LINE_STRIP : GL_TRIANGLE_STRIP);
     if (m_geometry.vertexCount() != v.size())
         m_geometry.allocate(v.size());
+    // TODO limit on left side to stay in bounds
     memcpy(m_geometry.vertexData(), v.constData(), sizeof(LineVertex) * v.size());
     markDirty(QSGNode::DirtyGeometry);
 }

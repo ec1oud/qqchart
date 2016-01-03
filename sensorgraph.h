@@ -18,8 +18,11 @@ public:
 signals:
     void sensorChanged(SensorItem * sensor);
 
+private slots:
+    void onMinMaxChanged();
+
 private:
-    SensorItem * m_sensor;
+    SensorItem *m_sensor = Q_NULLPTR;
 };
 
 #endif // SENSORGRAPH_H
