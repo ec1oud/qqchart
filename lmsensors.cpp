@@ -179,6 +179,17 @@ QList<QObject *> LmSensors::byType(int t)
     return ret;
 }
 
+void LmSensors::setUpdateIntervalMs(int updateIntervalMs)
+{
+    if (m_updateIntervalMs == updateIntervalMs)
+        return;
+
+    m_updateIntervalMs = updateIntervalMs;
+    killTimer(m_timerId);
+    m_timerId = startTimer(m_updateIntervalMs);
+    emit updateIntervalMsChanged();
+}
+
 Sensor::Sensor(QObject *parent) : QObject(parent) {}
 
 bool Sensor::recordSample(const qint64 &timestamp)

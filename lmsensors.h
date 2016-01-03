@@ -112,6 +112,7 @@ class LmSensors : public QObject
     Q_PROPERTY(bool initialized READ initialized NOTIFY itemsChanged)
     Q_PROPERTY(QString errorMessage READ errorMessage NOTIFY errorMessageChanged)
     Q_PROPERTY(QQmlListProperty<Sensor> items READ items NOTIFY itemsChanged)
+    Q_PROPERTY(int updateIntervalMs READ updateIntervalMs WRITE setUpdateIntervalMs NOTIFY updateIntervalMsChanged)
 
 public:
 
@@ -123,13 +124,21 @@ public:
     bool initialized() { return m_initialized; }
     QString errorMessage() { return m_errorMessage; }
 
+    int updateIntervalMs() const { return m_updateIntervalMs; }
+    void setUpdateIntervalMs(int updateIntervalMs);
+
     QQmlListProperty<Sensor> items();
 
     Q_INVOKABLE QList<QObject*> byType(int type); // really Sensor::SensorType
 
+
 signals:
     void itemsChanged();
     void errorMessageChanged();
+    void updateIntervalMsChanged();
+
+protected:
+    void timerEvent(QTimerEvent *event) Q_DECL_OVERRIDE { sampleAllValues(); }
 
 private:
     bool init();
@@ -138,6 +147,8 @@ private:
     QList<Sensor *> m_sensorItems;
     QString m_errorMessage;
     bool m_initialized;
+    int m_updateIntervalMs = 1000;
+    int m_timerId = startTimer(m_updateIntervalMs);
 };
 
 //QML_DECLARE_TYPE(LmSensors *)

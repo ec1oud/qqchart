@@ -9,7 +9,7 @@ Rectangle {
         id: list
         anchors.fill: parent
         anchors.margins: 6
-        model: lmSensors.items
+        model: LmSensors.items
         delegate: Rectangle {
             width: parent.width
             height: 75
@@ -50,10 +50,5 @@ Rectangle {
                 }
             }
         }
-    }
-    property LmSensors lmSensors: LmSensors { }
-    Timer {
-        interval: 1000; running: true; repeat: true
-        onTriggered: lmSensors.sampleAllValues()
     }
 }
