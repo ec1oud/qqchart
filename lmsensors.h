@@ -30,6 +30,8 @@ class SensorItem : public QObject
     Q_PROPERTY(qint32 maxSamples READ maxSamples WRITE setMaxSamples NOTIFY maxSamplesChanged)
     Q_PROPERTY(qreal valueMin READ valueMin WRITE setValueMin NOTIFY valueMinChanged)
     Q_PROPERTY(qreal valueMax READ valueMax WRITE setValueMax NOTIFY valueMaxChanged)
+    Q_PROPERTY(qreal normalMin READ normalMin WRITE setNormalMin NOTIFY normalMinChanged)
+    Q_PROPERTY(qreal normalMax READ normalMax WRITE setNormalMax NOTIFY normalMaxChanged)
 
 public:
     explicit SensorItem(QObject *parent = 0);
@@ -48,6 +50,10 @@ public:
     void setValueMin(qreal val);
     qreal valueMax() { return m_valueMax; }
     void setValueMax(qreal val);
+    qreal normalMin() const { return m_normalMin; }
+    void setNormalMin(qreal normalMin);
+    qreal normalMax() const { return m_normalMax; }
+    void setNormalMax(qreal normalMax);
     qreal currentSample();
     qreal minValue() { return m_minValue; }
     qreal maxValue() { return m_maxValue; }
@@ -65,6 +71,8 @@ signals:
     void valueMaxChanged();
     void minValueChanged();
     void maxValueChanged();
+    void normalMinChanged();
+    void normalMaxChanged();
 
 private:
     bool recordSample(const qint64 &timestamp);
@@ -78,8 +86,9 @@ private:
     const sensors_chip_name *m_chip = 0;
     const sensors_feature *m_feature = 0;
     const sensors_subfeature *m_subfeature = 0;
-    qreal m_valueMin = 0, m_valueMax = 0; // min/max value (y-axis limits)
-    qreal m_minValue = 0, m_maxValue = 0; // min/max values that have actually been seen
+    qreal m_valueMin = 0, m_valueMax = 100; // min/max value (y-axis limits)
+    qreal m_normalMin = 0, m_normalMax = 100; // normal min/max value: outside this range is an alarm
+    qreal m_minValue = qInf(), m_maxValue = 0; // min/max values that have actually been seen
     QString m_label;
     QString m_adapter;
     QString m_chipName;

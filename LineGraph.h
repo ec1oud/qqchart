@@ -78,9 +78,9 @@ protected:
     bool m_geometryChanged;
     bool m_wireframe;
     qreal m_lineWidth;
-    QColor m_color = Qt::gray;
-    QColor m_alertMinColor;
-    QColor m_alertMaxColor;
+    QColor m_color = Qt::cyan;
+    QColor m_alertMinColor = Qt::yellow;
+    QColor m_alertMaxColor = Qt::red;
     qreal m_minValue;
     qreal m_maxValue;
     qreal m_alertMinValue;

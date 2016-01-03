@@ -85,29 +85,49 @@ bool LmSensors::init()
                 new_item->m_valueMin = 0;
                 new_item->m_valueMax = 100;
 
+                const sensors_subfeature *limitSub = 0;
+
                 switch (new_item->m_feature->type) {
                 case SENSORS_FEATURE_IN:
                 case SENSORS_FEATURE_VID:
                     new_item->m_valueMin = 0;
                     new_item->m_valueMax = 15;
                     new_item->m_unit = "V";
+                    limitSub = sensors_get_subfeature(chip, feature, SENSORS_SUBFEATURE_IN_MIN);
+                    sensors_get_value(chip, limitSub->number, &new_item->m_normalMin);
+                    limitSub = sensors_get_subfeature(chip, feature, SENSORS_SUBFEATURE_IN_MAX);
+                    sensors_get_value(chip, limitSub->number, &new_item->m_normalMax);
                     break;
                 case SENSORS_FEATURE_FAN:
                     new_item->m_valueMin = 0;
                     new_item->m_valueMax = 3000;
                     new_item->m_unit = "RPM";
+                    limitSub = sensors_get_subfeature(chip, feature, SENSORS_SUBFEATURE_FAN_MIN);
+                    if (limitSub) sensors_get_value(chip, limitSub->number, &new_item->m_normalMin);
+                    limitSub = sensors_get_subfeature(chip, feature, SENSORS_SUBFEATURE_FAN_MAX);
+                    if (limitSub) sensors_get_value(chip, limitSub->number, &new_item->m_normalMax);
                     break;
                 case SENSORS_FEATURE_TEMP:
                     new_item->m_unit = "°C";
+                    limitSub = sensors_get_subfeature(chip, feature, SENSORS_SUBFEATURE_TEMP_MIN);
+                    if (limitSub) sensors_get_value(chip, limitSub->number, &new_item->m_normalMin);
+                    limitSub = sensors_get_subfeature(chip, feature, SENSORS_SUBFEATURE_TEMP_MAX);
+                    if (limitSub) sensors_get_value(chip, limitSub->number, &new_item->m_normalMax);
                     break;
                 case SENSORS_FEATURE_POWER:
                     new_item->m_unit = "W";
+                    limitSub = sensors_get_subfeature(chip, feature, SENSORS_SUBFEATURE_POWER_MAX);
+                    if (limitSub) sensors_get_value(chip, limitSub->number, &new_item->m_normalMax);
                     break;
                 case SENSORS_FEATURE_ENERGY:
                     new_item->m_unit = "J";
                     break;
                 case SENSORS_FEATURE_CURR:
                     new_item->m_unit = "A";
+                    limitSub = sensors_get_subfeature(chip, feature, SENSORS_SUBFEATURE_CURR_MIN);
+                    if (limitSub) sensors_get_value(chip, limitSub->number, &new_item->m_normalMin);
+                    limitSub = sensors_get_subfeature(chip, feature, SENSORS_SUBFEATURE_CURR_MAX);
+                    if (limitSub) sensors_get_value(chip, limitSub->number, &new_item->m_normalMax);
                     break;
                 case SENSORS_FEATURE_HUMIDITY:
                     new_item->m_unit = "%";
@@ -118,6 +138,7 @@ bool LmSensors::init()
                     break;
                 default:;
                 }
+//                qDebug() << "range of" << new_item->m_label << new_item->m_normalMin << new_item->m_normalMax;
 
                 m_sensorItems.append(new_item);
             }
@@ -235,6 +256,24 @@ qreal SensorItem::currentSample()
         return m_vertices.last().y;
     else
         return 0;
+}
+
+void SensorItem::setNormalMin(qreal normalMin)
+{
+    if (m_normalMin == normalMin)
+        return;
+
+    m_normalMin = normalMin;
+    emit normalMinChanged();
+}
+
+void SensorItem::setNormalMax(qreal normalMax)
+{
+    if (m_normalMax == normalMax)
+        return;
+
+    m_normalMax = normalMax;
+    emit normalMaxChanged();
 }
 
 qreal SensorItem::sample()

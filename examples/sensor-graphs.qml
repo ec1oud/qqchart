@@ -2,7 +2,7 @@ import QtQuick 2.5
 import org.ecloud.charts 1.0
 
 Rectangle {
-    width: 420
+    width: 600
     height: 640
     color: "black"
     ListView {
@@ -19,24 +19,15 @@ Rectangle {
                 id: graph
                 sensor: modelData
                 anchors.fill: parent
-                timeScale: 1
-                color: "green"
-                alertMinColor: "red"
-                alertMaxColor: "red"
-                alertMaxValue: valueMax // TODO find warning value
-                alertMinValue: valueMin
-//                MouseArea {
-//                    anchors.fill: parent
-//                    onWheel: {
-//                        if (wheel.angleDelta.y > 0)
-//                            parent.timeScale *= 10;
-//                        else
-//                            parent.timeScale /= 10;
-//                    }
-//                }
                 Text {
-                    text: label + ": " + value.toFixed(2) + " " + unit + " scale " + parent.timeScale +
-                          " min " + minValue.toFixed(2) + " max " + maxValue.toFixed(2)
+                    text: label + " (" + chipName + "):\nscale " + parent.timeScale +
+                          " min " + minValue.toFixed(2) + " max " + maxValue.toFixed(2) +
+                          " norm " + normalMin.toFixed(2) + ".." + normalMax.toFixed(2)
+                    color: "grey"
+                }
+                Text {
+                    text: value.toFixed(2) + " " + unit
+                    anchors.horizontalCenter: parent.horizontalCenter
                     color: "white"
                 }
                 Text {

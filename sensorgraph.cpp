@@ -15,6 +15,8 @@ void SensorGraph::setSensor(SensorItem *sensor)
             this, SLOT(setVertices(const QVector<LineNode::LineVertex>*)));
     setMinValue(qMin(sensor->valueMin(), sensor->minValue()));
     setMaxValue(qMax(sensor->valueMax(), sensor->maxValue()));
+    setAlertMinValue(sensor->normalMin());
+    setAlertMaxValue(sensor->normalMax());
     connect(sensor, SIGNAL(minValueChanged()), this, SLOT(onMinMaxChanged()));
     connect(sensor, SIGNAL(maxValueChanged()), this, SLOT(onMinMaxChanged()));
 
