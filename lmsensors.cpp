@@ -21,9 +21,9 @@ Sensor *itemAt(QQmlListProperty<Sensor> *property, int index)
 
 void clearitemPtr(QQmlListProperty<Sensor> *property) { return static_cast<QList<Sensor *> *>(property->data)->clear(); }
 
-QQmlListProperty<Sensor> LmSensors::items()
+QQmlListProperty<Sensor> LmSensors::sensors()
 {
-    return QQmlListProperty<Sensor>(this, &m_sensorItems, &appendItems, &itemSize, &itemAt, &clearitemPtr);
+    return QQmlListProperty<Sensor>(this, &m_sensors, &appendItems, &itemSize, &itemAt, &clearitemPtr);
 }
 
 bool LmSensors::init()
@@ -41,20 +41,20 @@ bool LmSensors::init()
 
     Sensor *new_item = new Sensor();
     new_item->m_type = Sensor::SensorType::Cpu;
-    new_item->m_index = m_sensorItems.count();
+    new_item->m_index = m_sensors.count();
     new_item->m_label = "CPU Load";
     new_item->m_adapter = "proc-stat";
     new_item->m_valueMin = 0;
     new_item->m_valueMax = 100;
     new_item->m_unit = "%";
-    m_sensorItems.append(new_item);
+    m_sensors.append(new_item);
 
     // add lm-sensors
 
     if (int err = sensors_init(NULL)) {
         m_errorMessage = sensors_strerror(err);
         emit errorMessageChanged();
-        emit itemsChanged();
+        emit sensorsChanged();
         return false;
     } else {
         chip_nr = 0;
@@ -72,7 +72,7 @@ bool LmSensors::init()
 
                 sub = sensors_get_subfeature(chip, feature, (sensors_subfeature_type)(((int)feature->type) << 8));
 
-                new_item->m_index = m_sensorItems.count();
+                new_item->m_index = m_sensors.count();
                 new_item->m_label = sensors_get_label(chip, feature);
                 if (adap)
                     new_item->m_adapter = adap;
@@ -150,19 +150,19 @@ bool LmSensors::init()
                 }
 //                qDebug() << "range of" << new_item->m_label << new_item->m_normalMin << new_item->m_normalMax;
 
-                m_sensorItems.append(new_item);
+                m_sensors.append(new_item);
             }
         }
     }
 
-    emit itemsChanged();
+    emit sensorsChanged();
     return true;
 }
 
 bool LmSensors::sampleAllValues()
 {
     qint64 timestamp = QDateTime().currentDateTime().toMSecsSinceEpoch();
-    foreach (Sensor *item, m_sensorItems) {
+    foreach (Sensor *item, m_sensors) {
         item->recordSample(timestamp);
     }
     return true;
@@ -172,7 +172,7 @@ QList<QObject *> LmSensors::byType(int t)
 {
     Sensor::SensorType type = static_cast<Sensor::SensorType>(t);
     QList<QObject *> ret;
-    foreach (Sensor * item, m_sensorItems)
+    foreach (Sensor * item, m_sensors)
         if (item->type() == type)
             ret << item;
 //qDebug() << "found" << ret.count() << "of type" << type;

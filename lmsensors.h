@@ -109,9 +109,9 @@ private:
 class LmSensors : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(bool initialized READ initialized NOTIFY itemsChanged)
+    Q_PROPERTY(bool initialized READ initialized NOTIFY sensorsChanged)
     Q_PROPERTY(QString errorMessage READ errorMessage NOTIFY errorMessageChanged)
-    Q_PROPERTY(QQmlListProperty<Sensor> items READ items NOTIFY itemsChanged)
+    Q_PROPERTY(QQmlListProperty<Sensor> sensors READ sensors NOTIFY sensorsChanged)
     Q_PROPERTY(int updateIntervalMs READ updateIntervalMs WRITE setUpdateIntervalMs NOTIFY updateIntervalMsChanged)
 
 public:
@@ -127,13 +127,13 @@ public:
     int updateIntervalMs() const { return m_updateIntervalMs; }
     void setUpdateIntervalMs(int updateIntervalMs);
 
-    QQmlListProperty<Sensor> items();
+    QQmlListProperty<Sensor> sensors();
 
     Q_INVOKABLE QList<QObject*> byType(int type); // really Sensor::SensorType
 
 
 signals:
-    void itemsChanged();
+    void sensorsChanged();
     void errorMessageChanged();
     void updateIntervalMsChanged();
 
@@ -144,7 +144,7 @@ private:
     bool init();
 
 private:
-    QList<Sensor *> m_sensorItems;
+    QList<Sensor *> m_sensors;
     QString m_errorMessage;
     bool m_initialized;
     int m_updateIntervalMs = 1000;

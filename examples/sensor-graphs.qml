@@ -9,7 +9,7 @@ Rectangle {
         id: list
         anchors.fill: parent
         anchors.margins: 6
-        model: LmSensors.items
+        model: LmSensors.sensors
         delegate: Rectangle {
             width: parent.width
             height: 75
