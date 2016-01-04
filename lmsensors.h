@@ -27,10 +27,10 @@ class Sensor : public QObject
     Q_PROPERTY(int chipId READ chipId CONSTANT)
     Q_PROPERTY(QString unit READ unit CONSTANT)
     Q_PROPERTY(qreal value READ currentSample NOTIFY currentSampleChanged)
-    Q_PROPERTY(qreal minValue READ minValue NOTIFY minValueChanged)
+    Q_PROPERTY(qreal minValue READ minValue NOTIFY minValueChanged) // seen so far
     Q_PROPERTY(qreal maxValue READ maxValue NOTIFY maxValueChanged)
     Q_PROPERTY(qint32 maxSamples READ maxSamples WRITE setMaxSamples NOTIFY maxSamplesChanged)
-    Q_PROPERTY(qreal valueMin READ valueMin WRITE setValueMin NOTIFY valueMinChanged)
+    Q_PROPERTY(qreal valueMin READ valueMin WRITE setValueMin NOTIFY valueMinChanged) // limit
     Q_PROPERTY(qreal valueMax READ valueMax WRITE setValueMax NOTIFY valueMaxChanged)
     Q_PROPERTY(qreal normalMin READ normalMin WRITE setNormalMin NOTIFY normalMinChanged)
     Q_PROPERTY(qreal normalMax READ normalMax WRITE setNormalMax NOTIFY normalMaxChanged)
@@ -129,7 +129,7 @@ public:
 
     QQmlListProperty<Sensor> sensors();
 
-    Q_INVOKABLE QList<QObject*> byType(int type); // really Sensor::SensorType
+    Q_INVOKABLE QList<QObject*> filtered(int type, const QString substring = QString()); // int is really Sensor::SensorType
 
 
 signals:
@@ -148,7 +148,7 @@ private:
     QString m_errorMessage;
     bool m_initialized;
     int m_updateIntervalMs = 1000;
-    int m_timerId = startTimer(m_updateIntervalMs);
+    int m_timerId = -1;
 };
 
 //QML_DECLARE_TYPE(LmSensors *)

@@ -3,6 +3,10 @@
 LmSensors::LmSensors(QObject *parent) : QObject(parent)
 {
     m_initialized = init();
+    // throw away first sample - tends to be wrong
+    foreach (Sensor *item, m_sensors)
+        item->sample();
+    m_timerId = startTimer(m_updateIntervalMs);
 }
 
 void appendItems(QQmlListProperty<Sensor> *property, Sensor *item)
@@ -104,7 +108,7 @@ bool LmSensors::init()
                 case SENSORS_FEATURE_FAN:
                     new_item->m_type = Sensor::SensorType::Fan;
                     new_item->m_valueMin = 0;
-                    new_item->m_valueMax = 3000;
+                    new_item->m_valueMax = 7200;
                     new_item->m_unit = "RPM";
                     limitSub = sensors_get_subfeature(chip, feature, SENSORS_SUBFEATURE_FAN_MIN);
                     if (limitSub) sensors_get_value(chip, limitSub->number, &new_item->m_normalMin);
@@ -168,12 +172,14 @@ bool LmSensors::sampleAllValues()
     return true;
 }
 
-QList<QObject *> LmSensors::byType(int t)
+QList<QObject *> LmSensors::filtered(int t, const QString substring)
 {
     Sensor::SensorType type = static_cast<Sensor::SensorType>(t);
     QList<QObject *> ret;
     foreach (Sensor * item, m_sensors)
-        if (item->type() == type)
+        if ((t == Sensor::SensorType::Unknown || item->type() == type) &&
+                (substring.isEmpty() || item->label().contains(substring) ||
+                 item->chipName().contains(substring) || item->adapter().contains(substring)))
             ret << item;
 //qDebug() << "found" << ret.count() << "of type" << type;
     return ret;
@@ -204,6 +210,8 @@ bool Sensor::recordSample(const qint64 &timestamp)
         sensors_get_value(m_chip, m_subfeature->number, &val);
         break;
     }
+    if (val == 65535)
+        return false;
 
     if (val < m_minValue) {
         m_minValue = val;

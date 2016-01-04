@@ -10,7 +10,7 @@ Rectangle {
         id: list
         anchors.fill: parent
         anchors.margins: 6
-        model: LmSensors.byType(Sensor.Temperature)
+        model: LmSensors.filtered(Sensor.Temperature)
         SensorGraph {
             sensor: modelData
             anchors.fill: parent

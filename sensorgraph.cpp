@@ -13,10 +13,15 @@ void SensorGraph::setSensor(Sensor *sensor)
 
     connect(sensor, SIGNAL(currentSampleChanged(const QVector<LineNode::LineVertex>*)),
             this, SLOT(setVertices(const QVector<LineNode::LineVertex>*)));
-    setMinValue(qMin(sensor->valueMin(), sensor->minValue()));
-    setMaxValue(qMax(sensor->valueMax(), sensor->maxValue()));
-    setAlertMinValue(sensor->normalMin());
-    setAlertMaxValue(sensor->normalMax());
+    // Don't override min/max if the user has set them
+    if (m_minValue == 0)
+        setMinValue(qMin(sensor->valueMin(), sensor->minValue()));
+    if (m_maxValue == 1)
+        setMaxValue(qMax(sensor->valueMax(), sensor->maxValue()));
+    if (m_alertMaxValue == 0)
+        setAlertMinValue(sensor->normalMin());
+    if (m_alertMaxValue == 1)
+        setAlertMaxValue(sensor->normalMax());
     connect(sensor, SIGNAL(minValueChanged()), this, SLOT(onMinMaxChanged()));
     connect(sensor, SIGNAL(maxValueChanged()), this, SLOT(onMinMaxChanged()));
 
