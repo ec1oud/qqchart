@@ -28,29 +28,26 @@ public:
 
     static const int verticesPerSample = 4;
 
-    static void appendVertices(QVector<LineNode::LineVertex> &v, float time, float value);
-
-    void updateGeometry(const QRectF &bounds, const QVector<qreal> &samples);
-    void updateGeometry(const QRectF &bounds, const QVector<LineNode::LineVertex> &v);
+    void updateGeometry(const QRectF &bounds, const QVector<LineVertex> *v, qreal timeScale);
     void setLineWidth(float width);
     void setColor(QColor color);
-    void setAlertMinColor(QColor color);
-    void setAlertMaxColor(QColor color);
+    void setWarningMinColor(QColor color);
+    void setWarningMaxColor(QColor color);
     void setMinValue(qreal v);
     void setMaxValue(qreal v);
-    void setAlertMinValue(qreal v);
-    void setAlertMaxValue(qreal v);
+    void setWarningMinValue(qreal v);
+    void setWarningMaxValue(qreal v);
     void setSpread(qreal v);
     void setWireframe(bool v);
 
     struct LineMaterial
     {
         QColor color;
-        QColor alertMinColor;
-        QColor alertMaxColor;
+        QColor warningMinColor;
+        QColor warningMaxColor;
         float lineWidth;
-        float alertMinValue;
-        float alertMaxValue;
+        float warningMinValue;
+        float warningMaxValue;
         float aa;
         QMatrix4x4 dataTransform;
     };
@@ -58,8 +55,8 @@ public:
 private:
     QSGGeometry m_geometry;
     QSGSimpleMaterial<LineMaterial> *m_material;
-    qreal m_minValue;
-    qreal m_maxValue;
+    qreal m_minValue = 0;
+    qreal m_maxValue = 1;
     bool m_wireframe;
 
     friend class LineShader;

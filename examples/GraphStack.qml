@@ -6,12 +6,8 @@ import org.ecloud.charts 1.0
 Item {
     id: root
     property alias color: graph.color
-
-    function appendSampleToAll(s) {
-        graph.appendSample(s);
-        wireframe.appendSample(s);
-        plainLine.appendSample(s);
-    }
+    property alias antialiasing: graph.antialiasing
+    property LineGraphModel model: null
 
     function newSample(i) {
 //        return (Math.sin(i / 20.0 * Math.PI * 2) + 1) * 0.4;
@@ -23,12 +19,12 @@ Item {
     LineGraph {
         id: graph
         anchors.fill: parent
+        model: root.model
         lineWidth: widthSlider.value
         color: "lightsteelblue"
-        alertMinColor: "yellow"
-        alertMaxColor: "orange"
+        warningMinColor: "yellow"
+        warningMaxColor: "orange"
         wireframe: false
-        antialiasing: aaCb.checked
         visible: fillCb.checked
         opacity: 0.8
         timeScale: width / 30
@@ -37,10 +33,11 @@ Item {
     LineGraph {
         id: wireframe
         anchors.fill: graph
+        model: root.model
         lineWidth: widthSlider.value
         color: graph.visible ? "black" : "white"
-        alertMinColor: "black"
-        alertMaxColor: "black"
+        warningMinColor: "black"
+        warningMaxColor: "black"
         wireframe: true
         timeScale: graph.timeScale
         visible: wireframeCb.checked
@@ -49,10 +46,11 @@ Item {
     LineGraph {
         id: plainLine
         anchors.fill: graph
+        model: root.model
         lineWidth: 0
         color: "red"
-        alertMinColor: "red"
-        alertMaxColor: "red"
+        warningMinColor: "red"
+        warningMaxColor: "red"
         wireframe: true
         timeScale: graph.timeScale
         visible: originalLineCb.checked
@@ -63,11 +61,6 @@ Item {
         interval: 500
         repeat: true
         running: timerRun.checked
-        onTriggered: {
-            graph.removeFirstSample();
-            wireframe.removeFirstSample();
-            plainLine.removeFirstSample();
-            root.appendSampleToAll(root.newSample(++root.offset));
-        }
+        onTriggered: model.appendSample(root.newSample(++root.offset))
     }
 }

@@ -5,7 +5,7 @@ import QtQuick.Controls.Styles 1.4
 import org.ecloud.charts 1.0
 
 Rectangle {
-    width: 800
+    width: 940
     height: 400
     color: "black"
 
@@ -13,42 +13,75 @@ Rectangle {
         id: graphs
         anchors.fill: parent
         anchors.margins: 50
-        anchors.bottomMargin: 180
-        anchors.topMargin: 180
+        antialiasing: aaCb.checked
         color: "lightsteelblue"
-
+        model: LineGraphModel {
+            label: "example data"
+        }
         Component.onCompleted: {
-            appendSampleToAll(0.3); // 0
-            appendSampleToAll(0.5); // 1
-            appendSampleToAll(0);   // 2
-            appendSampleToAll(1);   // 3
-            appendSampleToAll(0);   // 4
-            appendSampleToAll(1);   // 5
-            appendSampleToAll(0);   // 6
-            appendSampleToAll(1);   // 7
-            appendSampleToAll(0.9); // 8
-            appendSampleToAll(1.01);
-            appendSampleToAll(0.98);
-            appendSampleToAll(0.9);
-            appendSampleToAll(0.2);
-            appendSampleToAll(0.02);
-            appendSampleToAll(0);
-            appendSampleToAll(0.01);
-            appendSampleToAll(0.03);
-            appendSampleToAll(0.02);
-            appendSampleToAll(0.04);
-            appendSampleToAll(0.07);
-            appendSampleToAll(0.05);
-            appendSampleToAll(0.06);
-            appendSampleToAll(0.18);
-            appendSampleToAll(0.09);
-            appendSampleToAll(0.1);
-            appendSampleToAll(0.08);
-            appendSampleToAll(-0.06);
-            appendSampleToAll(0.04);
-            appendSampleToAll(0.02);
-            appendSampleToAll(0);
-            appendSampleToAll(0.1);
+            var time = new Date();
+            time = new Date(time.getTime() - 1000 * 30);
+            model.appendSample(0.3, time); // 0
+            time = new Date(time.getTime() + 1000)
+            model.appendSample(0.5, time); // 1
+            time = new Date(time.getTime() + 1000)
+            model.appendSample(0, time);   // 2
+            time = new Date(time.getTime() + 1000)
+            model.appendSample(1, time);   // 3
+            time = new Date(time.getTime() + 1000)
+            model.appendSample(0, time)   // 4
+            time = new Date(time.getTime() + 1000)
+            model.appendSample(1, time)   // 5
+            time = new Date(time.getTime() + 1000)
+            model.appendSample(0, time)   // 6
+            time = new Date(time.getTime() + 1000)
+            model.appendSample(1, time)   // 7
+            time = new Date(time.getTime() + 1000)
+            model.appendSample(0.9, time) // 8
+            time = new Date(time.getTime() + 1000)
+            model.appendSample(1.01, time)
+            time = new Date(time.getTime() + 1000)
+            model.appendSample(0.98, time)
+            time = new Date(time.getTime() + 1000)
+            model.appendSample(0.9, time)
+            time = new Date(time.getTime() + 1000)
+            model.appendSample(0.2, time)
+            time = new Date(time.getTime() + 1000)
+            model.appendSample(0.02, time)
+            time = new Date(time.getTime() + 1000)
+            model.appendSample(0, time)
+            time = new Date(time.getTime() + 1000)
+            model.appendSample(0.01, time)
+            time = new Date(time.getTime() + 1000)
+            model.appendSample(0.03, time)
+            time = new Date(time.getTime() + 1000)
+            model.appendSample(0.02, time)
+            time = new Date(time.getTime() + 1000)
+            model.appendSample(0.04, time)
+            time = new Date(time.getTime() + 1000)
+            model.appendSample(0.07, time)
+            time = new Date(time.getTime() + 1000)
+            model.appendSample(0.05, time)
+            time = new Date(time.getTime() + 1000)
+            model.appendSample(0.06, time)
+            time = new Date(time.getTime() + 1000)
+            model.appendSample(0.18, time)
+            time = new Date(time.getTime() + 1000)
+            model.appendSample(0.09, time)
+            time = new Date(time.getTime() + 1000)
+            model.appendSample(0.1, time)
+            time = new Date(time.getTime() + 1000)
+            model.appendSample(0.08, time)
+            time = new Date(time.getTime() + 1000)
+            model.appendSample(-0.06, time)
+            time = new Date(time.getTime() + 1000)
+            model.appendSample(0.04, time)
+            time = new Date(time.getTime() + 1000)
+            model.appendSample(0.02, time)
+            time = new Date(time.getTime() + 1000)
+            model.appendSample(0, time)
+            time = new Date(time.getTime() + 1000)
+            model.appendSample(0.1, time)
         }
 
     }
@@ -60,7 +93,7 @@ Rectangle {
         border.width: 2
         Row {
             anchors.top: parent.bottom
-            anchors.margins: 50
+            anchors.margins: 6
             width: parent.width
             spacing: 20
             opacity: 0.5

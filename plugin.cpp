@@ -6,8 +6,7 @@
 #include <QtQml>
 
 #include "lmsensors.h"
-#include "LineGraph.h"
-#include "sensorgraph.h"
+#include "linegraph.h"
 
 Q_LOGGING_CATEGORY(lcRegistration, "org.ecloud.charts.registration")
 
@@ -39,9 +38,9 @@ public:
         qCDebug(lcRegistration) << uri;
         Q_ASSERT(uri == QLatin1String(ModuleName));
         qmlRegisterType<LineGraph>(uri, 1, 0, "LineGraph");
+        qmlRegisterType<LineGraphModel>(uri, 1, 0, "LineGraphModel");
         qmlRegisterSingletonType<LmSensors>(uri, 1, 0, "LmSensors", LmSensorsSingleton);
         qmlRegisterType<Sensor>(uri, 1, 0, "Sensor");
-        qmlRegisterType<SensorGraph>(uri, 1, 0, "SensorGraph");
     }
 };
 

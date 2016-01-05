@@ -3,16 +3,16 @@ TARGET = org/ecloud/charts/chartsplugin
 TEMPLATE = lib
 
 SOURCES += plugin.cpp \
-    LineGraph.cpp \
-    LineNode.cpp \
-    lmsensors.cpp \
-    sensorgraph.cpp
+    linegraph.cpp \
+    linegraphmodel.cpp \
+    linenode.cpp \
+    lmsensors.cpp
 
 HEADERS += \
-    LineGraph.h \
-    LineNode.h \
-    lmsensors.h \
-    sensorgraph.h
+    linegraph.h \
+    linegraphmodel.h \
+    linenode_p.h \
+    lmsensors.h
 
 RESOURCES += graph.qrc
 

@@ -5,5 +5,5 @@ ListView {
     width: 200
     height: 200
     model: LmSensors.sensors
-    delegate: Text { text: label + ": " + value.toFixed(2) }
+    delegate: Text { text: label + ": " + currentValue.toFixed(2) }
 }

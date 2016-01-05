@@ -15,39 +15,39 @@ Rectangle {
             height: 75
             border.color: "#111"
             color: "transparent"
-            SensorGraph {
+            LineGraph {
                 id: graph
-                sensor: modelData
+                model: modelData
                 anchors.fill: parent
-                Text {
-                    text: label + " (" + chipName + "):\nscale " + parent.timeScale +
-                          " min " + minValue.toFixed(2) + " max " + maxValue.toFixed(2) +
-                          " norm " + normalMin.toFixed(2) + ".." + normalMax.toFixed(2)
-                    color: "grey"
+            }
+            Text {
+                text: label + " (" + chipName + "):\nscale " + parent.timeScale +
+                      " min " + minSampleValue.toFixed(2) + " max " + maxSampleValue.toFixed(2) +
+                      " norm " + normalMinValue.toFixed(2) + ".." + normalMaxValue.toFixed(2)
+                color: "grey"
+            }
+            Text {
+                text: currentValue.toFixed(2) + " " + unit
+                anchors.horizontalCenter: parent.horizontalCenter
+                color: "white"
+            }
+            Text {
+                anchors {
+                    right: parent.right
+                    top: parent.top
                 }
-                Text {
-                    text: value.toFixed(2) + " " + unit
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    color: "white"
+                horizontalAlignment: Text.Right
+                text: maxValue
+                color: "grey"
+            }
+            Text {
+                anchors {
+                    right: parent.right
+                    bottom: parent.bottom
                 }
-                Text {
-                    anchors {
-                        right: parent.right
-                        top: parent.top
-                    }
-                    horizontalAlignment: Text.Right
-                    text: graph.maxValue
-                    color: "grey"
-                }
-                Text {
-                    anchors {
-                        right: parent.right
-                        bottom: parent.bottom
-                    }
-                    horizontalAlignment: Text.Right
-                    text: graph.minValue
-                    color: "grey"
-                }
+                horizontalAlignment: Text.Right
+                text: minValue
+                color: "grey"
             }
         }
     }

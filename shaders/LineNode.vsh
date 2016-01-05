@@ -3,11 +3,11 @@ attribute highp vec4 pos; // x, y, i, t
 attribute highp vec4 prevNext;
 
 uniform lowp float lineWidth;
-uniform lowp float alertBelowMinimum;
-uniform lowp float alertAboveMaximum;
+uniform lowp float warningBelowMinimum;
+uniform lowp float warningAboveMaximum;
 uniform lowp vec4 normalColor;
-uniform lowp vec4 alertMinColor;
-uniform lowp vec4 alertMaxColor;
+uniform lowp vec4 warningMinColor;
+uniform lowp vec4 warningMaxColor;
 uniform highp mat4 dataTransform;
 uniform highp mat4 qt_Matrix;
 
@@ -57,6 +57,6 @@ void main(void)
 //    gl_Position = qt_Matrix * vec4(posPx + vec2(dataTransform[3][0], dataTransform[3][1]) + -t * miterLength * miter, 0.0, 1.0); // unlimited mitering
 
     vT = t * 0.5;
-    color = pos.y > alertAboveMaximum ? alertMaxColor :
-            pos.y < alertBelowMinimum ? alertMinColor : normalColor;
+    color = pos.y > warningAboveMaximum ? warningMaxColor :
+            pos.y < warningBelowMinimum ? warningMinColor : normalColor;
 }

@@ -11,8 +11,8 @@ Rectangle {
         anchors.fill: parent
         anchors.margins: 6
         model: LmSensors.filtered(Sensor.Temperature)
-        SensorGraph {
-            sensor: modelData
+        LineGraph {
+            model: modelData
             anchors.fill: parent
             color: colors[index]
             Text {
@@ -22,7 +22,7 @@ Rectangle {
             }
             Text {
                 color: "white"
-                text: modelData.value.toFixed(2) + " " + modelData.unit
+                text: modelData.currentValue.toFixed(2) + " " + modelData.unit
                 anchors.horizontalCenter: parent.horizontalCenter
                 y: index * font.pixelSize
             }
