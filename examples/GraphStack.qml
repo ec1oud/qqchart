@@ -11,7 +11,8 @@ Item {
 
     function newSample(i) {
 //        return (Math.sin(i / 20.0 * Math.PI * 2) + 1) * 0.4;
-        return (Math.sin(i / 20.0 * Math.PI * 2) + 1) * 0.4 + Math.random() * 0.05;
+//        return (Math.sin(i / 20.0 * Math.PI * 2) + 1) * 0.4 + Math.random() * 0.05;
+        return Math.sin(i / 20.0 * Math.PI * 2) * 0.95 + Math.random() * 0.05;
     }
 
     property int offset: 25;
@@ -20,8 +21,12 @@ Item {
         id: graph
         anchors.fill: parent
         model: root.model
+        minValue: -1 + offsetSlider.value
+        maxValue: 1 + offsetSlider.value
         lineWidth: widthSlider.value
         color: "lightsteelblue"
+        fillColorBelow: fillBelowCb.checked ? "#22FF2222" : "transparent"
+        fillColorAbove: fillAboveCb.checked ? "#222222FF" : "transparent"
         warningMinColor: "yellow"
         warningMaxColor: "orange"
         wireframe: false
@@ -34,6 +39,8 @@ Item {
         id: wireframe
         anchors.fill: graph
         model: root.model
+        minValue: -1 + offsetSlider.value
+        maxValue: 1 + offsetSlider.value
         lineWidth: widthSlider.value
         color: graph.visible ? "black" : "white"
         warningMinColor: "black"
@@ -47,6 +54,8 @@ Item {
         id: plainLine
         anchors.fill: graph
         model: root.model
+        minValue: -1 + offsetSlider.value
+        maxValue: 1 + offsetSlider.value
         lineWidth: 0
         color: "red"
         warningMinColor: "red"

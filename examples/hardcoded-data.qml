@@ -5,14 +5,15 @@ import QtQuick.Controls.Styles 1.4
 import org.ecloud.charts 1.0
 
 Rectangle {
-    width: 940
-    height: 400
+    width: 800
+    height: 480
     color: "black"
 
     GraphStack {
         id: graphs
         anchors.fill: parent
-        anchors.margins: 50
+        anchors.margins: 20
+        anchors.bottomMargin: 100
         antialiasing: aaCb.checked
         color: "lightsteelblue"
         model: LineGraphModel {
@@ -91,7 +92,7 @@ Rectangle {
         color: "transparent"
         border.color: "#40444444"
         border.width: 2
-        Row {
+        Flow {
             anchors.top: parent.bottom
             anchors.margins: 6
             width: parent.width
@@ -107,8 +108,20 @@ Rectangle {
                     value: 1
                 }
                 Text {
-//                    anchors.top: widthSlider.bottom
                     text: "line width " + widthSlider.value.toFixed(2)
+                    color: "white"
+                }
+            }
+            Column {
+                width: 300
+                Slider {
+                    id: offsetSlider
+                    width: 300
+                    minimumValue: -1
+                    maximumValue: +1
+                }
+                Text {
+                    text: "y offset " + offsetSlider.value.toFixed(2)
                     color: "white"
                 }
             }
@@ -149,6 +162,16 @@ Rectangle {
             CheckBox {
                 id: timerRun
                 text: "periodic update"
+                style: whiteCheckboxStyle
+            }
+            CheckBox {
+                id: fillBelowCb
+                text: "fill below"
+                style: whiteCheckboxStyle
+            }
+            CheckBox {
+                id: fillAboveCb
+                text: "fill above"
                 style: whiteCheckboxStyle
             }
         }

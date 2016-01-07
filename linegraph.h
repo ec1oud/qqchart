@@ -10,6 +10,8 @@ class LineGraph : public QQuickItem
     Q_PROPERTY(LineGraphModel * model READ model WRITE setModel NOTIFY modelChanged)
     Q_PROPERTY(qreal lineWidth READ lineWidth WRITE setLineWidth NOTIFY lineWidthChanged)
     Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY colorChanged)
+    Q_PROPERTY(QColor fillColorBelow READ fillColorBelow WRITE setFillColorBelow NOTIFY fillColorBelowChanged)
+    Q_PROPERTY(QColor fillColorAbove READ fillColorAbove WRITE setFillColorAbove NOTIFY fillColorAboveChanged)
     Q_PROPERTY(QColor warningMinColor READ warningMinColor WRITE setWarningMinColor NOTIFY warningMinColorChanged)
     Q_PROPERTY(QColor warningMaxColor READ warningMaxColor WRITE setWarningMaxColor NOTIFY warningMaxColorChanged)
     Q_PROPERTY(qreal minValue READ minValue WRITE setMinValue NOTIFY minValueChanged) // convenience
@@ -28,6 +30,12 @@ public:
 
     QColor color() const { return m_color; }
     void setColor(QColor color);
+
+    QColor fillColorBelow() const { return m_fillColorBelow; }
+    void setFillColorBelow(QColor fillColorBelow);
+
+    QColor fillColorAbove() const { return m_fillColorAbove; }
+    void setFillColorAbove(QColor fillColorAbove);
 
     QColor warningMinColor() const { return m_warningMinColor; }
     void setWarningMinColor(QColor warningMinColor);
@@ -67,6 +75,8 @@ signals:
     void modelChanged();
     void lineWidthChanged();
     void colorChanged();
+    void fillColorBelowChanged();
+    void fillColorAboveChanged();
     void warningMinColorChanged();
     void warningMaxColorChanged();
     void minValueChanged();
@@ -82,6 +92,8 @@ protected:
     bool m_propertiesChanged = true;
     bool m_wireframe = false;
     QColor m_color = Qt::cyan;
+    QColor m_fillColorBelow = Qt::transparent;
+    QColor m_fillColorAbove = Qt::transparent;
     QColor m_warningMinColor = Qt::yellow;
     QColor m_warningMaxColor = Qt::red;
     qreal m_lineWidth = 1;

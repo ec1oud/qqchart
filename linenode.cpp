@@ -20,11 +20,12 @@ public:
         program()->setUniformValue(id_lineWidth, GLfloat(m->aa ? m->lineWidth * 1.7 : m->lineWidth));
         program()->setUniformValue(id_warningBelowMinimum, m->warningMinValue);
         program()->setUniformValue(id_warningAboveMaximum, m->warningMaxValue);
+        program()->setUniformValue(id_fillDirection, m->fillDirection);
         program()->setUniformValue(id_normalColor, m->color);
         program()->setUniformValue(id_warningMinColor, m->warningMinColor);
         program()->setUniformValue(id_warningMaxColor, m->warningMaxColor);
         program()->setUniformValue(id_dataTransform, m->dataTransform);
-        program()->setUniformValue(id_aa, m->aa);
+        program()->setUniformValue(id_aa, m->fillDirection == 0 ? m->aa : 0);
 //qDebug() << "colors" << m->color << m->warningMinColor << m->warningMaxColor;
     }
 
@@ -32,6 +33,7 @@ public:
         id_lineWidth = program()->uniformLocation("lineWidth");
         id_warningBelowMinimum = program()->uniformLocation("warningBelowMinimum");
         id_warningAboveMaximum = program()->uniformLocation("warningAboveMaximum");
+        id_fillDirection = program()->uniformLocation("fillDirection");
         id_normalColor = program()->uniformLocation("normalColor");
         id_warningMinColor = program()->uniformLocation("warningMinColor");
         id_warningMaxColor = program()->uniformLocation("warningMaxColor");
@@ -43,6 +45,7 @@ private:
     int id_lineWidth;
     int id_warningBelowMinimum;
     int id_warningAboveMaximum;
+    int id_fillDirection;
     int id_normalColor;
     int id_warningMinColor;
     int id_warningMaxColor;
@@ -134,6 +137,12 @@ void LineNode::setWarningMinValue(qreal v)
 void LineNode::setWarningMaxValue(qreal v)
 {
     m_material->state()->warningMaxValue = v;
+    markDirty(QSGNode::DirtyMaterial);
+}
+
+void LineNode::setFillDirection(qreal v)
+{
+    m_material->state()->fillDirection = v;
     markDirty(QSGNode::DirtyMaterial);
 }
 

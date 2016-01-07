@@ -37,6 +37,7 @@ public:
     void setMaxValue(qreal v);
     void setWarningMinValue(qreal v);
     void setWarningMaxValue(qreal v);
+    void setFillDirection(qreal v);
     void setSpread(qreal v);
     void setWireframe(bool v);
 
@@ -48,6 +49,7 @@ public:
         float lineWidth;
         float warningMinValue;
         float warningMaxValue;
+        float fillDirection;
         float aa;
         QMatrix4x4 dataTransform;
     };

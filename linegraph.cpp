@@ -45,6 +45,28 @@ void LineGraph::setColor(QColor color)
     update();
 }
 
+void LineGraph::setFillColorBelow(QColor fillColorBelow)
+{
+    if (m_fillColorBelow == fillColorBelow)
+        return;
+
+    m_fillColorBelow = fillColorBelow;
+    m_propertiesChanged = true;
+    emit fillColorBelowChanged();
+    update();
+}
+
+void LineGraph::setFillColorAbove(QColor fillColorAbove)
+{
+    if (m_fillColorAbove == fillColorAbove)
+        return;
+
+    m_fillColorAbove = fillColorAbove;
+    m_propertiesChanged = true;
+    emit fillColorAboveChanged();
+    update();
+}
+
 void LineGraph::setWarningMinColor(QColor warningMinColor)
 {
     if (m_warningMinColor == warningMinColor)
@@ -73,6 +95,8 @@ void LineGraph::setMinValue(qreal minValue)
         m_model->setMinValue(minValue);
 
     m_geometryChanged = true;
+    m_propertiesChanged = true;
+    emit minValueChanged();
     update();
 }
 
@@ -82,6 +106,8 @@ void LineGraph::setMaxValue(qreal maxValue)
         m_model->setMaxValue(maxValue);
 
     m_geometryChanged = true;
+    m_propertiesChanged = true;
+    emit maxValueChanged();
     update();
 }
 
@@ -191,12 +217,23 @@ QSGNode *LineGraph::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
         n->appendChildNode(n->line);
     }
     if (m_propertiesChanged) {
+        float fillDirection = 0;
+        QColor fillColor = m_color;
+        if (m_fillColorAbove != Qt::transparent) {
+            fillDirection = -1;
+            fillColor = m_fillColorAbove;
+        }
+        if (m_fillColorBelow != Qt::transparent) {
+            fillDirection = 1;
+            fillColor = m_fillColorBelow;
+        }
         n->line->setLineWidth(m_lineWidth);
-        n->line->setColor(m_color);
+        n->line->setColor(fillColor);
         n->line->setWarningMinColor(m_warningMinColor);
         n->line->setWarningMaxColor(m_warningMaxColor);
         n->line->setWarningMinValue(m_model->normalMinValue());
         n->line->setWarningMaxValue(m_model->normalMaxValue());
+        n->line->setFillDirection(fillDirection);
         n->line->setMinValue(m_model->minValue());
         n->line->setMaxValue(m_model->maxValue());
         n->line->setWireframe(m_wireframe);
