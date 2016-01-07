@@ -17,6 +17,7 @@ public:
     QList<QByteArray> attributes() const {  return QList<QByteArray>() << "pos" << "prevNext"; }
 
     void updateState(const LineNode::LineMaterial *m, const LineNode::LineMaterial *) {
+        program()->setUniformValue(id_height, m->height);
         program()->setUniformValue(id_lineWidth, GLfloat(m->aa ? m->lineWidth * 1.7 : m->lineWidth));
         program()->setUniformValue(id_warningBelowMinimum, m->warningMinValue);
         program()->setUniformValue(id_warningAboveMaximum, m->warningMaxValue);
@@ -24,12 +25,14 @@ public:
         program()->setUniformValue(id_normalColor, m->color);
         program()->setUniformValue(id_warningMinColor, m->warningMinColor);
         program()->setUniformValue(id_warningMaxColor, m->warningMaxColor);
-        program()->setUniformValue(id_dataTransform, m->dataTransform);
+        program()->setUniformValue(id_dataScalingTransform, m->dataTransform.toGenericMatrix<2, 2>());
+        program()->setUniformValue(id_dataOffset, m->dataTransform.column(3).toVector2D());
         program()->setUniformValue(id_aa, m->fillDirection == 0 ? m->aa : 0);
 //qDebug() << "colors" << m->color << m->warningMinColor << m->warningMaxColor;
     }
 
     void resolveUniforms() {
+        id_height = program()->uniformLocation("height");
         id_lineWidth = program()->uniformLocation("lineWidth");
         id_warningBelowMinimum = program()->uniformLocation("warningBelowMinimum");
         id_warningAboveMaximum = program()->uniformLocation("warningAboveMaximum");
@@ -37,11 +40,13 @@ public:
         id_normalColor = program()->uniformLocation("normalColor");
         id_warningMinColor = program()->uniformLocation("warningMinColor");
         id_warningMaxColor = program()->uniformLocation("warningMaxColor");
-        id_dataTransform = program()->uniformLocation("dataTransform");
+        id_dataScalingTransform = program()->uniformLocation("dataScalingTransform");
+        id_dataOffset = program()->uniformLocation("dataOffset");
         id_aa = program()->uniformLocation("aa");
     }
 
 private:
+    int id_height;
     int id_lineWidth;
     int id_warningBelowMinimum;
     int id_warningAboveMaximum;
@@ -49,7 +54,8 @@ private:
     int id_normalColor;
     int id_warningMinColor;
     int id_warningMaxColor;
-    int id_dataTransform;
+    int id_dataScalingTransform;
+    int id_dataOffset;
     int id_aa;
 };
 
@@ -90,6 +96,12 @@ void LineNode::updateGeometry(const QRectF &bounds, const QVector<LineVertex> *v
     // TODO limit on left side to stay in bounds
     memcpy(m_geometry.vertexData(), v->constData(), sizeof(LineVertex) * v->size());
     markDirty(QSGNode::DirtyGeometry);
+}
+
+void LineNode::setHeight(float height)
+{
+    m_material->state()->height = height;
+    markDirty(QSGNode::DirtyMaterial);
 }
 
 void LineNode::setLineWidth(float width)

@@ -43,6 +43,8 @@ Item {
         maxValue: 1 + offsetSlider.value
         lineWidth: widthSlider.value
         color: graph.visible ? "black" : "white"
+        fillColorBelow: fillBelowCb.checked ? "#F22" : "transparent"
+        fillColorAbove: fillAboveCb.checked ? "#22F" : "transparent"
         warningMinColor: "black"
         warningMaxColor: "black"
         wireframe: true

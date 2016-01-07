@@ -227,6 +227,7 @@ QSGNode *LineGraph::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
             fillDirection = 1;
             fillColor = m_fillColorBelow;
         }
+        n->line->setHeight(height());
         n->line->setLineWidth(m_lineWidth);
         n->line->setColor(fillColor);
         n->line->setWarningMinColor(m_warningMinColor);

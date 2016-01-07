@@ -29,6 +29,7 @@ public:
     static const int verticesPerSample = 4;
 
     void updateGeometry(const QRectF &bounds, const QVector<LineVertex> *v, qreal timeScale);
+    void setHeight(float height);
     void setLineWidth(float width);
     void setColor(QColor color);
     void setWarningMinColor(QColor color);
@@ -46,6 +47,7 @@ public:
         QColor color;
         QColor warningMinColor;
         QColor warningMaxColor;
+        float height;
         float lineWidth;
         float warningMinValue;
         float warningMaxValue;
