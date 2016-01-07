@@ -19,7 +19,7 @@ uniform highp mat4 qt_Matrix;           // Qt's usual transform to go from Item 
 
 // variables which will be passed through to the frag shader, and automatically interpolated between vertices
 varying lowp float vT;                  // distance: 0 is on the line; goes to +/-0.5 outwards across the stroke
-varying lowp vec4 color;                // color of the vertex
+varying lowp vec4 vColor;               // color of the vertex
 
 void main(void)
 {
@@ -75,6 +75,6 @@ void main(void)
     gl_Position = qt_Matrix * vec4(posPx + offset, 0, 1.0);
 
     vT = t * 0.5;
-    color = pos.y > warningAboveMaximum ? warningMaxColor :
-            pos.y < warningBelowMinimum ? warningMinColor : normalColor;
+    vColor = pos.y > warningAboveMaximum ? warningMaxColor :
+             pos.y < warningBelowMinimum ? warningMinColor : normalColor;
 }
