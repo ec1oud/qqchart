@@ -8,7 +8,7 @@
 class LineGraphModel : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(int maxSamples READ maxSamples WRITE setMaxSamples NOTIFY maxSamplesChanged)
+    Q_PROPERTY(int timeSpan READ timeSpan WRITE setTimeSpan NOTIFY timeSpanChanged)
     Q_PROPERTY(qreal currentValue READ currentValue NOTIFY samplesChanged)
     Q_PROPERTY(qreal minValue READ minValue WRITE setMinValue NOTIFY minValueChanged)
     Q_PROPERTY(qreal maxValue READ maxValue WRITE setMaxValue NOTIFY maxValueChanged)
@@ -21,8 +21,8 @@ class LineGraphModel : public QObject
 public:
     explicit LineGraphModel(QObject *parent = 0);
 
-    int maxSamples() const { return m_maxSamples; }
-    void setMaxSamples(int maxSamples);
+    int timeSpan() const { return m_timeSpan; }
+    void setTimeSpan(int timeSpan);
 
     qreal currentValue() const;
 
@@ -49,7 +49,7 @@ public:
     void setNormalMaxValue(qreal normalMaxValue);
 
 signals:
-    void maxSamplesChanged();
+    void timeSpanChanged();
     void samplesChanged();
     void minSampleValueChanged();
     void maxSampleValueChanged();
@@ -69,7 +69,7 @@ protected:
 
 protected:
     QVector<LineNode::LineVertex> m_vertices;
-    int m_maxSamples = 1000;
+    int m_timeSpan = 1000; // in seconds
     qreal m_minValue = 0;
     qreal m_maxValue = 1;
     qreal m_normalMinValue = 0;

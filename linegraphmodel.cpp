@@ -39,8 +39,9 @@ void LineGraphModel::appendSample(qreal value, qint64 timestamp)
     m_vertices[i++].set(3,  1, time, value, tp, samplePrev, time + 0.01, value);
     Q_ASSERT(i == m_vertices.size());
 
-    if (m_vertices.size() > m_maxSamples * LineNode::verticesPerSample)
-        m_vertices.remove(0, m_vertices.size() - m_maxSamples * LineNode::verticesPerSample);
+    qint64 earliestTimeAllowed = m_vertices.last().x - m_timeSpan;
+    while (m_vertices.size() > 2 && m_vertices[1].x < earliestTimeAllowed)
+        m_vertices.remove(0, 4);
     emit samplesChanged();
 }
 
@@ -92,13 +93,13 @@ void LineGraphModel::setLabel(QString label)
     emit labelChanged();
 }
 
-void LineGraphModel::setMaxSamples(int maxSamples)
+void LineGraphModel::setTimeSpan(int timeSpan)
 {
-    if (m_maxSamples == maxSamples)
+    if (m_timeSpan == timeSpan)
         return;
 
-    m_maxSamples = maxSamples;
-    emit maxSamplesChanged();
+    m_timeSpan = timeSpan;
+    emit timeSpanChanged();
 }
 
 qreal LineGraphModel::currentValue() const
