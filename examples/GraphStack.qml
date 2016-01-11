@@ -32,7 +32,7 @@ Item {
         wireframe: false
         visible: fillCb.checked
         opacity: 0.8
-        timeScale: width / 30
+        timeSpan: 30
     }
 
     LineGraph {
@@ -48,7 +48,7 @@ Item {
         warningMinColor: "black"
         warningMaxColor: "black"
         wireframe: true
-        timeScale: graph.timeScale
+        timeSpan: graph.timeSpan
         visible: wireframeCb.checked
     }
 
@@ -63,7 +63,7 @@ Item {
         warningMinColor: "red"
         warningMaxColor: "red"
         wireframe: true
-        timeScale: graph.timeScale
+        timeSpan: graph.timeSpan
         visible: originalLineCb.checked
     }
 

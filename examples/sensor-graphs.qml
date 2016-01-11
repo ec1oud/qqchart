@@ -19,9 +19,10 @@ Rectangle {
                 id: graph
                 model: modelData
                 anchors.fill: parent
+                timeSpan: width
             }
             Text {
-                text: label + " (" + chipName + "):\nscale " + parent.timeScale +
+                text: label + " (" + chipName + "):\nscale " + parent.width / parent.timeSpan +
                       " min " + minSampleValue.toFixed(2) + " max " + maxSampleValue.toFixed(2) +
                       " norm " + normalMinValue.toFixed(2) + ".." + normalMaxValue.toFixed(2)
                 color: "grey"

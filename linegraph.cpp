@@ -111,34 +111,34 @@ void LineGraph::setMaxValue(qreal maxValue)
     update();
 }
 
-void LineGraph::setTimeScale(qreal timeScale)
+void LineGraph::setTimeSpan(qreal timeSpan)
 {
-    if (m_timeScale == timeScale)
+    if (m_timeSpan == timeSpan)
         return;
 
-    m_timeScale = timeScale;
+    m_timeSpan = timeSpan;
     m_geometryChanged = true;
-    emit timeScaleChanged();
+    emit timeSpanChanged();
     update();
 }
 
 qreal LineGraph::xAtTime(qint64 time)
 {
-    return time * m_timeScale;
+    return width() * time / m_timeSpan;
 }
 
 qint64 LineGraph::timeAtX(qreal x)
 {
     if (!m_model)
         return -1;
-    return m_model->sampleTimeNearest(x / m_timeScale);
+    return m_model->sampleTimeNearest(x / width() * m_timeSpan);
 }
 
 qreal LineGraph::valueAtX(qreal x)
 {
     if (!m_model)
         return qQNaN();
-    return m_model->sampleNearest(x / m_timeScale);
+    return m_model->sampleNearest(x / width() * m_timeSpan);
 }
 
 qreal LineGraph::yPixelAtX(qreal x)
@@ -242,7 +242,7 @@ QSGNode *LineGraph::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
     n->line->setSpread(antialiasing() && !m_wireframe ? 1.0 : 0.0);
 
     if ((m_geometryChanged || m_samplesChanged) && !m_model->vertices()->isEmpty())
-        n->line->updateGeometry(rect, m_model->vertices(), m_timeScale);
+        n->line->updateGeometry(rect, m_model->vertices(), width() / m_timeSpan);
 
     m_geometryChanged = false;
     m_samplesChanged = false;

@@ -16,7 +16,7 @@ class LineGraph : public QQuickItem
     Q_PROPERTY(QColor warningMaxColor READ warningMaxColor WRITE setWarningMaxColor NOTIFY warningMaxColorChanged)
     Q_PROPERTY(qreal minValue READ minValue WRITE setMinValue NOTIFY minValueChanged) // convenience
     Q_PROPERTY(qreal maxValue READ maxValue WRITE setMaxValue NOTIFY maxValueChanged) // convenience
-    Q_PROPERTY(qreal timeScale READ timeScale WRITE setTimeScale NOTIFY timeScaleChanged)
+    Q_PROPERTY(qreal timeSpan READ timeSpan WRITE setTimeSpan NOTIFY timeSpanChanged) // in seconds
     Q_PROPERTY(bool wireframe READ wireframe WRITE setWireframe NOTIFY wireframeChanged)
 
 public:
@@ -49,8 +49,8 @@ public:
     qreal maxValue() const { return m_model ? m_model->maxValue() : 0; }
     void setMaxValue(qreal maxValue);
 
-    qreal timeScale() const { return m_timeScale; }
-    void setTimeScale(qreal timeScale);
+    qreal timeSpan() const { return m_timeSpan; }
+    void setTimeSpan(qreal timeSpan);
 
     bool wireframe() const { return m_wireframe; }
     void setWireframe(bool wireframe);
@@ -81,7 +81,7 @@ signals:
     void warningMaxColorChanged();
     void minValueChanged();
     void maxValueChanged();
-    void timeScaleChanged();
+    void timeSpanChanged();
     void samplesChanged(); // the model has samplesChanged too, but this occurs at a max of once per frame
     void wireframeChanged();
 
@@ -97,7 +97,7 @@ protected:
     QColor m_warningMinColor = Qt::yellow;
     QColor m_warningMaxColor = Qt::red;
     qreal m_lineWidth = 1;
-    qreal m_timeScale = 1;
+    qreal m_timeSpan = 60;
 };
 
 #endif // LINEGRAPH_H
