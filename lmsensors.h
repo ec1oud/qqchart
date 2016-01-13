@@ -76,6 +76,7 @@ public:
 
     Q_INVOKABLE bool sampleAllValues();
     Q_INVOKABLE qint64 timestamp() { return (QDateTime().currentDateTime().toMSecsSinceEpoch()); }
+    Q_INVOKABLE void setDownsampleInterval(qreal downsampleInterval);
 
     bool initialized() { return m_initialized; }
     QString errorMessage() { return m_errorMessage; }

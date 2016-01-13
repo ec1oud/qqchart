@@ -172,6 +172,12 @@ bool LmSensors::sampleAllValues()
     return true;
 }
 
+void LmSensors::setDownsampleInterval(qreal downsampleInterval)
+{
+    foreach (Sensor *item, m_sensors)
+        item->setDownsampleInterval(downsampleInterval);
+}
+
 QList<QObject *> LmSensors::filtered(int t, const QString substring)
 {
     Sensor::SensorType type = static_cast<Sensor::SensorType>(t);

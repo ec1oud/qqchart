@@ -119,6 +119,8 @@ void LineGraph::setTimeSpan(qreal timeSpan)
     m_timeSpan = timeSpan;
     m_geometryChanged = true;
     emit timeSpanChanged();
+    if (m_model)
+        m_model->setDownsampleInterval(timeSpan / width());
     update();
 }
 
@@ -163,6 +165,8 @@ void LineGraph::setModel(LineGraphModel *model)
     connect(model, &LineGraphModel::samplesChanged, this, &LineGraph::updateVertices);
     connect(model, &LineGraphModel::minValueChanged, this, &LineGraph::minValueChanged);
     connect(model, &LineGraphModel::maxValueChanged, this, &LineGraph::maxValueChanged);
+    if (m_model)
+        m_model->setDownsampleInterval(m_timeSpan / width());
     emit modelChanged();
     updateVertices();
 }
@@ -180,6 +184,8 @@ void LineGraph::setWireframe(bool wireframe)
 void LineGraph::geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry)
 {
     m_geometryChanged = true;
+    if (m_model)
+        m_model->setDownsampleInterval(m_timeSpan / width());
     update();
     QQuickItem::geometryChanged(newGeometry, oldGeometry);
 }

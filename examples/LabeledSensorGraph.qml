@@ -6,7 +6,7 @@ LineGraph {
     anchors.fill: parent
     anchors.margins: 6
     property int labelLine: 0
-    timeSpan: width / 0.5
+    timeSpan: 600
     Text {
         color: parent.color
         text: model.label + " (" + model.chipName + ")"

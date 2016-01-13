@@ -34,4 +34,7 @@ Rectangle {
             labelLine: 1
         }
     }
+
+    // possible but unnecessary:
+    // Component.onCompleted: LmSensors.setDownsampleInterval(2)
 }
