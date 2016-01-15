@@ -106,7 +106,7 @@ Rectangle {
                     width: 300
                     minimumValue: 1
                     maximumValue: 25
-                    value: 1
+                    value: 1.3
                 }
                 Text {
                     text: "line width " + widthSlider.value.toFixed(2)
@@ -132,7 +132,7 @@ Rectangle {
                     id: hZoomSlider
                     width: 300
                     minimumValue: 1
-                    maximumValue: 20
+                    maximumValue: 50
                 }
                 Text {
                     text: "time scale " + hZoomSlider.value.toFixed(2)

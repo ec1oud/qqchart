@@ -96,7 +96,7 @@ protected:
     QColor m_fillColorAbove = Qt::transparent;
     QColor m_warningMinColor = Qt::yellow;
     QColor m_warningMaxColor = Qt::red;
-    qreal m_lineWidth = 1;
+    qreal m_lineWidth = 1.3;
     qreal m_timeSpan = 60;
 };
 

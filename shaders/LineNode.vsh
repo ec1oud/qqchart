@@ -50,6 +50,8 @@ void main(void)
             // angle is acute: make a beveled miter to avoid overshooting too far
             vec2 upToCap = miter * halfLineWidth * t;
             vec2 capDeviation = averageTangent * halfLineWidth;
+            float innerMiterLimit = max(-lineWidth, min(posPx.x - prev.x, lineWidth)) * 8.;
+            miterLength = max(-innerMiterLimit, min(miterLength, innerMiterLimit));
             if (lineToward.y > 0) {
                 capDeviation *= sign(i - 2.0) * mod(i - 2.0, 2.0); // lower knee
                 offset = oddMult * (upToCap + capDeviation) + evenMult * (-t * miterLength * miter);
