@@ -5,7 +5,7 @@ import QtQuick.Controls.Styles 1.4
 import org.ecloud.charts 1.0
 
 Rectangle {
-    width: 800
+    width: 990
     height: 480
     color: "black"
 
@@ -15,6 +15,7 @@ Rectangle {
         anchors.margins: 20
         anchors.bottomMargin: 100
         antialiasing: aaCb.checked
+        timeScale: hZoomSlider.value
         color: "lightsteelblue"
         model: LineGraphModel {
             label: "example data"
@@ -122,6 +123,19 @@ Rectangle {
                 }
                 Text {
                     text: "y offset " + offsetSlider.value.toFixed(2)
+                    color: "white"
+                }
+            }
+            Column {
+                width: 300
+                Slider {
+                    id: hZoomSlider
+                    width: 300
+                    minimumValue: 1
+                    maximumValue: 20
+                }
+                Text {
+                    text: "time scale " + hZoomSlider.value.toFixed(2)
                     color: "white"
                 }
             }

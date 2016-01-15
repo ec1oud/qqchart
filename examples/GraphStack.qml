@@ -7,6 +7,7 @@ Item {
     id: root
     property alias color: graph.color
     property alias antialiasing: graph.antialiasing
+    property real timeScale: 1
     property LineGraphModel model: null
 
     function newSample(i) {
@@ -32,7 +33,7 @@ Item {
         wireframe: false
         visible: fillCb.checked
         opacity: 0.8
-        timeSpan: 30
+        timeSpan: 30 * root.timeScale
     }
 
     LineGraph {
