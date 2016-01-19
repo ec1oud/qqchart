@@ -33,7 +33,7 @@ Item {
         wireframe: false
         visible: fillCb.checked
         opacity: 0.8
-        timeSpan: 30 * root.timeScale
+        timeSpan: 40 * root.timeScale
     }
 
     LineGraph {
