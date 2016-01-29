@@ -4,8 +4,8 @@ import QQChart 1.0
 Rectangle {
     id: root
     color: "black"
-    width: 640
-    height: 480
+    width: 1900
+    height: 1000
 
     DataSequenceModel {
         id: tableModel

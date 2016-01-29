@@ -21,6 +21,8 @@ int main(int argc, char **argv)
         view.setFormat(surfaceFormat);
         multisample = true;
     }
+    else
+        view.setTitle(QStringLiteral("no antialiasing"));
     view.setResizeMode(QQuickView::SizeRootObjectToView);
     if (app.arguments().contains(QLatin1String("-b")))
         view.setSource(QUrl("gridBenchmark.qml"));
