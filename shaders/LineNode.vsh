@@ -38,7 +38,6 @@ void main(void)
         vec2 lineAway = normalize(next - posPx);
         vec2 normal = vec2(lineAway.y, -lineAway.x);
         vec2 averageTangent = (prev == posPx) ? lineAway : normalize(lineToward + lineAway);
-        vec2 prevNext = next - prev;
         vec2 miter = normalize(vec2(-averageTangent.y, averageTangent.x));
         float halfLineWidth = lineWidth / 2.0;
         float miterLength = halfLineWidth / dot(normal, miter);
