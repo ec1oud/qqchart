@@ -4,7 +4,7 @@ import QtGraphicalEffects 1.0
 import org.ecloud.charts 1.0
 
 Window {
-    width: 480
+    width: 580
     height: 320
     x: 1920 - width - 4
     y: 4
