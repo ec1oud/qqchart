@@ -21,6 +21,7 @@ Window {
         antialiasing: true
         radius: 20
         Repeater {
+            id: fans
             model: LmSensors.filtered(Sensor.Fan)
             LabeledSensorGraph {
                 model: modelData
@@ -46,6 +47,34 @@ Window {
                 model: modelData
                 color: "wheat"
                 labelLine: 1
+            }
+        }
+        Repeater {
+            model: LmSensors.filtered(Sensor.Memory, "Memory Used")
+            LabeledSensorGraph {
+                model: modelData
+                color: "cyan"
+                labelLine: fans.count + 2
+                lineWidth: 2
+            }
+        }
+        Repeater {
+            model: LmSensors.filtered(Sensor.Memory, "Memory Cached")
+            LabeledSensorGraph {
+                model: modelData
+                color: "darkgreen"
+                labelLine: fans.count + 3
+                lineWidth: 1
+            }
+        }
+        Repeater {
+            model: LmSensors.filtered(Sensor.Memory, "Swap Free")
+            LabeledSensorGraph {
+                model: modelData
+                color: "midnightblue"
+                labelLine: fans.count + 4
+                lineWidth: 3
+                visible: modelData.maxValue > 0
             }
         }
     }
