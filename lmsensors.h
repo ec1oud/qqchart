@@ -29,7 +29,7 @@ class Sensor : public LineGraphModel
 public:
     enum SensorType { Unknown = 0, Cpu,
                       Memory = 0x100, MemoryFree, MemoryUsed, MemoryCache, MemoryTotal, SwapFree, SwapUsed, SwapTotal,
-                      Input = 0x200, Fan, Temperature, Power, Energy, Current, Humidity, Vid, Intrusion };
+                      Input = 0x200, Fan, Temperature, Power, Energy, Current, Humidity, Vid, Intrusion, Connected };
     Q_ENUM(SensorType)
 
     explicit Sensor(SensorType type = Unknown, QObject *parent = 0);
@@ -59,6 +59,7 @@ private:
     QString m_adapter;
     QString m_chipName;
     QString m_unit;
+    QFile *m_file = nullptr;
 
     friend class LmSensors;
 };

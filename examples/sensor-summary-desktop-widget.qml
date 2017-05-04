@@ -21,12 +21,23 @@ Window {
         antialiasing: true
         radius: 20
         Repeater {
+            id: batteries
+            model: LmSensors.filtered(Sensor.Energy)
+            LabeledSensorGraph {
+                model: modelData
+                color: "lightgreen"
+                labelLine: index + 1
+                lineWidth: 1
+//                visible: modelData.maxSampleValue > 0
+            }
+        }
+        Repeater {
             id: fans
             model: LmSensors.filtered(Sensor.Fan)
             LabeledSensorGraph {
                 model: modelData
                 color: Qt.rgba(0.3 + index * 0.03, 0.2 + index * 0.17, 1, 1)
-                labelLine: index + 2
+                labelLine: batteries.count + index + 2
                 lineWidth: 3
                 //visible: modelData.maxSampleValue > 0
             }
@@ -46,7 +57,7 @@ Window {
             LabeledSensorGraph {
                 model: modelData
                 color: "wheat"
-                labelLine: 1
+                labelLine: batteries.count + 1
             }
         }
         Repeater {
@@ -54,7 +65,7 @@ Window {
             LabeledSensorGraph {
                 model: modelData
                 color: "cyan"
-                labelLine: fans.count + 2
+                labelLine: batteries.count + fans.count + 2
                 lineWidth: 2
             }
         }
@@ -63,7 +74,7 @@ Window {
             LabeledSensorGraph {
                 model: modelData
                 color: "darkgreen"
-                labelLine: fans.count + 3
+                labelLine: batteries.count + fans.count + 3
                 lineWidth: 1
             }
         }
@@ -72,7 +83,7 @@ Window {
             LabeledSensorGraph {
                 model: modelData
                 color: "midnightblue"
-                labelLine: fans.count + 4
+                labelLine: batteries.count + fans.count + 4
                 lineWidth: 3
                 visible: modelData.maxValue > 0
             }

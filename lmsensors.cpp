@@ -220,6 +220,60 @@ bool LmSensors::init()
         }
     }
 
+    // take inventory of batteries and power adapters
+    QDir powerSupplyDir(QLatin1String("/sys/class/power_supply"));
+    for (const QString &powerSupply : powerSupplyDir.entryList()) {
+        if (powerSupply.startsWith(QLatin1String(".")))
+            continue;
+
+        bool isBattery = powerSupply.toLower().startsWith(QLatin1String("bat"));
+        QDir dir(powerSupplyDir);
+        dir.cd(powerSupply);
+        if (isBattery) {
+            for (QString metric : dir.entryList(QStringList() << "*_now")) {
+                QString fullMetric(metric);
+                fullMetric.replace(QLatin1String("_now"), QLatin1String("_full"));
+                QFile fullFile(dir.absoluteFilePath(fullMetric));
+                if (fullFile.open(QFile::ReadOnly)) {
+                    bool ok = false;
+                    qreal fullAmount = fullFile.readAll().trimmed().toDouble(&ok) / 1000000;
+                    fullFile.close();
+                    qDebug() << powerSupply << metric << fullFile.fileName() << fullAmount;
+                    if (!ok)
+                        continue;
+
+                    // OK we're good: we have a means of reading the "now" value, and have already read the "full" value
+                    new_item = new Sensor(Sensor::Energy);
+                    new_item->m_file = new QFile(dir.absoluteFilePath(metric));
+                    new_item->m_index = m_sensors.count();
+                    new_item->setLabel(powerSupply);
+                    new_item->m_adapter = "power_supply";
+                    new_item->setMinValue(0);
+                    new_item->setMaxValue(fullAmount);
+                    new_item->setNormalMinValue(fullAmount * 0.02);
+                    new_item->setNormalMaxValue(fullAmount);
+                    new_item->m_unit = "Ah"; // guessing uAh from the size of the number... so we divided down above
+                    m_sensors.append(new_item);
+                } else {
+//                    qDebug() << fullFile.fileName() << "isn't readable";
+                }
+            }
+        } else if (powerSupply.toLower().startsWith(QLatin1String("ac"))) {
+            // AC adapter
+            new_item = new Sensor(Sensor::Connected);
+            new_item->m_file = new QFile(dir.absoluteFilePath(QLatin1String("online")));
+            new_item->m_index = m_sensors.count();
+            new_item->setLabel(powerSupply);
+            new_item->m_adapter = "power_supply";
+            new_item->setMinValue(0);
+            new_item->setMaxValue(1);
+            new_item->setNormalMinValue(0);
+            new_item->setNormalMaxValue(1);
+            new_item->m_unit = "connected";
+            m_sensors.append(new_item);
+        }
+    }
+
     emit sensorsChanged();
     return true;
 }
@@ -347,8 +401,8 @@ void Sensor::getCPULoad(qreal &val)
 
 qreal Sensor::sample()
 {
-    qreal valTotal;
-    qreal val;
+    qreal valTotal = 0;
+    qreal val = 0;
 
     switch (m_type) {
     case Sensor::MemoryTotal:
@@ -378,6 +432,15 @@ qreal Sensor::sample()
         break;
     case Sensor::SensorType::Cpu:
         getCPULoad(val);
+        break;
+    case Sensor::Connected:
+    case Sensor::Energy:
+        if (m_file && m_file->open(QFile::ReadOnly)) {
+            val = m_file->readAll().trimmed().toDouble();
+            if (m_type == Sensor::Energy)
+                val /= 1000000;
+            m_file->close();
+        }
         break;
     default: // LM sensors
         sensors_get_value(m_chip, m_subfeature->number, &val);
