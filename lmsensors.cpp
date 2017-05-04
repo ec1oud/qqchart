@@ -62,6 +62,8 @@ bool LmSensors::init()
     new_item->m_adapter = "proc-stat";
     new_item->setMinValue(0);
     new_item->setMaxValue(memoryTotal);
+    new_item->setNormalMinValue(memoryTotal * 0.02);
+    new_item->setNormalMaxValue(memoryTotal);
     new_item->m_unit = "KB";
     m_sensors.append(new_item);
 
@@ -71,6 +73,8 @@ bool LmSensors::init()
     new_item->m_adapter = "proc-stat";
     new_item->setMinValue(0);
     new_item->setMaxValue(memoryTotal);
+    new_item->setNormalMinValue(0);
+    new_item->setNormalMaxValue(memoryTotal * 0.98);
     new_item->m_unit = "KB";
     m_sensors.append(new_item);
 
@@ -80,6 +84,8 @@ bool LmSensors::init()
     new_item->m_adapter = "proc-stat";
     new_item->setMinValue(0);
     new_item->setMaxValue(memoryTotal);
+    new_item->setNormalMinValue(0);
+    new_item->setNormalMaxValue(memoryTotal);
     new_item->m_unit = "KB";
     m_sensors.append(new_item);
 
@@ -91,6 +97,8 @@ bool LmSensors::init()
     new_item->m_adapter = "proc-stat";
     new_item->setMinValue(0);
     new_item->setMaxValue(swapTotal);
+    new_item->setNormalMinValue(swapTotal * 0.02);
+    new_item->setNormalMaxValue(swapTotal);
     new_item->m_unit = "KB";
     m_sensors.append(new_item);
 
@@ -100,6 +108,8 @@ bool LmSensors::init()
     new_item->m_adapter = "proc-stat";
     new_item->setMinValue(0);
     new_item->setMaxValue(swapTotal);
+    new_item->setNormalMinValue(0);
+    new_item->setNormalMaxValue(swapTotal * 0.98);
     new_item->m_unit = "KB";
     m_sensors.append(new_item);
 

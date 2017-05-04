@@ -24,9 +24,9 @@ Window {
             model: LmSensors.filtered(Sensor.Memory)
             LabeledSensorGraph {
                 model: modelData
-                color: Qt.rgba(0.3 + index * 0.03, 0.2 + index * 0.17, 1, 1)
+                color: Qt.rgba(0.3 + index * 0.33, 1 - index * 0.27, 0.7 + index * 0.11, 1)
                 labelLine: index + 2
-                lineWidth: 3
+                lineWidth: 1
                 visible: modelData.maxValue > 0
             }
         }
