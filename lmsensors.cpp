@@ -292,6 +292,10 @@ void Sensor::getMemoryMetric(const char *metric, qreal &val)
         val = beforeUnits.toDouble(&ok);
         if (!ok)
             val = 0;
+        else if (val > 10000 && m_unit.toLower() == QLatin1String("kb")) {
+            val /= 1000;
+            m_unit = QLatin1String("MB");
+        }
     } else {
         val = 0;
     }
