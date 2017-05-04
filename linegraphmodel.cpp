@@ -32,7 +32,7 @@ LineGraphModel::TimeValue LineGraphModel::largestTriangle(const TimeValue &previ
 LineGraphModel::TimeValue LineGraphModel::average(const QVector<TimeValue> &tvv)
 {
     TimeValue ret = {0, 0};
-    foreach (const TimeValue &tv, tvv) {
+    for (const TimeValue &tv : tvv) {
         ret.time += tv.time;
         ret.value += tv.value;
     }
@@ -85,6 +85,7 @@ void LineGraphModel::appendSample(qreal value, qint64 timestamp)
 
 int LineGraphModel::sampleIndexNearest(qint64 time)
 {
+    Q_UNUSED(time);
     return 0; // TODO binary search
 }
 

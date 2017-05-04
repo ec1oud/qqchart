@@ -28,10 +28,11 @@ class Sensor : public LineGraphModel
 
 public:
     enum SensorType { Unknown = 0, Cpu,
-                      Input = 0x100, Fan, Temperature, Power, Energy, Current, Humidity, Vid, Intrusion };
+                      Memory = 0x100, MemoryFree, MemoryUsed, MemoryCache, MemoryTotal, SwapFree, SwapUsed, SwapTotal,
+                      Input = 0x200, Fan, Temperature, Power, Energy, Current, Humidity, Vid, Intrusion };
     Q_ENUM(SensorType)
 
-    explicit Sensor(QObject *parent = 0);
+    explicit Sensor(SensorType type = Unknown, QObject *parent = 0);
 
     Q_INVOKABLE qreal sample();
 
@@ -43,6 +44,7 @@ public:
 
 private:
     bool recordSample(qint64 timestamp);
+    void getMemoryMetric(const char *metric, qreal &val);
     void getCPULoad(qreal &val);
 
 private:
@@ -95,7 +97,7 @@ signals:
     void updateIntervalMsChanged();
 
 protected:
-    void timerEvent(QTimerEvent *event) Q_DECL_OVERRIDE { sampleAllValues(); }
+    void timerEvent(QTimerEvent *) Q_DECL_OVERRIDE { sampleAllValues(); }
 
 private:
     bool init();

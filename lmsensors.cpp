@@ -4,7 +4,7 @@ LmSensors::LmSensors(QObject *parent) : QObject(parent)
 {
     m_initialized = init();
     // throw away first sample - tends to be wrong
-    foreach (Sensor *item, m_sensors)
+    for (Sensor *item : m_sensors)
         item->sample();
     m_timerId = startTimer(m_updateIntervalMs);
 }
@@ -43,14 +43,64 @@ bool LmSensors::init()
 
     // add CPU load
 
-    Sensor *new_item = new Sensor();
-    new_item->m_type = Sensor::SensorType::Cpu;
+    Sensor *new_item = new Sensor(Sensor::Cpu);
     new_item->m_index = m_sensors.count();
     new_item->setLabel(tr("CPU Load"));
     new_item->m_adapter = "proc-stat";
     new_item->setMinValue(0);
     new_item->setMaxValue(100);
     new_item->m_unit = "%";
+    m_sensors.append(new_item);
+
+    // add memory metrics
+
+    qreal memoryTotal = Sensor(Sensor::MemoryTotal).sample();
+
+    new_item = new Sensor(Sensor::MemoryFree);
+    new_item->m_index = m_sensors.count();
+    new_item->setLabel(tr("Memory Free"));
+    new_item->m_adapter = "proc-stat";
+    new_item->setMinValue(0);
+    new_item->setMaxValue(memoryTotal);
+    new_item->m_unit = "KB";
+    m_sensors.append(new_item);
+
+    new_item = new Sensor(Sensor::MemoryUsed);
+    new_item->m_index = m_sensors.count();
+    new_item->setLabel(tr("Memory Used"));
+    new_item->m_adapter = "proc-stat";
+    new_item->setMinValue(0);
+    new_item->setMaxValue(memoryTotal);
+    new_item->m_unit = "KB";
+    m_sensors.append(new_item);
+
+    new_item = new Sensor(Sensor::MemoryCache);
+    new_item->m_index = m_sensors.count();
+    new_item->setLabel(tr("Memory Cached"));
+    new_item->m_adapter = "proc-stat";
+    new_item->setMinValue(0);
+    new_item->setMaxValue(memoryTotal);
+    new_item->m_unit = "KB";
+    m_sensors.append(new_item);
+
+    qreal swapTotal = Sensor(Sensor::SwapTotal).sample();
+
+    new_item = new Sensor(Sensor::SwapFree);
+    new_item->m_index = m_sensors.count();
+    new_item->setLabel(tr("Swap Free"));
+    new_item->m_adapter = "proc-stat";
+    new_item->setMinValue(0);
+    new_item->setMaxValue(swapTotal);
+    new_item->m_unit = "KB";
+    m_sensors.append(new_item);
+
+    new_item = new Sensor(Sensor::SwapUsed);
+    new_item->m_index = m_sensors.count();
+    new_item->setLabel(tr("Swap Used"));
+    new_item->m_adapter = "proc-stat";
+    new_item->setMinValue(0);
+    new_item->setMaxValue(swapTotal);
+    new_item->m_unit = "KB";
     m_sensors.append(new_item);
 
     // add lm-sensors
@@ -167,23 +217,27 @@ bool LmSensors::init()
 bool LmSensors::sampleAllValues()
 {
     qint64 timestamp = QDateTime().currentDateTime().toMSecsSinceEpoch();
-    foreach (Sensor *item, m_sensors)
+    for (Sensor *item : m_sensors)
         item->recordSample(timestamp);
     return true;
 }
 
 void LmSensors::setDownsampleInterval(qreal downsampleInterval)
 {
-    foreach (Sensor *item, m_sensors)
+    for (Sensor *item : m_sensors)
         item->setDownsampleInterval(downsampleInterval);
 }
 
 QList<QObject *> LmSensors::filtered(int t, const QString substring)
 {
-    Sensor::SensorType type = static_cast<Sensor::SensorType>(t);
     QList<QObject *> ret;
-    foreach (Sensor * item, m_sensors)
-        if ((t == Sensor::SensorType::Unknown || item->type() == type) &&
+    QVector<Sensor::SensorType> types;
+    if (t == Sensor::SensorType::Memory)
+        types << Sensor::MemoryFree << Sensor::MemoryUsed << Sensor::MemoryCache << Sensor::SwapFree << Sensor::SwapUsed;
+    else
+        types << static_cast<Sensor::SensorType>(t);
+    for (Sensor * item : m_sensors)
+        if ((t == Sensor::SensorType::Unknown || types.contains(item->type())) &&
                 (substring.isEmpty() || item->label().contains(substring) ||
                  item->chipName().contains(substring) || item->adapter().contains(substring)))
             ret << item;
@@ -202,30 +256,45 @@ void LmSensors::setUpdateIntervalMs(int updateIntervalMs)
     emit updateIntervalMsChanged();
 }
 
-Sensor::Sensor(QObject *parent) : LineGraphModel(parent)
+Sensor::Sensor(SensorType type, QObject *parent) : LineGraphModel(parent)
 {
+    m_type = type;
     m_maxValue = 100; // good for temperatures and percentages at least
     m_normalMaxValue = 100;
 }
 
 bool Sensor::recordSample(qint64 timestamp)
 {
-    qreal val;
-
-    switch (m_type) {
-    case Sensor::SensorType::Cpu:
-        getCPULoad(val);
-        break;
-    default: // LM sensors
-        sensors_get_value(m_chip, m_subfeature->number, &val);
-        break;
-    }
+    qreal val = sample();
     if (val == 65535)
         return false;
-
     appendSample(val, timestamp);
-
     return true;
+}
+
+void Sensor::getMemoryMetric(const char *metric, qreal &val)
+{
+    QFile data("/proc/meminfo");
+    QLatin1String metricStr(metric);
+    if (data.open(QFile::ReadOnly)) {
+        QTextStream in(&data);
+        QString line;
+
+        do {
+            line = in.readLine(1024);
+        } while (!line.startsWith(metricStr));
+
+        QString afterColon = line.mid(line.indexOf(':') + 1).trimmed();
+        int spaceIdx = afterColon.indexOf(' ');
+        QString beforeUnits = afterColon.left(spaceIdx);
+        m_unit = afterColon.mid(spaceIdx + 1);
+        bool ok = false;
+        val = beforeUnits.toDouble(&ok);
+        if (!ok)
+            val = 0;
+    } else {
+        val = 0;
+    }
 }
 
 void Sensor::getCPULoad(qreal &val)
@@ -264,15 +333,41 @@ void Sensor::getCPULoad(qreal &val)
 
 qreal Sensor::sample()
 {
+    qreal valTotal;
     qreal val;
 
     switch (m_type) {
+    case Sensor::MemoryTotal:
+        getMemoryMetric("MemTotal", val);
+        break;
+    case Sensor::MemoryFree:
+        getMemoryMetric("MemFree", val);
+        break;
+    case Sensor::MemoryUsed:
+        getMemoryMetric("MemTotal", valTotal);
+        getMemoryMetric("MemFree", val);
+        val = valTotal - val;
+        break;
+    case Sensor::MemoryCache:
+        getMemoryMetric("Cached", val);
+        break;
+    case Sensor::SwapTotal:
+        getMemoryMetric("SwapTotal", val);
+        break;
+    case Sensor::SwapFree:
+        getMemoryMetric("SwapFree", val);
+        break;
+    case Sensor::SwapUsed:
+        getMemoryMetric("SwapTotal", valTotal);
+        getMemoryMetric("SwapFree", val);
+        val = valTotal - val;
+        break;
     case Sensor::SensorType::Cpu:
         getCPULoad(val);
         break;
-    default:
+    default: // LM sensors
         sensors_get_value(m_chip, m_subfeature->number, &val);
         break;
     }
-    return (qreal)val;
+    return val;
 }

@@ -9,7 +9,7 @@ LineGraph {
     timeSpan: 600
     Text {
         color: parent.color
-        text: model.label + " (" + model.chipName + ")"
+        text: model.label + (model.chipName === "" ? "" : " (" + model.chipName + ")")
         y: labelLine * font.pixelSize
         font.weight: Font.Bold
     }
