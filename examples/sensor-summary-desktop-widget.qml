@@ -1,3 +1,5 @@
+#!/bin/env qml
+
 import QtQuick 2.5
 import QtQuick.Window 2.1
 import QtGraphicalEffects 1.0
