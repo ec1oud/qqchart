@@ -1,16 +1,24 @@
 import QtQuick 2.5
 import QtQuick.Window 2.1
 import QtGraphicalEffects 1.0
+import Qt.labs.settings 1.0
 import org.ecloud.charts 1.0
 
 Window {
+    id: window
     width: 580
     height: 320
-    x: 1920 - width - 4
-    y: 4
     color: "transparent"
     flags: Qt.FramelessWindowHint | Qt.WindowStaysOnBottomHint
     visible: true
+
+    Settings {
+        category: "SensorSummaryDesktopWidget"
+        property alias x: window.x
+        property alias y: window.y
+        property alias width: window.width
+        property alias height: window.height
+    }
 
     Rectangle {
         id: content
