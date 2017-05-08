@@ -233,30 +233,22 @@ bool LmSensors::init()
             for (QString metric : dir.entryList(QStringList() << "*_now")) {
                 QString fullMetric(metric);
                 fullMetric.replace(QLatin1String("_now"), QLatin1String("_full"));
-                QFile fullFile(dir.absoluteFilePath(fullMetric));
-                if (fullFile.open(QFile::ReadOnly)) {
-                    bool ok = false;
-                    qreal fullAmount = fullFile.readAll().trimmed().toDouble(&ok) / 1000000;
-                    fullFile.close();
-                    qDebug() << powerSupply << metric << fullFile.fileName() << fullAmount;
-                    if (!ok)
-                        continue;
-
-                    // OK we're good: we have a means of reading the "now" value, and have already read the "full" value
-                    new_item = new Sensor(Sensor::Energy);
-                    new_item->m_file = new QFile(dir.absoluteFilePath(metric));
-                    new_item->m_index = m_sensors.count();
-                    new_item->setLabel(powerSupply);
-                    new_item->m_adapter = "power_supply";
-                    new_item->setMinValue(0);
-                    new_item->setMaxValue(fullAmount);
-                    new_item->setNormalMinValue(fullAmount * 0.02);
-                    new_item->setNormalMaxValue(fullAmount);
-                    new_item->m_unit = "Ah"; // guessing uAh from the size of the number... so we divided down above
-                    m_sensors.append(new_item);
-                } else {
-//                    qDebug() << fullFile.fileName() << "isn't readable";
-                }
+                qreal fullAmount = readRealFile(dir.absoluteFilePath(fullMetric)) / 1000000;
+                if (qIsNaN(fullAmount))
+                    continue;
+                // OK we're good: we have a means of reading the "now" value, and have already read the "full" value
+                new_item = new Sensor(Sensor::Energy);
+                new_item->m_file = new QFile(dir.absoluteFilePath(metric));
+                new_item->m_index = m_sensors.count();
+                new_item->setLabel(powerSupply);
+                new_item->m_adapter = "power_supply";
+                new_item->setMinValue(0);
+                new_item->setMaxValue(fullAmount);
+                new_item->setNormalMinValue(fullAmount * 0.02);
+                new_item->setNormalMaxValue(fullAmount);
+                new_item->m_unit = "Ah"; // guessing uAh from the size of the number... so we divided down above
+                new_item->m_scale = 1 / 1000000.0;
+                m_sensors.append(new_item);
             }
         } else if (powerSupply.toLower().startsWith(QLatin1String("ac"))) {
             // AC adapter
@@ -270,6 +262,40 @@ bool LmSensors::init()
             new_item->setNormalMinValue(0);
             new_item->setNormalMaxValue(1);
             new_item->m_unit = "connected";
+            m_sensors.append(new_item);
+        }
+    }
+
+    // find relevant cpufreq files
+    QStringList curFreqs = find(QDir(QLatin1String("/sys/devices/system/cpu")), QStringList() << QLatin1String("scaling_cur_freq"));
+    curFreqs.sort();
+    QRegularExpression reCpu("cpu(\\d+)");
+    for (const QString &cf : curFreqs) {
+        // prefer /sys/devices/system/cpu/cpu2/cpufreq/scaling_cur_freq over /sys/devices/system/cpu/cpufreq/policy2/scaling_cur_freq
+        if (cf.contains(QLatin1String("policy")))
+            continue;
+        QString minF(cf); minF.replace(QLatin1String("_cur"), QLatin1String("_min"));
+        QString maxF(cf); maxF.replace(QLatin1String("_cur"), QLatin1String("_max"));
+        qreal min = readRealFile(minF) / 1000; // kHz to MHz
+        qreal max = readRealFile(maxF) / 1000;
+        if (!(qIsNaN(min) || qIsNaN(max))) {
+            new_item = new Sensor(Sensor::Frequency);
+            new_item->m_file = new QFile(cf);
+            new_item->m_index = m_sensors.count();
+            {
+                QRegularExpressionMatch match = reCpu.match(cf);
+                if (match.hasMatch())
+                    new_item->setLabel(QString(QLatin1String("CPU %1")).arg(match.captured(0)));
+                else
+                    new_item->setLabel(QLatin1String("CPU"));
+            }
+            new_item->m_adapter = "CPU";
+            new_item->setMinValue(min);
+            new_item->setMaxValue(max);
+            new_item->setNormalMinValue(min);
+            new_item->setNormalMaxValue(max * 0.98);
+            new_item->m_unit = "MHz";
+            new_item->m_scale = 1 / 1000.0;
             m_sensors.append(new_item);
         }
     }
@@ -306,6 +332,33 @@ QList<QObject *> LmSensors::filtered(int t, const QString substring)
                  item->chipName().contains(substring) || item->adapter().contains(substring)))
             ret << item;
 //qDebug() << "found" << ret.count() << "of type" << type;
+    return ret;
+}
+
+qreal LmSensors::readRealFile(const QString &path)
+{
+    QFile f(path);
+    qreal val = qQNaN();
+    if (f.open(QFile::ReadOnly)) {
+        bool ok = false;
+        val = f.readAll().trimmed().toDouble(&ok);
+        f.close();
+        if (!ok)
+            val = qQNaN();
+    }
+    return val;
+}
+
+QStringList LmSensors::find(QDir dir, QStringList nameFilters)
+{
+    QDirIterator it(dir, QDirIterator::Subdirectories);
+    QStringList ret;
+    while (it.hasNext()) {
+        QDir d(it.next());
+        QStringList e = d.entryList(nameFilters);
+        for (const QString &f : e)
+            ret << d.filePath(f);
+    }
     return ret;
 }
 
@@ -435,10 +488,9 @@ qreal Sensor::sample()
         break;
     case Sensor::Connected:
     case Sensor::Energy:
+    case Sensor::Frequency:
         if (m_file && m_file->open(QFile::ReadOnly)) {
             val = m_file->readAll().trimmed().toDouble();
-            if (m_type == Sensor::Energy)
-                val /= 1000000;
             m_file->close();
         }
         break;
@@ -446,5 +498,6 @@ qreal Sensor::sample()
         sensors_get_value(m_chip, m_subfeature->number, &val);
         break;
     }
+    val *= m_scale;
     return val;
 }

@@ -29,7 +29,7 @@ class Sensor : public LineGraphModel
 public:
     enum SensorType { Unknown = 0, Cpu,
                       Memory = 0x100, MemoryFree, MemoryUsed, MemoryCache, MemoryTotal, SwapFree, SwapUsed, SwapTotal,
-                      Input = 0x200, Fan, Temperature, Power, Energy, Current, Humidity, Vid, Intrusion, Connected };
+                      Input = 0x200, Fan, Temperature, Power, Energy, Current, Humidity, Vid, Intrusion, Connected, Frequency };
     Q_ENUM(SensorType)
 
     explicit Sensor(SensorType type = Unknown, QObject *parent = 0);
@@ -56,6 +56,7 @@ private:
     const sensors_subfeature *m_subfeature = 0;
     qint64 m_totalJiffies = 0;
     qint64 m_workJiffies = 0;
+    qreal m_scale = 1;
     QString m_adapter;
     QString m_chipName;
     QString m_unit;
@@ -90,7 +91,7 @@ public:
     QQmlListProperty<Sensor> sensors();
 
     Q_INVOKABLE QList<QObject*> filtered(int type, const QString substring = QString()); // int is really Sensor::SensorType
-
+    static qreal readRealFile(const QString &path);
 
 signals:
     void sensorsChanged();
@@ -99,6 +100,7 @@ signals:
 
 protected:
     void timerEvent(QTimerEvent *) Q_DECL_OVERRIDE { sampleAllValues(); }
+    static QStringList find(QDir dir, QStringList nameFilters);
 
 private:
     bool init();
