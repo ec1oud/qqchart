@@ -9,7 +9,7 @@ import org.ecloud.charts 1.0
 Window {
     id: window
     width: 580
-    height: 320
+    height: 360
     color: "transparent"
     flags: Qt.FramelessWindowHint | Qt.WindowStaysOnBottomHint
     visible: true
@@ -30,73 +30,103 @@ Window {
         border.color: "#6e4b4d"
         antialiasing: true
         radius: 20
-        Repeater {
-            id: batteries
-            model: LmSensors.filtered(Sensor.Energy)
-            LabeledSensorGraph {
-                model: modelData
-                color: "lightgreen"
-                labelLine: index + 1
-                lineWidth: 1
-//                visible: modelData.maxSampleValue > 0
+        Item {
+            id: bottom
+            anchors.fill: parent
+            anchors.topMargin: 120
+
+            Repeater {
+                id: batteries
+                model: LmSensors.filtered(Sensor.Energy)
+                LabeledSensorGraph {
+                    model: modelData
+                    color: "lightgreen"
+                    labelLine: index + 1
+                    lineWidth: 1
+                    //visible: modelData.maxSampleValue > 0
+                }
+            }
+            Repeater {
+                id: fans
+                model: LmSensors.filtered(Sensor.Fan)
+                LabeledSensorGraph {
+                    model: modelData
+                    color: Qt.rgba(0.3 + index * 0.03, 0.2 + index * 0.17, 1, 1)
+                    labelLine: batteries.count + index + 2
+                    lineWidth: 3
+                    //visible: modelData.maxSampleValue > 0
+                }
+            }
+            Repeater {
+                model: LmSensors.filtered(Sensor.Temperature, "Core 0")
+                LabeledSensorGraph {
+                    model: modelData
+                    color: "#F85"
+                    labelLine: 0
+                    minValue: 25
+                    maxValue: 85
+                }
+            }
+            Repeater {
+                model: LmSensors.filtered(Sensor.Cpu)
+                LabeledSensorGraph {
+                    model: modelData
+                    color: "wheat"
+                    labelLine: batteries.count + 1
+                }
+            }
+            Repeater {
+                model: LmSensors.filtered(Sensor.Memory, "Memory Used")
+                LabeledSensorGraph {
+                    model: modelData
+                    color: "cyan"
+                    labelLine: batteries.count + fans.count + 2
+                    lineWidth: 2
+                }
+            }
+            Repeater {
+                model: LmSensors.filtered(Sensor.Memory, "Memory Cached")
+                LabeledSensorGraph {
+                    model: modelData
+                    color: "darkgreen"
+                    labelLine: batteries.count + fans.count + 3
+                    lineWidth: 1
+                }
+            }
+            Repeater {
+                model: LmSensors.filtered(Sensor.Memory, "Swap Free")
+                LabeledSensorGraph {
+                    model: modelData
+                    color: "midnightblue"
+                    labelLine: batteries.count + fans.count + 4
+                    lineWidth: 3
+                    visible: modelData.maxValue > 0
+                }
             }
         }
-        Repeater {
-            id: fans
-            model: LmSensors.filtered(Sensor.Fan)
-            LabeledSensorGraph {
-                model: modelData
-                color: Qt.rgba(0.3 + index * 0.03, 0.2 + index * 0.17, 1, 1)
-                labelLine: batteries.count + index + 2
-                lineWidth: 3
-                //visible: modelData.maxSampleValue > 0
+        Item {
+            anchors.bottom: bottom.top
+            anchors.bottomMargin: 4
+            anchors.top: parent.top
+            width: parent.width
+            Repeater {
+                model: LmSensors.filtered(Sensor.Frequency)
+                LabeledSensorGraph {
+                    model: modelData
+                    color: Qt.rgba(0.3 + index * 0.03, 0.2 + index * 0.17, 1, 1)
+                    labelLine: index
+                    lineWidth: 1
+                }
             }
         }
-        Repeater {
-            model: LmSensors.filtered(Sensor.Temperature, "Core 0")
-            LabeledSensorGraph {
-                model: modelData
-                color: "#F85"
-                labelLine: 0
-                minValue: 25
-                maxValue: 85
-            }
-        }
-        Repeater {
-            model: LmSensors.filtered(Sensor.Cpu)
-            LabeledSensorGraph {
-                model: modelData
-                color: "wheat"
-                labelLine: batteries.count + 1
-            }
-        }
-        Repeater {
-            model: LmSensors.filtered(Sensor.Memory, "Memory Used")
-            LabeledSensorGraph {
-                model: modelData
-                color: "cyan"
-                labelLine: batteries.count + fans.count + 2
-                lineWidth: 2
-            }
-        }
-        Repeater {
-            model: LmSensors.filtered(Sensor.Memory, "Memory Cached")
-            LabeledSensorGraph {
-                model: modelData
-                color: "darkgreen"
-                labelLine: batteries.count + fans.count + 3
-                lineWidth: 1
-            }
-        }
-        Repeater {
-            model: LmSensors.filtered(Sensor.Memory, "Swap Free")
-            LabeledSensorGraph {
-                model: modelData
-                color: "midnightblue"
-                labelLine: batteries.count + fans.count + 4
-                lineWidth: 3
-                visible: modelData.maxValue > 0
-            }
+        Rectangle {
+            anchors.bottom: bottom.top
+            anchors.bottomMargin: 2
+            anchors.margins: 8
+            anchors.left: parent.left
+            anchors.right: parent.right
+            height: 1
+            color: content.border.color
         }
     }
     DropShadow {
