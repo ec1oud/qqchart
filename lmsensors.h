@@ -100,7 +100,7 @@ signals:
 
 protected:
     void timerEvent(QTimerEvent *) Q_DECL_OVERRIDE { sampleAllValues(); }
-    static QStringList find(QDir dir, QStringList nameFilters);
+    static QStringList find(const QString &dir, const QStringList &nameFilters);
 
 private:
     bool init();

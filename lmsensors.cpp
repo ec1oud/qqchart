@@ -1,4 +1,5 @@
 #include "lmsensors.h"
+#include <QDirIterator>
 
 LmSensors::LmSensors(QObject *parent) : QObject(parent)
 {
@@ -267,12 +268,19 @@ bool LmSensors::init()
     }
 
     // find relevant cpufreq files
-    QStringList curFreqs = find(QDir(QLatin1String("/sys/devices/system/cpu")), QStringList() << QLatin1String("scaling_cur_freq"));
+    QStringList curFreqs = find(QLatin1String("/sys/devices/system/cpu"), QStringList() << QLatin1String("scaling_cur_freq"));
     curFreqs.sort();
     QRegularExpression reCpu("cpu(\\d+)");
+    bool hasPolicyFiles = false;
+    bool skipPolicyFiles = false;
+    for (const QString &cf : curFreqs)
+        if (cf.contains("policy"))
+            hasPolicyFiles = true;
+        else
+            skipPolicyFiles = true;
     for (const QString &cf : curFreqs) {
-        // prefer /sys/devices/system/cpu/cpu2/cpufreq/scaling_cur_freq over /sys/devices/system/cpu/cpufreq/policy2/scaling_cur_freq
-        if (cf.contains(QLatin1String("policy")))
+        // prefer /sys/devices/system/cpu/cpu2/cpufreq/scaling_cur_freq over /sys/devices/system/cpu/cpufreq/policy2/scaling_cur_freq, iff both exist
+        if (skipPolicyFiles && cf.contains(QLatin1String("policy")))
             continue;
         QString minF(cf); minF.replace(QLatin1String("_cur"), QLatin1String("_min"));
         QString maxF(cf); maxF.replace(QLatin1String("_cur"), QLatin1String("_max"));
@@ -349,16 +357,12 @@ qreal LmSensors::readRealFile(const QString &path)
     return val;
 }
 
-QStringList LmSensors::find(QDir dir, QStringList nameFilters)
+QStringList LmSensors::find(const QString &dir, const QStringList &nameFilters)
 {
-    QDirIterator it(dir, QDirIterator::Subdirectories);
+    QDirIterator it(dir, nameFilters, QDir::NoFilter, QDirIterator::Subdirectories);
     QStringList ret;
-    while (it.hasNext()) {
-        QDir d(it.next());
-        QStringList e = d.entryList(nameFilters);
-        for (const QString &f : e)
-            ret << d.filePath(f);
-    }
+    while (it.hasNext())
+        ret << it.next();
     return ret;
 }
 
