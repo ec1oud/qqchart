@@ -117,6 +117,7 @@ Window {
                     labelLine: index
                     lineWidth: 1
                 }
+                onItemAdded: model[index].downsampleInterval = 15
             }
         }
         Rectangle {
