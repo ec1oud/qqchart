@@ -3,12 +3,14 @@ TARGET = org/ecloud/charts/chartsplugin
 TEMPLATE = lib
 
 SOURCES += plugin.cpp \
+    influxdb.cpp \
     linegraph.cpp \
     linegraphmodel.cpp \
     linenode.cpp \
     lmsensors.cpp
 
 HEADERS += \
+    influxdb.h \
     linegraph.h \
     linegraphmodel.h \
     linenode_p.h \

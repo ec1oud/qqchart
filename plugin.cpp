@@ -5,6 +5,7 @@
 #include <QQmlExtensionPlugin>
 #include <QtQml>
 
+#include "influxdb.h"
 #include "lmsensors.h"
 #include "linegraph.h"
 
@@ -41,6 +42,9 @@ public:
         qmlRegisterType<LineGraphModel>(uri, 1, 0, "LineGraphModel");
         qmlRegisterSingletonType<LmSensors>(uri, 1, 0, "LmSensors", LmSensorsSingleton);
         qmlRegisterType<Sensor>(uri, 1, 0, "Sensor");
+        qmlRegisterType<InfluxQuery>(uri, 1, 0, "InfluxQuery");
+        qmlRegisterUncreatableType<InfluxValueSeries>(uri, 1, 0, "InfluxValueSeries", "InfluxValueSeries is only available from InfluxQuery");
+//        qmlRegisterType<InfluxValueSeries>(uri, 1, 0, "InfluxValueSeries");
     }
 };
 
