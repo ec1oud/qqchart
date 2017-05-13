@@ -159,10 +159,14 @@ void InfluxQuery::init()
     if (!whereAnds.isEmpty())
         m_queryString += QLatin1String(" WHERE ") + whereAnds.join(QLatin1String(" AND "));
 
-    // TODO only get the full range initially or when timeConstraint changes;
-    // otherwise just get incremental updates
-    if (!m_timeConstraint.isEmpty())
-        m_queryString += QLatin1String(" AND time ") + m_timeConstraint;
+    // only get the full range initially; otherwise just get incremental updates
+    if (m_lastUpdate.isNull()) {
+        if (!m_timeConstraint.isEmpty())
+            m_queryString += QLatin1String(" AND time ") + m_timeConstraint;
+    } else {
+        int secsSinceLast = m_lastUpdate.secsTo(QDateTime::currentDateTime());
+        m_queryString += QString(QLatin1String(" AND time > now() - %1s")).arg(secsSinceLast);
+    }
 
     if (m_sampleInterval)
         m_queryString += QString(QLatin1String(" GROUP BY time(%1s)")).arg(m_sampleInterval);
@@ -175,29 +179,31 @@ void InfluxQuery::init()
     m_queryUrl = m_server;
     m_queryUrl.setQuery(quq);
     qCDebug(lcInflux) << m_queryUrl;
-    m_values.clear();
-    for (const QString & field : m_fields) {
-        InfluxValueSeries *v = new InfluxValueSeries(field);
-        // TODO get the min/max from influx
-        if (field == QLatin1String("temperature")) {
-            v->setMinValue(-20);
-            v->setNormalMinValue(0);
-            v->setMaxValue(40);
-            v->setNormalMaxValue(25);
-        } else if (field == QLatin1String("pressure")) {
-            v->setMinValue(95000);
-            v->setNormalMinValue(98000);
-            v->setMaxValue(105000);
-            v->setNormalMaxValue(103000);
+    if (m_lastUpdate.isNull()) {
+        m_values.clear();
+        for (const QString & field : m_fields) {
+            InfluxValueSeries *v = new InfluxValueSeries(field);
+            // initial min/max; we'll refine it later from influx
+            if (field == QLatin1String("temperature")) {
+                v->setMinValue(-20);
+                v->setNormalMinValue(0);
+                v->setMaxValue(40);
+                v->setNormalMaxValue(25);
+            } else if (field == QLatin1String("pressure")) {
+                v->setMinValue(95000);
+                v->setNormalMinValue(98000);
+                v->setMaxValue(105000);
+                v->setNormalMaxValue(103000);
+            }
+    //        v->m_unit = "%";
+            m_values.append(v);
         }
-//        v->m_unit = "%";
-        m_values.append(v);
+        emit valuesChanged();
     }
-    emit valuesChanged();
 
     m_influxReq = QNetworkRequest(m_queryUrl);
-
-    m_initialized = true;
+    m_initialized = m_lastUpdate.isValid();
+    m_lastUpdate = QDateTime::currentDateTime();
     emit initializedChanged();
 }
 
@@ -247,9 +253,11 @@ void InfluxQuery::networkFinished()
         }
         int timeSpan = int(qAbs(first.secsTo(last)));
         qCDebug(lcInflux) << "for" << m_fields << "got" << count << "samples from" << first << "to" << last << "timespan" << timeSpan;
-        for (int i = 0; i < m_values.count(); ++i) {
-            m_values[i]->setTimeSpan(timeSpan);
-            qCDebug(lcInflux) << "value range of" << m_fields.at(i) << m_values.at(i)->minSampleValue() << m_values.at(i)->maxSampleValue();
+        if (!m_initialized) {
+            for (int i = 0; i < m_values.count(); ++i) {
+                m_values[i]->setTimeSpan(timeSpan);
+                qCDebug(lcInflux) << "value range of" << m_fields.at(i) << m_values.at(i)->minSampleValue() << m_values.at(i)->maxSampleValue();
+            }
         }
     } else {
         qCWarning(lcInflux) << err.errorString();

@@ -132,6 +132,7 @@ private:
     int m_updateIntervalMs = -1;
     int m_timerId = 0;
     QUrl m_queryUrl;
+    QDateTime m_lastUpdate;
 
     QNetworkAccessManager m_nam;
     QNetworkRequest m_influxReq;
