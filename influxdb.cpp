@@ -4,6 +4,7 @@ InfluxValueSeries::InfluxValueSeries(QString fieldName, QObject *parent)
   : LineGraphModel(parent)
 {
     setLabel(fieldName);
+    setTimeSpan(INT_MAX);
     setDownsampleMethod(NoDownsample); // influx will do that for us
 }
 
@@ -192,9 +193,12 @@ void InfluxQuery::networkFinished()
             for (int i = 0; i < m_values.count(); ++i)
                 m_values[i]->appendSample(samples.takeAt(0).toDouble(), last);
         }
-        qDebug() << "for" << m_fields << "got" << count << "samples from" << first << "to" << last;
-        for (int i = 0; i < m_values.count(); ++i)
+        int timeSpan = int(qAbs(first.secsTo(last)));
+        qDebug() << "for" << m_fields << "got" << count << "samples from" << first << "to" << last << "timespan" << timeSpan;
+        for (int i = 0; i < m_values.count(); ++i) {
+            m_values[i]->setTimeSpan(timeSpan);
             qDebug() << "value range of" << m_fields.at(i) << m_values.at(i)->minSampleValue() << m_values.at(i)->maxSampleValue();
+        }
     } else {
         qWarning() << err.errorString();
     }
