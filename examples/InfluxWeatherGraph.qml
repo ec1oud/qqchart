@@ -3,10 +3,13 @@ import org.ecloud.charts 1.0
 
 Rectangle {
     id: root
-    width: 600
-    height: 640
-    color: "black"
-    property int timespanHours : 2400
+    width: 580
+    height: 360
+    color: "transparent"
+    border.color: "#6e4b4d"
+    antialiasing: true
+    radius: 20
+    property int timespanHours : 240
     InfluxQuery {
         id: query
         server: "http://localhost:8086"
@@ -15,21 +18,22 @@ Rectangle {
         fields: ["temperature", "pressure"]
         wherePairs: [{"stationId": "41000008"}]
         timeConstraint: "> now() - " + root.timespanHours + "h"
-        updateIntervalMs: 600000
+        updateIntervalMs: sampleInterval * 1000
         sampleInterval: timespanHours * 3600 / root.width * 2
         Component.onCompleted: sampleAllValues()
     }
     ListView {
         id: list
         anchors.fill: parent
-        anchors.margins: 6
+        anchors.margins: 8
         model: query.values
+        spacing: 4
+        clip: true
 
-        delegate: Rectangle {
-            width: parent.width
-            height: 75
-            border.color: "#111"
-            color: "transparent"
+        delegate: Item {
+            width: list.width
+            property int visibleRows: Math.min(4, list.model.length)
+            height: (list.height - 4 * (visibleRows - 1)) / visibleRows
             LineGraph {
                 id: graph
                 model: modelData
@@ -49,10 +53,11 @@ Rectangle {
                 onSamplesChanged: model.autoScale()
             }
             Text {
-                text: label + "\nscale " + Math.round(graph.timeSpan / parent.width / 60) + " min / px;" +
-                      " min " + minSampleValue.toFixed(2) + " max " + maxSampleValue.toFixed(2) +
-                      " norm " + normalMinValue.toFixed(2) + ".." + normalMaxValue.toFixed(2)
-                color: "grey"
+                text: label + ": last " + (root.timespanHours > 24 ?
+                                               (root.timespanHours / 24) + " days" :
+                                               root.timespanHours + " hours")
+                font.bold: true
+                color: "black"
             }
             Text {
                 anchors {
@@ -61,7 +66,7 @@ Rectangle {
                 }
                 horizontalAlignment: Text.Right
                 text: maxValue
-                color: "grey"
+                color: "black"
             }
             Text {
                 anchors {
@@ -70,7 +75,7 @@ Rectangle {
                 }
                 horizontalAlignment: Text.Right
                 text: minValue
-                color: "grey"
+                color: "black"
             }
         }
     }
