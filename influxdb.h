@@ -16,11 +16,28 @@
 class InfluxValueSeries : public LineGraphModel
 {
     Q_OBJECT
+    Q_PROPERTY(qreal additiveCorrection READ additiveCorrection WRITE setAdditiveCorrection NOTIFY additiveCorrectionChanged)
+    Q_PROPERTY(qreal multiplicativeCorrection READ multiplicativeCorrection WRITE setMultiplicativeCorrection NOTIFY multiplicativeCorrectionChanged)
 
 public:
     explicit InfluxValueSeries(QString fieldName, QObject *parent = 0);
 
+    qreal additiveCorrection() const { return m_additiveCorrection; }
+    void setAdditiveCorrection(qreal additiveCorrection);
+
+    qreal multiplicativeCorrection() const { return m_multiplicativeCorrection; }
+    void setMultiplicativeCorrection(qreal multiplicativeCorrection);
+
+signals:
+    void additiveCorrectionChanged();
+    void multiplicativeCorrectionChanged();
+
+protected:
+    virtual void finagle(qreal &time, qreal &value);
+
 private:
+    qreal m_additiveCorrection = 0;
+    qreal m_multiplicativeCorrection = 1;
 };
 
 

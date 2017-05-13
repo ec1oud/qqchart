@@ -35,9 +35,17 @@ Rectangle {
                 model: modelData
                 anchors.fill: parent
                 timeSpan: root.timespanHours * 3600
+                property bool isTemperature: label === "temperature"
+                color: isTemperature ? "green" : "yellow"
+                warningMinColor: isTemperature ? "cyan" : "orange"
+                warningMaxColor: "orange"
+                Component.onCompleted: {
+                    if (isTemperature)
+                        model.additiveCorrection = -11 // known-inaccurate sensor
+                }
             }
             Text {
-                text: label + "\nscale " + parent.width / parent.timeSpan +
+                text: label + "\nscale " + Math.round(graph.timeSpan / parent.width / 60) + " min / px;" +
                       " min " + minSampleValue.toFixed(2) + " max " + maxSampleValue.toFixed(2) +
                       " norm " + normalMinValue.toFixed(2) + ".." + normalMaxValue.toFixed(2)
                 color: "grey"

@@ -197,6 +197,7 @@ void LineGraphModel::appendVertices(qreal time, qreal value)
         value = m_minValue;
     if (value > m_maxValue)
         value = m_maxValue;
+    finagle(time, value);
     if (value > m_maxSampleValue) {
         m_maxSampleValue = value;
         emit maxSampleValueChanged();
@@ -235,6 +236,7 @@ void LineGraphModel::appendVertices(qreal time, qreal value)
 void LineGraphModel::modifyEndVertices(qreal time, qreal value, int fromLast)
 {
 //    qDebug() << m_label << time << value << "already have samples:" << m_vertices.size();
+    finagle(time, value);
     int i = (m_vertices.length() / LineNode::verticesPerSample - fromLast - 1) * LineNode::verticesPerSample;
     Q_ASSERT(i >= 0);
     qreal tp = time - 0.01;

@@ -8,6 +8,30 @@ InfluxValueSeries::InfluxValueSeries(QString fieldName, QObject *parent)
     setDownsampleMethod(NoDownsample); // influx will do that for us
 }
 
+void InfluxValueSeries::setAdditiveCorrection(qreal additiveCorrection)
+{
+    if (m_additiveCorrection == additiveCorrection)
+        return;
+
+    m_additiveCorrection = additiveCorrection;
+    emit additiveCorrectionChanged();
+}
+
+void InfluxValueSeries::setMultiplicativeCorrection(qreal multiplicativeCorrection)
+{
+    if (m_multiplicativeCorrection == multiplicativeCorrection)
+        return;
+
+    m_multiplicativeCorrection = multiplicativeCorrection;
+    emit multiplicativeCorrectionChanged();
+}
+
+void InfluxValueSeries::finagle(qreal &time, qreal &value)
+{
+    Q_UNUSED(time);
+    value = value * m_multiplicativeCorrection + m_additiveCorrection;
+}
+
 void appendItems(QQmlListProperty<InfluxValueSeries> *property, InfluxValueSeries *item)
 {
     Q_UNUSED(property);

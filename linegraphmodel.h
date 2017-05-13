@@ -90,6 +90,7 @@ protected:
     double triangleArea(const LineGraphModel::TimeValue &a, const LineGraphModel::TimeValue &b, const LineGraphModel::TimeValue &c);
     LineGraphModel::TimeValue largestTriangle(const TimeValue &previous, const QVector<TimeValue> &current, const TimeValue &next);
     LineGraphModel::TimeValue average(const QVector<TimeValue> &tvv);
+    virtual void finagle(qreal &time, qreal &value) { Q_UNUSED(time); Q_UNUSED(value); }
 
 protected:
     QVector<TimeValue> m_currentBucket;
