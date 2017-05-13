@@ -14,6 +14,7 @@ class LineGraphModel : public QObject
     Q_PROPERTY(qreal currentValue READ currentValue NOTIFY samplesChanged)
     Q_PROPERTY(qreal minValue READ minValue WRITE setMinValue NOTIFY minValueChanged)
     Q_PROPERTY(qreal maxValue READ maxValue WRITE setMaxValue NOTIFY maxValueChanged)
+    Q_PROPERTY(bool clipValues READ clipValues WRITE setClipValues NOTIFY clipValuesChanged)
     Q_PROPERTY(qreal normalMinValue READ normalMinValue WRITE setNormalMinValue NOTIFY normalMinValueChanged)
     Q_PROPERTY(qreal normalMaxValue READ normalMaxValue WRITE setNormalMaxValue NOTIFY normalMaxValueChanged)
     Q_PROPERTY(qreal minSampleValue READ minSampleValue NOTIFY minSampleValueChanged)
@@ -42,6 +43,9 @@ public:
     qreal maxValue() const { return m_maxValue; }
     void setMaxValue(qreal maxValue);
 
+    bool clipValues() const { return m_clipValues; }
+    void setClipValues(bool clipValues);
+
     qreal minSampleValue() const { return m_minSampleValue; }
     qreal maxSampleValue() const { return m_maxSampleValue; }
 
@@ -51,12 +55,15 @@ public:
     Q_INVOKABLE int sampleIndexNearest(qint64 time);
     Q_INVOKABLE qint64 sampleTimeNearest(qint64 time);
     Q_INVOKABLE qreal sampleNearest(qint64 time);
+    Q_INVOKABLE void autoScale();
 
     qreal normalMinValue() const { return m_normalMinValue; }
     void setNormalMinValue(qreal normalMinValue);
 
     qreal normalMaxValue() const { return m_normalMaxValue; }
     void setNormalMaxValue(qreal normalMaxValue);
+
+    static qreal niceNum(qreal range, bool round);
 
 signals:
     void timeSpanChanged();
@@ -70,6 +77,7 @@ signals:
     void normalMinValueChanged();
     void normalMaxValueChanged();
     void labelChanged();
+    void clipValuesChanged();
 
 public slots:
     void appendSample(qreal value, qint64 timestamp = QDateTime::currentMSecsSinceEpoch());
@@ -98,6 +106,8 @@ protected:
     QVector<LineNode::LineVertex> m_vertices;
     int m_timeSpan = 1000; // in seconds
     DownsampleMethod m_downsampleMethod = LargestTriangleThreeBuckets;
+    bool m_clipValues = true;
+    int m_maxTicks = 10; // TODO adjust based on view size
     qreal m_downsampleBucketInterval = 0; // time in seconds: duration of one bucket
     qreal m_minValue = 0;
     qreal m_maxValue = 1;

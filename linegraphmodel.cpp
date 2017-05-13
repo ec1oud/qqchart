@@ -1,4 +1,5 @@
 #include "linegraphmodel.h"
+#include <cmath>
 
 LineGraphModel::LineGraphModel(QObject *parent) : QObject(parent)
 {
@@ -105,6 +106,57 @@ qreal LineGraphModel::sampleNearest(qint64 time)
     return qQNaN();
 }
 
+/**
+* Returns a "nice" number approximately equal to range
+  Rounds the number if round = true Takes the ceiling if round = false.
+
+  From http://stackoverflow.com/questions/8506881/nice-label-algorithm-for-charts-with-minimum-ticks
+*
+* @param range the data range
+* @param round whether to round the result
+* @return a "nice" number to be used for the data range
+*/
+qreal LineGraphModel::niceNum(qreal range, bool round)
+{
+    qreal exponent; /** exponent of range */
+    qreal fraction; /** fractional part of range */
+    qreal niceFraction; /** nice, rounded fraction */
+
+    exponent = floor(log10(range));
+    fraction = range / pow(10.f, exponent);
+
+    if (round) {
+        if (fraction < 1.5)
+            niceFraction = 1;
+        else if (fraction < 3)
+            niceFraction = 2;
+        else if (fraction < 7)
+            niceFraction = 5;
+        else
+            niceFraction = 10;
+    } else {
+        if (fraction <= 1)
+            niceFraction = 1;
+        else if (fraction <= 2)
+            niceFraction = 2;
+        else if (fraction <= 5)
+            niceFraction = 5;
+        else
+            niceFraction = 10;
+    }
+
+    return niceFraction * pow(10, exponent);
+}
+
+void LineGraphModel::autoScale()
+{
+    qreal range = niceNum(m_maxSampleValue - m_minSampleValue, false);
+    qreal tickSpacing = niceNum(range / (m_maxTicks - 1), true);
+    setMinValue(floor(m_minSampleValue / tickSpacing) * tickSpacing);
+    setMaxValue(ceil(m_maxSampleValue / tickSpacing) * tickSpacing);
+qDebug() << Q_FUNC_INFO << m_minSampleValue << "," << m_maxSampleValue << "tickSpacing" << tickSpacing << "->" << minValue() << "," << maxValue();
+}
+
 void LineGraphModel::setNormalMinValue(qreal normalMinValue)
 {
     if (m_normalMinValue == normalMinValue)
@@ -185,6 +237,15 @@ void LineGraphModel::setMaxValue(qreal maxValue)
     emit maxValueChanged();
 }
 
+void LineGraphModel::setClipValues(bool clipValues)
+{
+    if (m_clipValues == clipValues)
+        return;
+
+    m_clipValues = clipValues;
+    emit clipValuesChanged();
+}
+
 const QVector<LineNode::LineVertex> *LineGraphModel::vertices()
 {
     return &m_vertices;
@@ -193,10 +254,12 @@ const QVector<LineNode::LineVertex> *LineGraphModel::vertices()
 void LineGraphModel::appendVertices(qreal time, qreal value)
 {
 //    qDebug() << m_label << time << value << "already have samples:" << m_vertices.size();
-    if (value < m_minValue)
-        value = m_minValue;
-    if (value > m_maxValue)
-        value = m_maxValue;
+    if (m_clipValues) {
+        if (value < m_minValue)
+            value = m_minValue;
+        if (value > m_maxValue)
+            value = m_maxValue;
+    }
     finagle(time, value);
     if (value > m_maxSampleValue) {
         m_maxSampleValue = value;

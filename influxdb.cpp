@@ -180,7 +180,7 @@ qDebug() << m_queryUrl;
             v->setMinValue(-20);
             v->setNormalMinValue(0);
             v->setMaxValue(40);
-            v->setNormalMaxValue(40);
+            v->setNormalMaxValue(25);
         } else if (field == QLatin1String("pressure")) {
             v->setMinValue(95000);
             v->setNormalMinValue(98000);

@@ -6,7 +6,7 @@ Rectangle {
     width: 600
     height: 640
     color: "black"
-    property int timespanHours : 240
+    property int timespanHours : 2400
     InfluxQuery {
         id: query
         server: "http://localhost:8086"
@@ -37,12 +37,16 @@ Rectangle {
                 timeSpan: root.timespanHours * 3600
                 property bool isTemperature: label === "temperature"
                 color: isTemperature ? "green" : "yellow"
+                minValue: model.minValue // continuously, along with autoScale
+                maxValue: model.maxValue
                 warningMinColor: isTemperature ? "cyan" : "orange"
                 warningMaxColor: "orange"
                 Component.onCompleted: {
+                    model.clipValues = false // because we will auto-scale
                     if (isTemperature)
                         model.additiveCorrection = -11 // known-inaccurate sensor
                 }
+                onSamplesChanged: model.autoScale()
             }
             Text {
                 text: label + "\nscale " + Math.round(graph.timeSpan / parent.width / 60) + " min / px;" +
