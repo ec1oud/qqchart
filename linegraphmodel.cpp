@@ -193,6 +193,10 @@ const QVector<LineNode::LineVertex> *LineGraphModel::vertices()
 void LineGraphModel::appendVertices(qreal time, qreal value)
 {
 //    qDebug() << m_label << time << value << "already have samples:" << m_vertices.size();
+    if (value < m_minValue)
+        value = m_minValue;
+    if (value > m_maxValue)
+        value = m_maxValue;
     if (value > m_maxSampleValue) {
         m_maxSampleValue = value;
         emit maxSampleValueChanged();

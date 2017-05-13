@@ -153,15 +153,15 @@ qDebug() << m_queryUrl;
         InfluxValueSeries *v = new InfluxValueSeries(field);
         // TODO get the min/max from influx
         if (field == QLatin1String("temperature")) {
-            v->setMinValue(0);
+            v->setMinValue(-20);
             v->setNormalMinValue(0);
             v->setMaxValue(40);
             v->setNormalMaxValue(40);
         } else if (field == QLatin1String("pressure")) {
             v->setMinValue(95000);
-            v->setNormalMinValue(95000);
+            v->setNormalMinValue(98000);
             v->setMaxValue(105000);
-            v->setNormalMaxValue(105000);
+            v->setNormalMaxValue(103000);
         }
 //        v->m_unit = "%";
         m_values.append(v);
@@ -212,9 +212,11 @@ void InfluxQuery::networkFinished()
             if (first.isNull())
                 first = last;
             ++count;
-//            qDebug() << timestamp.toString() << samples;
-            for (int i = 0; i < m_values.count(); ++i)
-                m_values[i]->appendSample(samples.takeAt(0).toDouble(), last);
+//            qDebug() << last.toString() << samples;
+            for (int i = 0; i < m_values.count(); ++i) {
+                qreal val = samples.takeAt(0).toDouble(qQNaN());
+                m_values[i]->appendSample(val, last);
+            }
         }
         int timeSpan = int(qAbs(first.secsTo(last)));
         qDebug() << "for" << m_fields << "got" << count << "samples from" << first << "to" << last << "timespan" << timeSpan;
