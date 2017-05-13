@@ -1,4 +1,4 @@
-QT       += qml quick
+QT       += qml quick network
 TARGET = org/ecloud/charts/chartsplugin
 TEMPLATE = lib
 

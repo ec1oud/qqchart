@@ -1,5 +1,12 @@
 #include "influxdb.h"
 
+InfluxValueSeries::InfluxValueSeries(QString fieldName, QObject *parent)
+  : LineGraphModel(parent)
+{
+    setLabel(fieldName);
+    setDownsampleMethod(NoDownsample); // influx will do that for us
+}
+
 void appendItems(QQmlListProperty<InfluxValueSeries> *property, InfluxValueSeries *item)
 {
     Q_UNUSED(property);
@@ -103,6 +110,10 @@ void InfluxQuery::init()
     }
     if (!whereAnds.isEmpty())
         m_queryString += QLatin1String(" WHERE ") + whereAnds.join(QLatin1String(" AND "));
+
+    // TODO only get the full range initially or when timeConstraint changes;
+    // otherwise just get incremental updates
+    // TODO get influx to do the decimation for us
     if (!m_timeConstraint.isEmpty())
         m_queryString += QLatin1String(" AND time ") + m_timeConstraint;
 qDebug() << m_queryString;
@@ -116,12 +127,25 @@ qDebug() << m_queryUrl;
     m_values.clear();
     for (const QString & field : m_fields) {
         InfluxValueSeries *v = new InfluxValueSeries(field);
-        v->setMinValue(0);
-        v->setMaxValue(100);
+        // TODO get the min/max from influx
+        if (field == QLatin1String("temperature")) {
+            v->setMinValue(0);
+            v->setNormalMinValue(0);
+            v->setMaxValue(40);
+            v->setNormalMaxValue(40);
+        } else if (field == QLatin1String("pressure")) {
+            v->setMinValue(95000);
+            v->setNormalMinValue(95000);
+            v->setMaxValue(105000);
+            v->setNormalMaxValue(105000);
+        }
 //        v->m_unit = "%";
         m_values.append(v);
     }
     emit valuesChanged();
+
+    m_influxReq = QNetworkRequest(m_queryUrl);
+
     m_initialized = true;
     emit initializedChanged();
 }
@@ -130,12 +154,51 @@ bool InfluxQuery::sampleAllValues()
 {
     if (!m_initialized)
         init();
-    // TODO
+
+    m_netReply = m_nam.get(m_influxReq);
+    connect(m_netReply, &QNetworkReply::finished, this, &InfluxQuery::networkFinished);
+    connect(m_netReply, SIGNAL(error(QNetworkReply::NetworkError)),
+            this, SLOT(networkError(QNetworkReply::NetworkError)));
+
     return true;
 }
 
-InfluxValueSeries::InfluxValueSeries(QString fieldName, QObject *parent)
-  : LineGraphModel(parent)
+void InfluxQuery::networkError(QNetworkReply::NetworkError e)
 {
-    setLabel(fieldName);
+    qDebug() << e;
+    m_netReply->disconnect();
+    m_netReply->deleteLater();
+    m_netReply = nullptr;
+}
+
+void InfluxQuery::networkFinished()
+{
+    QJsonParseError err;
+    QJsonDocument jdoc = QJsonDocument::fromJson(m_netReply->readAll(), &err);
+    if (err.error == QJsonParseError::NoError) {
+//        qDebug() << jdoc.object().value(QLatin1String("results")).toArray();
+        QJsonObject o = jdoc.object().value(QLatin1String("results")).toArray().first().toObject();
+        QJsonArray arr = o.value("series").toArray().first().toObject().value("values").toArray();
+        QDateTime first;
+        QDateTime last;
+        int count = 0;
+        for (auto o : arr) {
+            QJsonArray samples = o.toArray();
+            last = QDateTime::fromString(samples.takeAt(0).toString(), Qt::ISODateWithMs);
+            if (first.isNull())
+                first = last;
+            ++count;
+//            qDebug() << timestamp.toString() << samples;
+            for (int i = 0; i < m_values.count(); ++i)
+                m_values[i]->appendSample(samples.takeAt(0).toDouble(), last);
+        }
+        qDebug() << "for" << m_fields << "got" << count << "samples from" << first << "to" << last;
+        for (int i = 0; i < m_values.count(); ++i)
+            qDebug() << "value range of" << m_fields.at(i) << m_values.at(i)->minSampleValue() << m_values.at(i)->maxSampleValue();
+    } else {
+        qWarning() << err.errorString();
+    }
+    m_netReply->disconnect();
+    m_netReply->deleteLater();
+    m_netReply = nullptr;
 }

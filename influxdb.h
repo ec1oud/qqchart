@@ -25,7 +25,6 @@ private:
 
 
 // curl -GET 'http://localhost:8086/query' --data-urlencode "db=weather" --data-urlencode "q=SELECT temperature,pressure FROM \"uradmonitor\" WHERE "stationId" = '41000008' AND time > now() - 10h"
-// SELECT temperature,pressure FROM \"uradmonitor\" WHERE "stationId" = '41000008' AND time > now() - 10h"
 
 class InfluxQuery : public QObject
 {
@@ -89,7 +88,10 @@ signals:
 
 protected:
     void timerEvent(QTimerEvent *) Q_DECL_OVERRIDE { sampleAllValues(); }
-    static QStringList find(QDir dir, QStringList nameFilters);
+
+protected slots:
+    void networkError(QNetworkReply::NetworkError e);
+    void networkFinished();
 
 private:
     void init();
@@ -108,6 +110,10 @@ private:
     int m_updateIntervalMs = -1;
     int m_timerId = 0;
     QUrl m_queryUrl;
+
+    QNetworkAccessManager m_nam;
+    QNetworkRequest m_influxReq;
+    QNetworkReply *m_netReply = nullptr;
 };
 
 #endif // INFLUXDB_H

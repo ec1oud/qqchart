@@ -2,9 +2,11 @@ import QtQuick 2.5
 import org.ecloud.charts 1.0
 
 Rectangle {
+    id: root
     width: 600
     height: 640
     color: "black"
+    property int timespanHours : 8
     InfluxQuery {
         id: query
         server: "http://localhost:8086"
@@ -12,8 +14,9 @@ Rectangle {
         measurement: "uradmonitor"
         fields: ["temperature", "pressure"]
         wherePairs: [{"stationId": "41000008"}]
-        timeConstraint: "> now() - 10h"
-        updateIntervalMs: 500
+        timeConstraint: "> now() - " + root.timespanHours + "h"
+        updateIntervalMs: 600000
+        Component.onCompleted: sampleAllValues()
     }
     ListView {
         id: list
@@ -30,7 +33,7 @@ Rectangle {
                 id: graph
                 model: modelData
                 anchors.fill: parent
-                timeSpan: width
+                timeSpan: root.timespanHours * 3600
             }
             Text {
                 text: label + "\nscale " + parent.width / parent.timeSpan +
