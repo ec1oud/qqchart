@@ -1,5 +1,9 @@
 #include "influxdb.h"
 
+#include <QLoggingCategory>
+
+Q_LOGGING_CATEGORY(lcInflux, "org.ecloud.charts.model.influxdb")
+
 InfluxValueSeries::InfluxValueSeries(QString fieldName, QObject *parent)
   : LineGraphModel(parent)
 {
@@ -94,7 +98,6 @@ void InfluxQuery::setFields(QStringList fields)
 
 void InfluxQuery::setWherePairs(QJsonArray wherePairs)
 {
-//qDebug() << wherePairs;
     m_initialized = false;
     m_wherePairs = wherePairs;
     emit wherePairsChanged();
@@ -164,14 +167,14 @@ void InfluxQuery::init()
     if (m_sampleInterval)
         m_queryString += QString(QLatin1String(" GROUP BY time(%1s)")).arg(m_sampleInterval);
 
-qDebug() << m_queryString;
+    qCDebug(lcInflux) << m_queryString;
 
     QUrlQuery quq;
     quq.addQueryItem(QLatin1String("db"), m_database);
     quq.addQueryItem(QLatin1String("q"), m_queryString);
     m_queryUrl = m_server;
     m_queryUrl.setQuery(quq);
-qDebug() << m_queryUrl;
+    qCDebug(lcInflux) << m_queryUrl;
     m_values.clear();
     for (const QString & field : m_fields) {
         InfluxValueSeries *v = new InfluxValueSeries(field);
@@ -213,7 +216,7 @@ bool InfluxQuery::sampleAllValues()
 
 void InfluxQuery::networkError(QNetworkReply::NetworkError e)
 {
-    qDebug() << e;
+    qCWarning(lcInflux) << e;
     m_netReply->disconnect();
     m_netReply->deleteLater();
     m_netReply = nullptr;
@@ -243,13 +246,13 @@ void InfluxQuery::networkFinished()
             }
         }
         int timeSpan = int(qAbs(first.secsTo(last)));
-        qDebug() << "for" << m_fields << "got" << count << "samples from" << first << "to" << last << "timespan" << timeSpan;
+        qCDebug(lcInflux) << "for" << m_fields << "got" << count << "samples from" << first << "to" << last << "timespan" << timeSpan;
         for (int i = 0; i < m_values.count(); ++i) {
             m_values[i]->setTimeSpan(timeSpan);
-            qDebug() << "value range of" << m_fields.at(i) << m_values.at(i)->minSampleValue() << m_values.at(i)->maxSampleValue();
+            qCDebug(lcInflux) << "value range of" << m_fields.at(i) << m_values.at(i)->minSampleValue() << m_values.at(i)->maxSampleValue();
         }
     } else {
-        qWarning() << err.errorString();
+        qCWarning(lcInflux) << err.errorString();
     }
     m_netReply->disconnect();
     m_netReply->deleteLater();

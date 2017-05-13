@@ -1,5 +1,8 @@
 #include "linegraphmodel.h"
 #include <cmath>
+#include <QLoggingCategory>
+
+Q_LOGGING_CATEGORY(lcLineGraphModel, "org.ecloud.charts.model")
 
 LineGraphModel::LineGraphModel(QObject *parent) : QObject(parent)
 {
@@ -74,7 +77,7 @@ void LineGraphModel::appendSample(qreal value, qint64 timestamp)
             modify = false;
         }
         m_currentBucket.append(tv);
-//        qDebug() << "buckets" << m_previousBucket.count() << m_currentBucket.count();
+        qCDebug(lcLineGraphModel) << "buckets" << m_previousBucket.count() << m_currentBucket.count();
     } else {
         modify = false;
     }
@@ -154,7 +157,8 @@ void LineGraphModel::autoScale()
     qreal tickSpacing = niceNum(range / (m_maxTicks - 1), true);
     setMinValue(floor(m_minSampleValue / tickSpacing) * tickSpacing);
     setMaxValue(ceil(m_maxSampleValue / tickSpacing) * tickSpacing);
-qDebug() << Q_FUNC_INFO << m_minSampleValue << "," << m_maxSampleValue << "tickSpacing" << tickSpacing << "->" << minValue() << "," << maxValue();
+    qCDebug(lcLineGraphModel) << Q_FUNC_INFO << m_minSampleValue << m_maxSampleValue
+                              << "tickSpacing" << tickSpacing << "autoscaled:" << minValue() << maxValue();
 }
 
 void LineGraphModel::setNormalMinValue(qreal normalMinValue)
