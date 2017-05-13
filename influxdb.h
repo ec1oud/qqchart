@@ -37,6 +37,7 @@ class InfluxQuery : public QObject
     Q_PROPERTY(QJsonArray wherePairs READ wherePairs WRITE setWherePairs NOTIFY wherePairsChanged)
     Q_PROPERTY(QString timeConstraint READ timeConstraint WRITE setTimeConstraint NOTIFY timeConstraintChanged) // e.g. "> now() - 12h"
     Q_PROPERTY(int updateIntervalMs READ updateIntervalMs WRITE setUpdateIntervalMs NOTIFY updateIntervalMsChanged)
+    Q_PROPERTY(int sampleInterval READ sampleInterval WRITE setSampleInterval NOTIFY sampleIntervalChanged) // seconds between graphed samples
 
     // output
     Q_PROPERTY(bool initialized READ initialized NOTIFY initializedChanged)
@@ -74,6 +75,9 @@ public:
     QString timeConstraint() const { return m_timeConstraint; }
     void setTimeConstraint(QString timeConstraint);
 
+    int sampleInterval() const { return m_sampleInterval; }
+    void setSampleInterval(int sampleInterval);
+
 signals:
     void valuesChanged();
     void initializedChanged();
@@ -85,6 +89,7 @@ signals:
     void fieldsChanged();
     void wherePairsChanged();    
     void timeConstraintChanged();
+    void sampleIntervalChanged();
 
 protected:
     void timerEvent(QTimerEvent *) Q_DECL_OVERRIDE { sampleAllValues(); }
@@ -114,6 +119,7 @@ private:
     QNetworkAccessManager m_nam;
     QNetworkRequest m_influxReq;
     QNetworkReply *m_netReply = nullptr;
+    int m_sampleInterval = 0;
 };
 
 #endif // INFLUXDB_H

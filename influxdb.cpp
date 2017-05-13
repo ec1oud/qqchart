@@ -86,6 +86,15 @@ void InfluxQuery::setTimeConstraint(QString timeConstraint)
     emit timeConstraintChanged();
 }
 
+void InfluxQuery::setSampleInterval(int sampleInterval)
+{
+    if (m_sampleInterval == sampleInterval)
+        return;
+
+    m_sampleInterval = sampleInterval;
+    emit sampleIntervalChanged();
+}
+
 void InfluxQuery::setUpdateIntervalMs(int updateIntervalMs)
 {
     if (m_updateIntervalMs == updateIntervalMs)
@@ -101,8 +110,19 @@ void InfluxQuery::setUpdateIntervalMs(int updateIntervalMs)
 void InfluxQuery::init()
 {
     // SELECT temperature,pressure FROM \"uradmonitor\" WHERE "stationId" = '41000008' AND time > now() - 10h"
-    m_queryString = QLatin1String("SELECT ") + m_fields.join(QLatin1Char(',')) +
-        QLatin1String(" FROM ") + m_measurement;
+    // or
+    // SELECT mean(temperature),mean(pressure) FROM uradmonitor WHERE "stationId" = '41000008' AND time > now() - 240h GROUP BY time(10m)
+    m_queryString = QLatin1String("SELECT ");
+    int i = 0;
+    for (auto f : m_fields) {
+        if (i++)
+            m_queryString += QLatin1Char(',');
+        if (m_sampleInterval)
+            m_queryString += QString(QLatin1String("mean(%1)")).arg(f);
+        else
+            m_queryString += f;
+    }
+    m_queryString += QLatin1String(" FROM ") + m_measurement;
     QStringList whereAnds;
     for (const QJsonValue &wpair : m_wherePairs) {
         const QJsonObject o = wpair.toObject();
@@ -114,9 +134,12 @@ void InfluxQuery::init()
 
     // TODO only get the full range initially or when timeConstraint changes;
     // otherwise just get incremental updates
-    // TODO get influx to do the decimation for us
     if (!m_timeConstraint.isEmpty())
         m_queryString += QLatin1String(" AND time ") + m_timeConstraint;
+
+    if (m_sampleInterval)
+        m_queryString += QString(QLatin1String(" GROUP BY time(%1s)")).arg(m_sampleInterval);
+
 qDebug() << m_queryString;
 
     QUrlQuery quq;

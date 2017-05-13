@@ -6,7 +6,7 @@ Rectangle {
     width: 600
     height: 640
     color: "black"
-    property int timespanHours : 8
+    property int timespanHours : 240
     InfluxQuery {
         id: query
         server: "http://localhost:8086"
@@ -16,6 +16,7 @@ Rectangle {
         wherePairs: [{"stationId": "41000008"}]
         timeConstraint: "> now() - " + root.timespanHours + "h"
         updateIntervalMs: 600000
+        sampleInterval: timespanHours * 3600 / root.width * 2
         Component.onCompleted: sampleAllValues()
     }
     ListView {
