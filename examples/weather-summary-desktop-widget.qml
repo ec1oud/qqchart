@@ -25,12 +25,13 @@ Window {
         spacing: 8
         anchors.fill: parent
         InfluxWeatherGraph {
-           timespanHours: 720 // a month
-           height: (window.height - column.spacing) / 2
-        }
-        InfluxWeatherGraph {
             timespanHours: 72
             height: (window.height - column.spacing) / 2
+            currentVisible: true
+        }
+        InfluxWeatherGraph {
+           timespanHours: 720 // a month
+           height: (window.height - column.spacing) / 2
         }
     }
 }

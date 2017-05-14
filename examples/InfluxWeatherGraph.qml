@@ -10,6 +10,7 @@ Rectangle {
     antialiasing: true
     radius: 20
     property int timespanHours : 240
+    property bool currentVisible: false
     InfluxQuery {
         id: query
         server: "http://localhost:8086"
@@ -33,18 +34,30 @@ Rectangle {
         delegate: Item {
             width: list.width
             property int visibleRows: Math.min(4, list.model.length)
+            property bool isTemperature: label === "temperature"
             height: (list.height - 4 * (visibleRows - 1)) / visibleRows
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.right: parent.right
+                color: "darkgrey"
+                styleColor: "black"
+                style: Text.Outline
+                font.pointSize: 24
+                font.bold: true
+                text: model.currentValue.toFixed(isTemperature ? 2 : 0) + model.unit
+                visible: currentVisible
+            }
             LineGraph {
                 id: graph
                 model: modelData
                 anchors.fill: parent
                 timeSpan: root.timespanHours * 3600
-                property bool isTemperature: label === "temperature"
                 color: isTemperature ? "green" : "yellow"
                 minValue: model.minValue // continuously, along with autoScale
                 maxValue: model.maxValue
                 warningMinColor: isTemperature ? "cyan" : "orange"
                 warningMaxColor: "orange"
+                lineWidth: isTemperature ? 2 : 1
                 Component.onCompleted: {
                     model.clipValues = false // because we will auto-scale
                     if (isTemperature)
