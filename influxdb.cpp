@@ -189,13 +189,14 @@ void InfluxQuery::init()
                 v->setNormalMinValue(0);
                 v->setMaxValue(40);
                 v->setNormalMaxValue(25);
+                v->setUnit(QString::fromUtf8("°C"));
             } else if (field == QLatin1String("pressure")) {
                 v->setMinValue(95000);
                 v->setNormalMinValue(98000);
                 v->setMaxValue(105000);
                 v->setNormalMaxValue(103000);
+                v->setUnit(QLatin1String("Pa"));
             }
-    //        v->m_unit = "%";
             m_values.append(v);
         }
         emit valuesChanged();

@@ -20,6 +20,7 @@ class LineGraphModel : public QObject
     Q_PROPERTY(qreal minSampleValue READ minSampleValue NOTIFY minSampleValueChanged)
     Q_PROPERTY(qreal maxSampleValue READ maxSampleValue NOTIFY maxSampleValueChanged)
     Q_PROPERTY(QString label READ label WRITE setLabel NOTIFY labelChanged)
+    Q_PROPERTY(QString unit READ unit WRITE setUnit NOTIFY unitChanged)
 
 public:
     enum DownsampleMethod { NoDownsample = 0, LargestTriangleThreeBuckets };
@@ -52,6 +53,9 @@ public:
     QString label() const { return m_label; }
     void setLabel(QString label);
 
+    QString unit() { return m_unit; }
+    void setUnit(QString unit);
+
     Q_INVOKABLE int sampleIndexNearest(qint64 time);
     Q_INVOKABLE qint64 sampleTimeNearest(qint64 time);
     Q_INVOKABLE qreal sampleNearest(qint64 time);
@@ -77,6 +81,7 @@ signals:
     void normalMinValueChanged();
     void normalMaxValueChanged();
     void labelChanged();
+    void unitChanged();
     void clipValuesChanged();
 
 public slots:
@@ -117,6 +122,7 @@ protected:
     qreal m_maxSampleValue = -qInf();
     qint64 m_timeOffset = QDateTime::currentMSecsSinceEpoch();
     QString m_label;
+    QString m_unit;
 
     friend class LineGraph;
 };

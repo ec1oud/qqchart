@@ -24,7 +24,6 @@ class Sensor : public LineGraphModel
     Q_PROPERTY(QString adapter READ adapter CONSTANT)
     Q_PROPERTY(QString chipName READ chipName CONSTANT)
     Q_PROPERTY(int chipId READ chipId CONSTANT)
-    Q_PROPERTY(QString unit READ unit CONSTANT)
 
 public:
     enum SensorType { Unknown = 0, Cpu,
@@ -40,7 +39,6 @@ public:
     QString adapter() { return m_adapter; }
     QString chipName() { return m_chipName; }
     int chipId() { return m_chipId; }
-    QString unit() { return m_unit; }
 
 private:
     bool recordSample(qint64 timestamp);
@@ -59,7 +57,6 @@ private:
     qreal m_scale = 1;
     QString m_adapter;
     QString m_chipName;
-    QString m_unit;
     QFile *m_file = nullptr;
 
     friend class LmSensors;

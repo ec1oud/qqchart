@@ -77,7 +77,7 @@ void LineGraphModel::appendSample(qreal value, qint64 timestamp)
             modify = false;
         }
         m_currentBucket.append(tv);
-        qCDebug(lcLineGraphModel) << "buckets" << m_previousBucket.count() << m_currentBucket.count();
+//        qCDebug(lcLineGraphModel) << "buckets" << m_previousBucket.count() << m_currentBucket.count();
     } else {
         modify = false;
     }
@@ -186,6 +186,15 @@ void LineGraphModel::setLabel(QString label)
 
     m_label = label;
     emit labelChanged();
+}
+
+void LineGraphModel::setUnit(QString unit)
+{
+    if (m_unit == unit)
+        return;
+
+    m_unit = unit;
+    emit unitChanged();
 }
 
 void LineGraphModel::setTimeSpan(int timeSpan)
