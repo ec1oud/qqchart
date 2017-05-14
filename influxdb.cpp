@@ -195,7 +195,8 @@ void InfluxQuery::init()
                 v->setNormalMinValue(98000);
                 v->setMaxValue(105000);
                 v->setNormalMaxValue(103000);
-                v->setUnit(QLatin1String("Pa"));
+                v->setUnit(QLatin1String("hPa"));
+                v->setMultiplier(0.01);
             }
             m_values.append(v);
         }

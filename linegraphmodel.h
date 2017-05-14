@@ -56,6 +56,8 @@ public:
     QString unit() { return m_unit; }
     void setUnit(QString unit);
 
+    void setMultiplier(qreal m) { m_multiplier = m; }
+
     Q_INVOKABLE int sampleIndexNearest(qint64 time);
     Q_INVOKABLE qint64 sampleTimeNearest(qint64 time);
     Q_INVOKABLE qreal sampleNearest(qint64 time);
@@ -120,6 +122,7 @@ protected:
     qreal m_normalMaxValue = 1;
     qreal m_minSampleValue = qInf(); // seen for all time, even if it's no longer in m_vertices
     qreal m_maxSampleValue = -qInf();
+    qreal m_multiplier = 1;
     qint64 m_timeOffset = QDateTime::currentMSecsSinceEpoch();
     QString m_label;
     QString m_unit;
