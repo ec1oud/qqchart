@@ -55,6 +55,9 @@ public:
     bool wireframe() const { return m_wireframe; }
     void setWireframe(bool wireframe);
 
+    Q_INVOKABLE QJSValue sampleNearestX(qreal x);
+    Q_INVOKABLE qreal xAtTime(qint64 time);
+
     static void registerMetaType();
 
 protected:
@@ -65,11 +68,6 @@ protected:
 public slots:
     void appendSample(qreal value); // convenience
     void removeFirstSample(); // convenience
-
-    qreal xAtTime(qint64 time);
-    qint64 timeAtX(qreal x);
-    qreal valueAtX(qreal x);
-    qreal yPixelAtX(qreal x);
 
 signals:
     void modelChanged();

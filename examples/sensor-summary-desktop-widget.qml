@@ -44,6 +44,7 @@ Window {
                     labelLine: index + 1
                     lineWidth: 1
                     //visible: modelData.maxSampleValue > 0
+                    hoverX: hoverCursor.hoverX - 10
                 }
             }
             Repeater {
@@ -55,6 +56,7 @@ Window {
                     labelLine: batteries.count + index + 2
                     lineWidth: 3
                     //visible: modelData.maxSampleValue > 0
+                    hoverX: hoverCursor.hoverX - 10
                 }
             }
             Repeater {
@@ -65,6 +67,7 @@ Window {
                     labelLine: 0
                     minValue: 25
                     maxValue: 85
+                    hoverX: hoverCursor.hoverX - 10
                 }
             }
             Repeater {
@@ -73,6 +76,7 @@ Window {
                     model: modelData
                     color: "wheat"
                     labelLine: batteries.count + 1
+                    hoverX: hoverCursor.hoverX - 10
                 }
             }
             Repeater {
@@ -82,6 +86,7 @@ Window {
                     color: "cyan"
                     labelLine: batteries.count + fans.count + 2
                     lineWidth: 2
+                    hoverX: hoverCursor.hoverX - 10
                 }
             }
             Repeater {
@@ -91,6 +96,7 @@ Window {
                     color: "darkgreen"
                     labelLine: batteries.count + fans.count + 3
                     lineWidth: 1
+                    hoverX: hoverCursor.hoverX - 10
                 }
             }
             Repeater {
@@ -101,6 +107,7 @@ Window {
                     labelLine: batteries.count + fans.count + 4
                     lineWidth: 3
                     visible: modelData.maxValue > 0
+                    hoverX: hoverCursor.hoverX - 10
                 }
             }
         }
@@ -139,4 +146,6 @@ Window {
         samples: 7
         color: "#80000000"
     }
+
+    HoverCursor { id: hoverCursor }
 }

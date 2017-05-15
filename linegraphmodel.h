@@ -49,6 +49,8 @@ public:
 
     qreal minSampleValue() const { return m_minSampleValue; }
     qreal maxSampleValue() const { return m_maxSampleValue; }
+    qint64 minSampleTime() const { return m_vertices.isEmpty() ? -1 : m_vertices.first().x; }
+    qint64 maxSampleTime() const { return m_vertices.isEmpty() ? -1 : m_vertices.last().x; }
 
     QString label() const { return m_label; }
     void setLabel(QString label);
@@ -58,9 +60,7 @@ public:
 
     void setMultiplier(qreal m) { m_multiplier = m; }
 
-    Q_INVOKABLE int sampleIndexNearest(qint64 time);
-    Q_INVOKABLE qint64 sampleTimeNearest(qint64 time);
-    Q_INVOKABLE qreal sampleNearest(qint64 time);
+    Q_INVOKABLE LineNode::LineVertex sampleNearest(qint64 time);
     Q_INVOKABLE void autoScale();
 
     qreal normalMinValue() const { return m_normalMinValue; }

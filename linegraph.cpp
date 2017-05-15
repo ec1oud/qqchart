@@ -1,6 +1,7 @@
 #include "linegraph.h"
 #include "linenode_p.h"
 #include <QDateTime>
+#include <QtQml/qqmlengine.h>
 
 LineGraph::LineGraph()
 {
@@ -126,29 +127,26 @@ void LineGraph::setTimeSpan(qreal timeSpan)
 
 qreal LineGraph::xAtTime(qint64 time)
 {
-    return width() * time / m_timeSpan;
+    return width() - (m_model->maxSampleTime() - time) / m_timeSpan * width();
 }
 
-qint64 LineGraph::timeAtX(qreal x)
+QJSValue LineGraph::sampleNearestX(qreal x)
 {
-    if (!m_model)
-        return -1;
-    return m_model->sampleTimeNearest(x / width() * m_timeSpan);
-}
+    static QJSValue nullJS(QJSValue::NullValue);
+    QJSEngine *engine = qmlEngine(this);
 
-qreal LineGraph::valueAtX(qreal x)
-{
-    if (!m_model)
-        return qQNaN();
-    return m_model->sampleNearest(x / width() * m_timeSpan);
-}
+    qint64 time = m_model->maxSampleTime() - (width() - x) / width() * m_timeSpan;
+    LineNode::LineVertex v = m_model->sampleNearest(time);
+    if (qIsNaN(v.y))
+        return nullJS;
 
-qreal LineGraph::yPixelAtX(qreal x)
-{
-    if (!m_model)
-        return qQNaN();
     qreal vscale = height() / (m_model->maxValue() - m_model->minValue());
-    return height() - vscale * (valueAtX(x) - m_model->minValue());
+    QJSValue ret = engine->newObject();
+    ret.setProperty(QLatin1String("time"), v.x);
+    ret.setProperty(QLatin1String("value"), v.y);
+    ret.setProperty(QLatin1String("x"), xAtTime(v.x));
+    ret.setProperty(QLatin1String("y"), height() - vscale * (v.y - m_model->minValue()));
+    return ret;
 }
 
 void LineGraph::setModel(LineGraphModel *model)

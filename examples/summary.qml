@@ -14,6 +14,7 @@ Rectangle {
             labelLine: index + 2
             lineWidth: 3
             visible: model.maxSampleValue > 0
+            hoverX: hoverCursor.hoverX - 10
         }
     }
     Repeater {
@@ -24,6 +25,7 @@ Rectangle {
             labelLine: 0
             minValue: 25
             maxValue: 85
+            hoverX: hoverCursor.hoverX - 10
         }
     }
     Repeater {
@@ -32,8 +34,11 @@ Rectangle {
             model: modelData
             color: "wheat"
             labelLine: 1
+            hoverX: hoverCursor.hoverX - 10
         }
     }
+
+    HoverCursor { id: hoverCursor }
 
     // possible but unnecessary:
     // Component.onCompleted: LmSensors.setDownsampleInterval(2)

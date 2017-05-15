@@ -87,26 +87,21 @@ void LineGraphModel::appendSample(qreal value, qint64 timestamp)
         appendVertices(time, value);
 }
 
-int LineGraphModel::sampleIndexNearest(qint64 time)
+LineNode::LineVertex LineGraphModel::sampleNearest(qint64 time)
 {
-    Q_UNUSED(time);
-    return 0; // TODO binary search
-}
-
-qint64 LineGraphModel::sampleTimeNearest(qint64 time)
-{
-    int idx = sampleIndexNearest(time);
-    if (idx >= 0)
-        return m_vertices[idx].x + m_timeOffset;
-    return -1;
-}
-
-qreal LineGraphModel::sampleNearest(qint64 time)
-{
-    int idx = sampleIndexNearest(time);
-    if (idx >= 0)
-        return m_vertices[idx].y;
-    return qQNaN();
+    // TODO support horizontal scrolling; but so far we don't, so just assume
+    // time is zero at the right and negative to the left
+    LineNode::LineVertex proto;
+    proto.x = time;
+    auto found = std::upper_bound(m_vertices.begin(), m_vertices.end(), proto, [](const auto &lhs, const auto &rhs) {
+        return lhs.x < rhs.x;
+    });
+    if (found == m_vertices.end()) {
+        proto.x = -1;
+        proto.y = qQNaN();
+        return proto;
+    }
+    return *found;
 }
 
 /**
