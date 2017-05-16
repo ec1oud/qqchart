@@ -6,9 +6,21 @@ Q_LOGGING_CATEGORY(lcLineGraphModel, "org.ecloud.charts.model")
 
 const qint64 LineGraphModel::m_timeOffset(LineGraphModel::timeNowMs());
 
+/*!
+    \qmltype LineGraphModel
+    \instantiates LineGraphModel
+    \brief A model to store vertices for LineGraph to render
+    \inherits QObject
+
+    A LineGraphModel stores a time-value series of samples in a form
+    which is useful both for in-memory storage and later querying,
+    and for direct rendering: that is, a vector of vertex structs
+    ready to be sent to the line graph vertex shader.
+
+    It's required to append samples in time order, with the oldest first.
+*/
 LineGraphModel::LineGraphModel(QObject *parent) : QObject(parent)
 {
-
 }
 
 double LineGraphModel::triangleArea(
@@ -35,6 +47,9 @@ LineGraphModel::TimeValue LineGraphModel::largestTriangle(const TimeValue &previ
     return current[chosen];
 }
 
+/*!
+    Returns the average time and value of the given series.
+*/
 LineGraphModel::TimeValue LineGraphModel::average(const QVector<TimeValue> &tvv)
 {
     TimeValue ret = {0, 0};
@@ -47,7 +62,6 @@ LineGraphModel::TimeValue LineGraphModel::average(const QVector<TimeValue> &tvv)
     return ret;
 }
 
-
 LineGraphModel::TimeValue LineGraphModel::endVertex(int fromLast)
 {
     int i = (m_vertices.count() / LineNode::verticesPerSample - fromLast) * LineNode::verticesPerSample;
@@ -57,6 +71,10 @@ LineGraphModel::TimeValue LineGraphModel::endVertex(int fromLast)
     return ret;
 }
 
+/*!
+    Append the given sample \a value taken at the given \a time,
+    in seconds since startup.
+*/
 void LineGraphModel::appendSample(qreal value, qreal time)
 {
     TimeValue tv { time, value };
@@ -87,6 +105,10 @@ void LineGraphModel::appendSample(qreal value, qreal time)
         appendVertices(time, value);
 }
 
+/*!
+    Append the given sample \a value taken at the given \a timestamp,
+    in milliseconds since the epoch.
+*/
 void LineGraphModel::appendSampleMs(qreal value, qint64 timestamp)
 {
     appendSample(value, (timestamp - m_timeOffset) / 1000.0);
@@ -113,14 +135,10 @@ LineNode::LineVertex LineGraphModel::sampleNearest(qreal time)
 }
 
 /**
-* Returns a "nice" number approximately equal to range
-  Rounds the number if round = true Takes the ceiling if round = false.
+    Returns a "nice" number approximately equal to \a range
+    Rounds the number if \a round = true; takes the ceiling if \a round = false.
 
-  From http://stackoverflow.com/questions/8506881/nice-label-algorithm-for-charts-with-minimum-ticks
-*
-* @param range the data range
-* @param round whether to round the result
-* @return a "nice" number to be used for the data range
+    From http://stackoverflow.com/questions/8506881/nice-label-algorithm-for-charts-with-minimum-ticks
 */
 qreal LineGraphModel::niceNum(qreal range, bool round)
 {
@@ -267,6 +285,10 @@ const QVector<LineNode::LineVertex> *LineGraphModel::vertices()
     return &m_vertices;
 }
 
+/*!
+    Append vertices representing the given sample \a value
+    taken at the given \a time, in seconds since startup.
+*/
 void LineGraphModel::appendVertices(qreal time, qreal value)
 {
 //    qDebug() << m_label << time << value << "already have samples:" << m_vertices.size();

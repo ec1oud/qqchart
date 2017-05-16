@@ -105,9 +105,9 @@ protected:
     void appendVertices(qreal time, qreal value);
     void modifyEndVertices(qreal time, qreal value, int fromLast = 0);
     TimeValue endVertex(int fromLast = 0);
-    double triangleArea(const LineGraphModel::TimeValue &a, const LineGraphModel::TimeValue &b, const LineGraphModel::TimeValue &c);
-    LineGraphModel::TimeValue largestTriangle(const TimeValue &previous, const QVector<TimeValue> &current, const TimeValue &next);
-    LineGraphModel::TimeValue average(const QVector<TimeValue> &tvv);
+    static double triangleArea(const LineGraphModel::TimeValue &a, const LineGraphModel::TimeValue &b, const LineGraphModel::TimeValue &c);
+    static LineGraphModel::TimeValue largestTriangle(const TimeValue &previous, const QVector<TimeValue> &current, const TimeValue &next);
+    static LineGraphModel::TimeValue average(const QVector<TimeValue> &tvv);
     virtual void finagle(qreal &time, qreal &value) { Q_UNUSED(time); Q_UNUSED(value); }
 
 protected:
