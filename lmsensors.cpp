@@ -314,7 +314,7 @@ bool LmSensors::init()
 
 bool LmSensors::sampleAllValues()
 {
-    qint64 timestamp = QDateTime().currentDateTime().toMSecsSinceEpoch();
+    qint64 timestamp = LineGraphModel::timeNowMs();
     for (Sensor *item : m_sensors)
         item->recordSample(timestamp);
     return true;
@@ -389,7 +389,7 @@ bool Sensor::recordSample(qint64 timestamp)
     qreal val = sample();
     if (val == 65535)
         return false;
-    appendSample(val, timestamp);
+    appendSampleMs(val, timestamp);
     return true;
 }
 

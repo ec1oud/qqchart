@@ -56,7 +56,7 @@ public:
     void setWireframe(bool wireframe);
 
     Q_INVOKABLE QJSValue sampleNearestX(qreal x);
-    Q_INVOKABLE qreal xAtTime(qint64 time);
+    Q_INVOKABLE qreal xAtTime(qreal time);
 
     static void registerMetaType();
 

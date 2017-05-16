@@ -16,7 +16,7 @@ void LineGraph::registerMetaType()
 
 void LineGraph::appendSample(qreal value)
 {
-    m_model->appendSample(value);
+    m_model->appendSampleMs(value);
 }
 
 void LineGraph::removeFirstSample()
@@ -125,7 +125,7 @@ void LineGraph::setTimeSpan(qreal timeSpan)
     update();
 }
 
-qreal LineGraph::xAtTime(qint64 time)
+qreal LineGraph::xAtTime(qreal time)
 {
     return width() - (m_model->maxSampleTime() - time) / m_timeSpan * width();
 }
@@ -135,14 +135,14 @@ QJSValue LineGraph::sampleNearestX(qreal x)
     static QJSValue nullJS(QJSValue::NullValue);
     QJSEngine *engine = qmlEngine(this);
 
-    qint64 time = m_model->maxSampleTime() - (width() - x) / width() * m_timeSpan;
+    qreal time = m_model->maxSampleTime() - m_timeSpan + x / width() * m_timeSpan;
     LineNode::LineVertex v = m_model->sampleNearest(time);
     if (qIsNaN(v.y))
         return nullJS;
 
     qreal vscale = height() / (m_model->maxValue() - m_model->minValue());
     QJSValue ret = engine->newObject();
-    ret.setProperty(QLatin1String("time"), v.x);
+    ret.setProperty(QLatin1String("time"), v.x); // TODO add m_timeOffset
     ret.setProperty(QLatin1String("value"), v.y);
     ret.setProperty(QLatin1String("x"), xAtTime(v.x));
     ret.setProperty(QLatin1String("y"), height() - vscale * (v.y - m_model->minValue()));

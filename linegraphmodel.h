@@ -49,8 +49,8 @@ public:
 
     qreal minSampleValue() const { return m_minSampleValue; }
     qreal maxSampleValue() const { return m_maxSampleValue; }
-    qint64 minSampleTime() const { return m_vertices.isEmpty() ? -1 : m_vertices.first().x; }
-    qint64 maxSampleTime() const { return m_vertices.isEmpty() ? -1 : m_vertices.last().x; }
+    qreal minSampleTime() const { return m_vertices.isEmpty() ? -1 : m_vertices.first().x; } // in seconds
+    qreal maxSampleTime() const { return m_vertices.isEmpty() ? -1 : m_vertices.last().x; }
 
     QString label() const { return m_label; }
     void setLabel(QString label);
@@ -60,7 +60,7 @@ public:
 
     void setMultiplier(qreal m) { m_multiplier = m; }
 
-    Q_INVOKABLE LineNode::LineVertex sampleNearest(qint64 time);
+    Q_INVOKABLE LineNode::LineVertex sampleNearest(qreal time);
     Q_INVOKABLE void autoScale();
 
     qreal normalMinValue() const { return m_normalMinValue; }
@@ -87,8 +87,9 @@ signals:
     void clipValuesChanged();
 
 public slots:
-    void appendSample(qreal value, qint64 timestamp = QDateTime::currentMSecsSinceEpoch());
-    void appendSample(qreal value, QDateTime timestamp) { appendSample(value, timestamp.toMSecsSinceEpoch()); }
+    void appendSample(qreal value, qreal time); // time in seconds
+    void appendSampleMs(qreal value, qint64 timestamp = timeNowMs());
+    void appendSampleMs(qreal value, QDateTime timestamp) { appendSampleMs(value, timestamp.toMSecsSinceEpoch()); }
     void removeFirstSample();
 
 protected:
@@ -96,6 +97,8 @@ protected:
         qreal time;
         qreal value;
     };
+
+    static qint64 timeNowMs() { return QDateTime::currentMSecsSinceEpoch(); }
 
 protected:
     virtual const QVector<LineNode::LineVertex> *vertices();
@@ -123,9 +126,10 @@ protected:
     qreal m_minSampleValue = qInf(); // seen for all time, even if it's no longer in m_vertices
     qreal m_maxSampleValue = -qInf();
     qreal m_multiplier = 1;
-    qint64 m_timeOffset = QDateTime::currentMSecsSinceEpoch();
     QString m_label;
     QString m_unit;
+
+    static const qint64 m_timeOffset;
 
     friend class LineGraph;
 };

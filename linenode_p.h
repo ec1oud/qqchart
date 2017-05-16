@@ -11,11 +11,11 @@ public:
     LineNode();
 
     struct LineVertex {
-        float x;
-        float y;
-        float i;
-        float t;
-        float prevX;
+        float x;        // time (assuming your x axis is that); first sample has x=0
+        float y;        // original sample value
+        float i;        // incrementing index
+        float t;        // -1 or 1 to inset or outset by half-line-width and achieve antialiasing
+        float prevX;    // previous/next values are for the shader to calculate slopes, miter angles etc.
         float prevY;
         float nextX;
         float nextY;

@@ -4,6 +4,8 @@
 
 Q_LOGGING_CATEGORY(lcLineGraphModel, "org.ecloud.charts.model")
 
+const qint64 LineGraphModel::m_timeOffset(LineGraphModel::timeNowMs());
+
 LineGraphModel::LineGraphModel(QObject *parent) : QObject(parent)
 {
 
@@ -55,10 +57,8 @@ LineGraphModel::TimeValue LineGraphModel::endVertex(int fromLast)
     return ret;
 }
 
-void LineGraphModel::appendSample(qreal value, qint64 timestamp)
+void LineGraphModel::appendSample(qreal value, qreal time)
 {
-    // make time (x) values smaller; TODO why does this even matter? loss of precision?
-    float time = (timestamp - m_timeOffset) / 1000.0;
     TimeValue tv { time, value };
     // On currentBucket overflow:
     // finalize the vertex from m_previousBucket
@@ -87,10 +87,17 @@ void LineGraphModel::appendSample(qreal value, qint64 timestamp)
         appendVertices(time, value);
 }
 
-LineNode::LineVertex LineGraphModel::sampleNearest(qint64 time)
+void LineGraphModel::appendSampleMs(qreal value, qint64 timestamp)
 {
-    // TODO support horizontal scrolling; but so far we don't, so just assume
-    // time is zero at the right and negative to the left
+    appendSample(value, (timestamp - m_timeOffset) / 1000.0);
+}
+
+/*!
+    Get the LineVertex instance which is nearest the given \a time,
+    which is in seconds, beginning with zero from the first sample recorded.
+*/
+LineNode::LineVertex LineGraphModel::sampleNearest(qreal time)
+{
     LineNode::LineVertex proto;
     proto.x = time;
     auto found = std::upper_bound(m_vertices.begin(), m_vertices.end(), proto, [](const auto &lhs, const auto &rhs) {
@@ -101,6 +108,7 @@ LineNode::LineVertex LineGraphModel::sampleNearest(qint64 time)
         proto.y = qQNaN();
         return proto;
     }
+//qDebug() << Q_FUNC_INFO << time << "found" << found->t << found->x << found->y;
     return *found;
 }
 

@@ -250,7 +250,7 @@ void InfluxQuery::networkFinished()
 //            qDebug() << last.toString() << samples;
             for (int i = 0; i < m_values.count(); ++i) {
                 qreal val = samples.takeAt(0).toDouble(qQNaN());
-                m_values[i]->appendSample(val, last);
+                m_values[i]->appendSampleMs(val, last);
             }
         }
         int timeSpan = int(qAbs(first.secsTo(last)));
