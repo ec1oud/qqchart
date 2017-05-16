@@ -47,7 +47,7 @@ Rectangle {
                 text: model.currentValue.toFixed(isTemperature ? 2 : 0) + model.unit
                 visible: currentVisible
             }
-            LineGraph {
+            LineGraphWithHoverFeedback {
                 id: graph
                 model: modelData
                 anchors.fill: parent
@@ -58,6 +58,7 @@ Rectangle {
                 warningMinColor: isTemperature ? "cyan" : "orange"
                 warningMaxColor: "orange"
                 lineWidth: isTemperature ? 2 : 1
+                hoverX: hoverCursor.mouseX - list.anchors.margins
                 Component.onCompleted: {
                     model.clipValues = false // because we will auto-scale
                     if (isTemperature)
@@ -92,4 +93,5 @@ Rectangle {
             }
         }
     }
+    HoverCursor { id: hoverCursor }
 }

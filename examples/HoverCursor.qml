@@ -4,7 +4,7 @@ MouseArea {
     id: hoverCursor
     anchors.fill: parent
     hoverEnabled: true
-    property alias hoverX: rect.x
+    property real hoverX: containsMouse ? rect.x : -1
     Rectangle {
         id: rect
         width: 1
