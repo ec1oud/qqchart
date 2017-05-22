@@ -120,7 +120,9 @@ Window {
                 model: LmSensors.filtered(Sensor.Frequency)
                 LabeledSensorGraph {
                     model: modelData
-                    color: Qt.rgba(0.3 + index * 0.03, 0.2 + index * 0.17, 1, 1)
+                    warningMinColor: "saddlebrown"
+                    color: Qt.rgba(0, 0.2 + index * 0.07, 0.1, 1)
+                    warningMaxColor: "cyan"
                     labelLine: index
                     lineWidth: 1
                 }
