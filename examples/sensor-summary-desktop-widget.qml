@@ -33,7 +33,7 @@ Window {
         Item {
             id: bottom
             anchors.fill: parent
-            anchors.topMargin: 120
+            anchors.topMargin: 130
 
             Repeater {
                 id: batteries
@@ -115,10 +115,12 @@ Window {
             anchors.bottom: bottom.top
             anchors.bottomMargin: 4
             anchors.top: parent.top
+            anchors.topMargin: 4
             width: parent.width
             Repeater {
                 model: LmSensors.filtered(Sensor.Frequency)
                 LabeledSensorGraph {
+                    anchors.topMargin: 16
                     model: modelData
                     warningMinColor: "saddlebrown"
                     color: Qt.rgba(0, 0.2 + index * 0.07, 0.1, 1)
