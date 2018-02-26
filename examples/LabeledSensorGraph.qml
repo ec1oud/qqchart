@@ -23,7 +23,7 @@ LineGraphWithHoverFeedback {
             font.weight: Font.Bold
         }
         Text {
-            color: "grey"
+            color: "darkgrey"
             text: "(max " + Math.round(model.maxSampleValue) + " / " + Math.round(root.maxValue) + ")"
             y: labelLine * font.pixelSize
             font.weight: Font.Bold
