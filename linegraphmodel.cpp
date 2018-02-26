@@ -114,6 +114,12 @@ void LineGraphModel::appendSampleMs(qreal value, qint64 timestamp)
     appendSample(value, (timestamp - m_timeOffset) / 1000.0);
 }
 
+void LineGraphModel::removeFirstSample()
+{
+    qWarning("poorly tested, maybe wrong"); // removing from the bucket(s) depends on m_downsampleMethod if we even need to do that
+    m_vertices.remove(0, LineNode::verticesPerSample);
+}
+
 /*!
     Get the LineVertex instance which is nearest the given \a time,
     which is in seconds, beginning with zero from the first sample recorded.
