@@ -149,7 +149,7 @@ bool LmSensors::init()
                 new_item->setMinValue(0);
                 new_item->setMaxValue(100);
 
-                const sensors_subfeature *limitSub = 0;
+                const sensors_subfeature *limitSub = nullptr;
 
                 switch (new_item->m_feature->type) {
                 case SENSORS_FEATURE_IN:
@@ -162,9 +162,15 @@ bool LmSensors::init()
                     new_item->setMaxValue(15);
                     new_item->m_unit = "V";
                     limitSub = sensors_get_subfeature(chip, feature, SENSORS_SUBFEATURE_IN_MIN);
-                    sensors_get_value(chip, limitSub->number, &new_item->m_normalMinValue);
+                    if (limitSub)
+                        sensors_get_value(chip, limitSub->number, &new_item->m_normalMinValue);
+                    else
+                        qDebug() << "no min limit" << new_item->chipName() << new_item->m_feature->name << new_item->m_subfeature->name;
                     limitSub = sensors_get_subfeature(chip, feature, SENSORS_SUBFEATURE_IN_MAX);
-                    sensors_get_value(chip, limitSub->number, &new_item->m_normalMaxValue);
+                    if (limitSub)
+                        sensors_get_value(chip, limitSub->number, &new_item->m_normalMaxValue);
+                    else
+                        qDebug() << "no max limit" << new_item->chipName() << new_item->m_feature->name << new_item->m_subfeature->name;
                     break;
                 case SENSORS_FEATURE_FAN:
                     new_item->m_type = Sensor::SensorType::Fan;
