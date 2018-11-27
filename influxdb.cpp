@@ -197,6 +197,12 @@ void InfluxQuery::init()
                 v->setNormalMaxValue(103000);
                 v->setUnit(QLatin1String("hPa"));
                 v->setMultiplier(0.01);
+            } else if (field == QLatin1String("humidity")) {
+                v->setMinValue(0);
+                v->setNormalMinValue(50);
+                v->setMaxValue(100);
+                v->setNormalMaxValue(90);
+                v->setUnit(QLatin1String("%"));
             }
             m_values.append(v);
         }

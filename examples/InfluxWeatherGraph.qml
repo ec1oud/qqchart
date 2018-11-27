@@ -16,8 +16,9 @@ Rectangle {
         server: "http://localhost:8086"
         database: "weather"
         measurement: "uradmonitor"
-        fields: ["temperature", "pressure"]
-        wherePairs: [{"stationId": "41000008"}]
+        fields: ["temperature", "pressure", "humidity"]
+        //wherePairs: [{"stationId": "41000008"}]
+        wherePairs: [{"stationId": "820000ED"}]
         timeConstraint: "> now() - " + root.timespanHours + "h"
         updateIntervalMs: sampleInterval * 1000
         sampleInterval: timespanHours * 3600 / root.width * 2
@@ -35,6 +36,7 @@ Rectangle {
             width: list.width
             property int visibleRows: Math.min(4, list.model.length)
             property bool isTemperature: label === "temperature"
+            property bool isPressure: label === "pressure"
             height: (list.height - 4 * (visibleRows - 1)) / visibleRows
             Text {
                 anchors.verticalCenter: parent.verticalCenter
@@ -44,7 +46,7 @@ Rectangle {
                 style: Text.Outline
                 font.pointSize: 24
                 font.bold: true
-                text: model.currentValue.toFixed(isTemperature ? 2 : 0) + model.unit
+                text: model.currentValue.toFixed(isPressure ? 0 : 2) + model.unit
                 visible: currentVisible
             }
             LineGraphWithHoverFeedback {
@@ -62,7 +64,7 @@ Rectangle {
                 Component.onCompleted: {
                     model.clipValues = false // because we will auto-scale
                     if (isTemperature)
-                        model.additiveCorrection = -11 // known-inaccurate sensor
+                        model.additiveCorrection = -5 // -11 // known-inaccurate sensor
                 }
                 onSamplesChanged: model.autoScale()
             }
