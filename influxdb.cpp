@@ -66,6 +66,33 @@ void InfluxQuery::setServer(QUrl server)
     emit serverChanged();
 }
 
+void InfluxQuery::setUser(QString user)
+{
+    if (m_user == user)
+        return;
+
+    m_user = user;
+    emit userChanged();
+}
+
+void InfluxQuery::setPassword(QString password)
+{
+    if (m_password == password)
+        return;
+
+    m_password = password;
+    emit passwordChanged();
+}
+
+void InfluxQuery::setIgnoreSslErrors(bool ignoreSslErrors)
+{
+    if (m_ignoreSslErrors == ignoreSslErrors)
+        return;
+
+    m_ignoreSslErrors = ignoreSslErrors;
+    emit ignoreSslErrorsChanged();
+}
+
 void InfluxQuery::setDatabase(QString db)
 {
     if (m_database == db)
@@ -122,6 +149,12 @@ void InfluxQuery::setSampleInterval(int sampleInterval)
     emit sampleIntervalChanged();
 }
 
+void InfluxQuery::onAuthenticationRequired(QNetworkReply *reply, QAuthenticator *authenticator)
+{
+    authenticator->setUser(m_user);
+    authenticator->setPassword(m_password);
+}
+
 void InfluxQuery::setUpdateIntervalMs(int updateIntervalMs)
 {
     if (m_updateIntervalMs == updateIntervalMs)
@@ -154,18 +187,25 @@ void InfluxQuery::init()
     for (const QJsonValue &wpair : m_wherePairs) {
         const QJsonObject o = wpair.toObject();
         for (const QString &k : o.keys())
-            whereAnds << QString(QLatin1String("\"%1\" = '%2'")).arg(k).arg(o.value(k).toString());
+            whereAnds << QString(QLatin1String("%1 = '%2'")).arg(k).arg(o.value(k).toString());
     }
+	m_queryString += QLatin1String(" WHERE ");
+//qDebug() << whereAnds;
     if (!whereAnds.isEmpty())
-        m_queryString += QLatin1String(" WHERE ") + whereAnds.join(QLatin1String(" AND "));
+        m_queryString += whereAnds.join(QLatin1String(" AND "));
 
     // only get the full range initially; otherwise just get incremental updates
     if (m_lastUpdate.isNull()) {
-        if (!m_timeConstraint.isEmpty())
-            m_queryString += QLatin1String(" AND time ") + m_timeConstraint;
+        if (!m_timeConstraint.isEmpty()) {
+	if (!whereAnds.isEmpty())
+		m_queryString += QLatin1String(" AND ");
+            m_queryString += QLatin1String("time ") + m_timeConstraint;
+		}
     } else {
         int secsSinceLast = m_lastUpdate.secsTo(QDateTime::currentDateTime());
-        m_queryString += QString(QLatin1String(" AND time > now() - %1s")).arg(secsSinceLast);
+	if (!whereAnds.isEmpty())
+		m_queryString += QLatin1String("AND ");
+        m_queryString += QString(QLatin1String("time > now() - %1s")).arg(secsSinceLast);
     }
 
     if (m_sampleInterval)
@@ -203,6 +243,12 @@ void InfluxQuery::init()
                 v->setMaxValue(100);
                 v->setNormalMaxValue(90);
                 v->setUnit(QLatin1String("%"));
+            } else if (field == QLatin1String("moisture")) {
+                v->setMinValue(0);
+                v->setNormalMinValue(40);
+                v->setMaxValue(100);
+                v->setNormalMaxValue(90);
+                v->setUnit(QLatin1String("%"));
             }
             m_values.append(v);
         }
@@ -215,12 +261,20 @@ void InfluxQuery::init()
     emit initializedChanged();
 }
 
+InfluxQuery::InfluxQuery(QObject *parent) : QObject(parent)
+{
+    connect(&m_nam, &QNetworkAccessManager::authenticationRequired,
+            this, &InfluxQuery::onAuthenticationRequired);
+}
+
 bool InfluxQuery::sampleAllValues()
 {
     if (!m_initialized)
         init();
 
     m_netReply = m_nam.get(m_influxReq);
+    if (m_ignoreSslErrors)
+        m_netReply->ignoreSslErrors();
     connect(m_netReply, &QNetworkReply::finished, this, &InfluxQuery::networkFinished);
     connect(m_netReply, SIGNAL(error(QNetworkReply::NetworkError)),
             this, SLOT(networkError(QNetworkReply::NetworkError)));

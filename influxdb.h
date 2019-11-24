@@ -48,6 +48,9 @@ class InfluxQuery : public QObject
     Q_OBJECT
     // input
     Q_PROPERTY(QUrl server READ server WRITE setServer NOTIFY serverChanged)
+    Q_PROPERTY(QString user READ user WRITE setUser NOTIFY userChanged)
+    Q_PROPERTY(QString password READ password WRITE setPassword NOTIFY passwordChanged)
+    Q_PROPERTY(bool ignoreSslErrors READ ignoreSslErrors WRITE setIgnoreSslErrors NOTIFY ignoreSslErrorsChanged)
     Q_PROPERTY(QString database READ database WRITE setDatabase NOTIFY databaseChanged)
     Q_PROPERTY(QString measurement READ measurement WRITE setMeasurement NOTIFY measurementChanged)
     Q_PROPERTY(QStringList fields READ fields WRITE setFields NOTIFY fieldsChanged)
@@ -62,7 +65,7 @@ class InfluxQuery : public QObject
     Q_PROPERTY(QQmlListProperty<InfluxValueSeries> values READ values NOTIFY valuesChanged)
 
 public:
-    explicit InfluxQuery(QObject *parent = 0) : QObject(parent) { }
+    explicit InfluxQuery(QObject *parent = nullptr);
 
     Q_INVOKABLE bool sampleAllValues();
 
@@ -76,6 +79,15 @@ public:
 
     QUrl server() const { return m_server; }
     void setServer(QUrl server);
+
+    QString user() const { return m_user;}
+    void setUser(QString user);
+
+    QString password() const { return m_password; }
+    void setPassword(QString password);
+
+    bool ignoreSslErrors() const { return m_ignoreSslErrors; }
+    void setIgnoreSslErrors(bool ignoreSslErrors);
 
     QString database() const { return m_database; }
     void setDatabase(QString database);
@@ -101,6 +113,9 @@ signals:
     void errorMessageChanged();
     void updateIntervalMsChanged();
     void serverChanged();
+    void userChanged();
+    void passwordChanged();
+    void ignoreSslErrorsChanged();
     void databaseChanged();
     void measurementChanged();
     void fieldsChanged();
@@ -112,6 +127,7 @@ protected:
     void timerEvent(QTimerEvent *) Q_DECL_OVERRIDE { sampleAllValues(); }
 
 protected slots:
+    void onAuthenticationRequired(QNetworkReply *reply, QAuthenticator *authenticator);
     void networkError(QNetworkReply::NetworkError e);
     void networkFinished();
 
@@ -122,13 +138,16 @@ private:
     QList<InfluxValueSeries *> m_values;
     QString m_errorMessage;
     QUrl m_server;
+    QString m_user;
+    QString m_password;
     QString m_database;
     QString m_measurement;
     QStringList m_fields;
     QJsonArray m_wherePairs;
     QString m_timeConstraint;
     QString m_queryString;
-    bool m_initialized;
+    bool m_initialized = false;
+    bool m_ignoreSslErrors = false;
     int m_updateIntervalMs = -1;
     int m_timerId = 0;
     QUrl m_queryUrl;
