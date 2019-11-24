@@ -197,14 +197,14 @@ void InfluxQuery::init()
     // only get the full range initially; otherwise just get incremental updates
     if (m_lastUpdate.isNull()) {
         if (!m_timeConstraint.isEmpty()) {
-	if (!whereAnds.isEmpty())
-		m_queryString += QLatin1String(" AND ");
+            if (!whereAnds.isEmpty())
+                m_queryString += QLatin1String(" AND ");
             m_queryString += QLatin1String("time ") + m_timeConstraint;
-		}
+        }
     } else {
         int secsSinceLast = m_lastUpdate.secsTo(QDateTime::currentDateTime());
-	if (!whereAnds.isEmpty())
-		m_queryString += QLatin1String("AND ");
+        if (!whereAnds.isEmpty())
+            m_queryString += QLatin1String("AND ");
         m_queryString += QString(QLatin1String("time > now() - %1s")).arg(secsSinceLast);
     }
 
@@ -299,28 +299,29 @@ void InfluxQuery::networkFinished()
         QJsonObject o = jdoc.object().value(QLatin1String("results")).toArray().first().toObject();
         QJsonArray arr = o.value("series").toArray().first().toObject().value("values").toArray();
         QDateTime first;
-        QDateTime last;
         int count = 0;
         for (auto o : arr) {
             QJsonArray samples = o.toArray();
-            last = QDateTime::fromString(samples.takeAt(0).toString(), Qt::ISODateWithMs);
+            m_lastSampleTime = QDateTime::fromString(samples.takeAt(0).toString(), Qt::ISODateWithMs);
             if (first.isNull())
-                first = last;
+                first = m_lastSampleTime;
             ++count;
 //            qDebug() << last.toString() << samples;
             for (int i = 0; i < m_values.count(); ++i) {
                 qreal val = samples.takeAt(0).toDouble(qQNaN());
-                m_values[i]->appendSampleMs(val, last);
+                m_values[i]->appendSampleMs(val, m_lastSampleTime);
             }
         }
-        int timeSpan = int(qAbs(first.secsTo(last)));
-        qCDebug(lcInflux) << "for" << m_fields << "got" << count << "samples from" << first << "to" << last << "timespan" << timeSpan;
+        int timeSpan = int(qAbs(first.secsTo(m_lastSampleTime)));
+        m_lastUpdate = QDateTime::currentDateTime();
+        qCDebug(lcInflux) << "for" << m_fields << "got" << count << "samples from" << first << "to" << m_lastSampleTime << "timespan" << timeSpan;
         if (!m_initialized) {
             for (int i = 0; i < m_values.count(); ++i) {
                 m_values[i]->setTimeSpan(timeSpan);
                 qCDebug(lcInflux) << "value range of" << m_fields.at(i) << m_values.at(i)->minSampleValue() << m_values.at(i)->maxSampleValue();
             }
         }
+        emit valuesUpdated();
     } else {
         qCWarning(lcInflux) << err.errorString();
     }

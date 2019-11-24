@@ -63,6 +63,8 @@ class InfluxQuery : public QObject
     Q_PROPERTY(bool initialized READ initialized NOTIFY initializedChanged)
     Q_PROPERTY(QString errorMessage READ errorMessage NOTIFY errorMessageChanged)
     Q_PROPERTY(QQmlListProperty<InfluxValueSeries> values READ values NOTIFY valuesChanged)
+    Q_PROPERTY(QDateTime lastUpdate READ lastUpdate NOTIFY valuesUpdated) // time when the query ran
+    Q_PROPERTY(QDateTime lastSampleTime READ lastSampleTime NOTIFY valuesUpdated) // timestamp of the last datapoint in values
 
 public:
     explicit InfluxQuery(QObject *parent = nullptr);
@@ -76,6 +78,9 @@ public:
     void setUpdateIntervalMs(int updateIntervalMs);
 
     QQmlListProperty<InfluxValueSeries> values();
+
+    QDateTime lastUpdate() { return m_lastUpdate; }
+    QDateTime lastSampleTime() const { return m_lastSampleTime; }
 
     QUrl server() const { return m_server; }
     void setServer(QUrl server);
@@ -108,7 +113,8 @@ public:
     void setSampleInterval(int sampleInterval);
 
 signals:
-    void valuesChanged();
+    void valuesChanged(); // that means values property definition, not actual data!
+    void valuesUpdated(); // actual data points
     void initializedChanged();
     void errorMessageChanged();
     void updateIntervalMsChanged();
@@ -152,6 +158,7 @@ private:
     int m_timerId = 0;
     QUrl m_queryUrl;
     QDateTime m_lastUpdate;
+    QDateTime m_lastSampleTime;
 
     QNetworkAccessManager m_nam;
     QNetworkRequest m_influxReq;

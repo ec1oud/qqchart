@@ -7,7 +7,7 @@ import org.ecloud.charts 1.0
 
 Window {
     id: window
-    width: 720
+    width: 740
     height: 360
     color: "transparent"
     flags: Qt.FramelessWindowHint | Qt.WindowStaysOnBottomHint
@@ -18,8 +18,6 @@ Window {
         category: "PoolPumpDesktopWidget"
         property alias x: window.x
         property alias y: window.y
-        property alias width: window.width
-        property alias height: window.height
         property string server
         property string user
         property string password
@@ -39,7 +37,7 @@ Window {
         wherePairs: [{"device": "poolpump"}]
         timeConstraint: "> now() - " + window.timespanHours + "h"
         updateIntervalMs: sampleInterval * 1000
-        sampleInterval: window.timespanHours * 3600 / window.width * 1
+        sampleInterval: 3600
         Component.onCompleted: {
             sampleAllValues()
             values[0].maxValue = 3.5
@@ -50,19 +48,25 @@ Window {
 		model: query1.values[0]
 		anchors.fill: parent
         anchors.margins: 10
-        timeSpan: window.timespanHours * 3600
-        color: "blue"
-        warningMaxColor: "blue"
+        timeSpan: query1.values[0].timeSpan
+        color: "lightsteelblue"
+//        fillColorBelow: "lightsteelblue"
+        warningMaxColor: "lightsteelblue"
         minValue: 0
         maxValue: 3.5
         lineWidth: 1
         hoverX: hoverCursor.hoverX
-        HoverCursor { id: hoverCursor }
+        HoverCursor {
+            id: hoverCursor
+            timeSpan: query1.values[0].timeSpan
+            lastSampleTime: query1.lastSampleTime
+        }
     }
 	Text {
         text: "Pool pump current: last " + (window.timespanHours > 24 ?
                                        (window.timespanHours / 24) + " days" :
-                                       window.timespanHours + " hours")
+                                       window.timespanHours + " hours") +
+              " as of " + query1.lastSampleTime
 		font.bold: true
 		color: "black"
 	}

@@ -60,7 +60,7 @@ Rectangle {
                 warningMinColor: isTemperature ? "cyan" : "orange"
                 warningMaxColor: "orange"
                 lineWidth: isTemperature ? 2 : 1
-                hoverX: hoverCursor.mouseX - list.anchors.margins
+                hoverX: hoverCursor.mouseX
                 Component.onCompleted: {
                     model.clipValues = false // because we will auto-scale
                     if (isTemperature)
@@ -95,5 +95,10 @@ Rectangle {
             }
         }
     }
-    HoverCursor { id: hoverCursor }
+    HoverCursor {
+        id: hoverCursor
+        anchors.margins: 8
+        timeSpan: query1.values[0].timeSpan
+        lastSampleTime: query1.lastSampleTime
+    }
 }
