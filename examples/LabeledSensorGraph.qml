@@ -3,11 +3,14 @@ import org.ecloud.charts 1.0
 
 LineGraphWithHoverFeedback {
     id: root
-    anchors.fill: parent
-    anchors.margins: 10
     property int labelLine: 0
     timeSpan: 600
+    height: 100
+    x: 4
+    width: parent.width - 8
+    property alias lineHeight: label.font.pixelSize
     Text {
+        id: label
         color: parent.color
         text: model.label + (model.chipName === "" ? "" : " (" + model.chipName + ")")
         y: labelLine * font.pixelSize

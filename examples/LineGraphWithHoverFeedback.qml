@@ -19,8 +19,8 @@ LineGraph {
 
     Rectangle {
         id: pointFeedback
-        x: hoverSample ? hoverSample.x - width / 2 : 0
-        y: hoverSample ? hoverSample.y - height / 2 : 0
+        x: hoverSample ? hoverSample.x - width / 2 : -100
+        y: hoverSample ? hoverSample.y - height / 2 : -100
         color: "red" // root.color
         width: 7
         height: 7

@@ -33,7 +33,7 @@ Window {
         Item {
             id: bottom
             anchors.fill: parent
-            anchors.topMargin: 130
+            anchors.topMargin: cpuFrequencyRepeater.implicitHeight
 
             Repeater {
                 id: batteries
@@ -44,7 +44,7 @@ Window {
                     labelLine: index + 1
                     lineWidth: 1
                     //visible: modelData.maxSampleValue > 0
-                    hoverX: hoverCursor.hoverX - 10
+                    hoverX: hoverCursor.hoverX - 4
                 }
             }
             Repeater {
@@ -56,7 +56,7 @@ Window {
                     labelLine: batteries.count + index + 2
                     lineWidth: 3
                     //visible: modelData.maxSampleValue > 0
-                    hoverX: hoverCursor.hoverX - 10
+                    hoverX: hoverCursor.hoverX - 4
                 }
             }
             Repeater {
@@ -67,7 +67,7 @@ Window {
                     labelLine: 0
                     minValue: 25
                     maxValue: 85
-                    hoverX: hoverCursor.hoverX - 10
+                    hoverX: hoverCursor.hoverX - 4
                 }
             }
             Repeater {
@@ -76,7 +76,7 @@ Window {
                     model: modelData
                     color: "wheat"
                     labelLine: batteries.count + 1
-                    hoverX: hoverCursor.hoverX - 10
+                    hoverX: hoverCursor.hoverX - 4
                 }
             }
             Repeater {
@@ -86,7 +86,7 @@ Window {
                     color: "cyan"
                     labelLine: batteries.count + fans.count + 2
                     lineWidth: 2
-                    hoverX: hoverCursor.hoverX - 10
+                    hoverX: hoverCursor.hoverX - 4
                 }
             }
             Repeater {
@@ -96,7 +96,7 @@ Window {
                     color: "darkgreen"
                     labelLine: batteries.count + fans.count + 3
                     lineWidth: 1
-                    hoverX: hoverCursor.hoverX - 10
+                    hoverX: hoverCursor.hoverX - 4
                 }
             }
             Repeater {
@@ -107,25 +107,26 @@ Window {
                     labelLine: batteries.count + fans.count + 4
                     lineWidth: 3
                     visible: modelData.maxValue > 0
-                    hoverX: hoverCursor.hoverX - 10
+                    hoverX: hoverCursor.hoverX - 4
                 }
             }
         }
         Item {
-            anchors.bottom: bottom.top
-            anchors.bottomMargin: 4
             anchors.top: parent.top
             anchors.topMargin: 4
             width: parent.width
+            height: 100
             Repeater {
+                id: cpuFrequencyRepeater
                 model: LmSensors.filtered(Sensor.Frequency)
+                implicitHeight: count * 15.5
                 LabeledSensorGraph {
-                    anchors.topMargin: 16
+                    y: lineHeight * index
+                    height: lineHeight / 3
                     model: modelData
                     warningMinColor: "saddlebrown"
                     color: Qt.rgba(0, 0.2 + index * 0.07, 0.1, 1)
                     warningMaxColor: "cyan"
-                    labelLine: index
                     lineWidth: 1
                 }
                 onItemAdded: model[index].downsampleInterval = 15
