@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <file>shaders/LineNode.vsh</file>
-        <file>shaders/LineNode.fsh</file>
+        <file>shaders/LineNode.vert.qsb</file>
+        <file>shaders/LineNode.frag.qsb</file>
     </qresource>
 </RCC>

@@ -179,13 +179,13 @@ void LineGraph::setWireframe(bool wireframe)
     emit wireframeChanged();
 }
 
-void LineGraph::geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry)
+void LineGraph::geometryChange(const QRectF &newGeometry, const QRectF &oldGeometry)
 {
     m_geometryChanged = true;
     if (m_model)
         m_model->setDownsampleInterval(m_timeSpan / width());
     update();
-    QQuickItem::geometryChanged(newGeometry, oldGeometry);
+    QQuickItem::geometryChange(newGeometry, oldGeometry);
 }
 
 void LineGraph::updateVertices()
@@ -213,7 +213,7 @@ QSGNode *LineGraph::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
 
     if (rect.isEmpty()) {
         delete n;
-        return 0;
+        return nullptr;
     }
     if (!n) {
         n = new GraphNode();
@@ -243,7 +243,7 @@ QSGNode *LineGraph::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
         n->line->setMaxValue(m_model->maxValue());
         n->line->setWireframe(m_wireframe);
     }
-    n->line->setSpread(antialiasing() && !m_wireframe ? 1.0 : 0.0);
+    n->line->setSpread(antialiasing() && !m_wireframe ? 1 : 0);
 
     if ((m_geometryChanged || m_samplesChanged) && !m_model->vertices()->isEmpty())
         n->line->updateGeometry(rect, m_model->vertices(), width() / m_timeSpan);

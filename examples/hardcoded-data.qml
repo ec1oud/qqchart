@@ -1,8 +1,6 @@
-import QtQuick 2.0
-import QtQuick.Controls 1.4
-import QtQuick.Controls.Styles 1.4
-
-import org.ecloud.charts 1.0
+import QtQuick
+import QtQuick.Controls
+import org.ecloud.charts
 
 Rectangle {
     width: 990
@@ -183,6 +181,10 @@ Rectangle {
         border.color: "#40444444"
         border.width: 2
         Flow {
+            palette.buttonText: "white"
+            palette.text: "white"
+            palette.windowText: "white"
+
             anchors.top: parent.bottom
             anchors.margins: 6
             width: parent.width
@@ -193,8 +195,8 @@ Rectangle {
                 Slider {
                     id: widthSlider
                     width: 300
-                    minimumValue: 1
-                    maximumValue: 25
+                    from: 1
+                    to: 25
                     value: 1.3
                 }
                 Text {
@@ -207,8 +209,8 @@ Rectangle {
                 Slider {
                     id: offsetSlider
                     width: 300
-                    minimumValue: -1
-                    maximumValue: +1
+                    from: -1
+                    to: +1
                 }
                 Text {
                     text: "y offset " + offsetSlider.value.toFixed(2)
@@ -220,62 +222,46 @@ Rectangle {
                 Slider {
                     id: hZoomSlider
                     width: 300
-                    minimumValue: 1
-                    maximumValue: 50
+                    from: 1
+                    to: 50
                 }
                 Text {
                     text: "time scale " + hZoomSlider.value.toFixed(2)
                     color: "white"
                 }
             }
-            Component {
-                id: whiteCheckboxStyle
-                CheckBoxStyle {
-                    label: Text {
-                        text: control.text
-                        color: "white"
-                    }
-                }
-            }
 
             CheckBox {
                 id: fillCb
                 text: "fill"
-                style: whiteCheckboxStyle
                 checked: true
             }
             CheckBox {
                 id: aaCb
                 text: "antialiasing"
-                style: whiteCheckboxStyle
                 checked: true
             }
             CheckBox {
                 id: originalLineCb
                 text: "actual samples"
-                style: whiteCheckboxStyle
 //                checked: true
             }
             CheckBox {
                 id: wireframeCb
                 text: "wireframe"
-                style: whiteCheckboxStyle
 //                checked: true
             }
             CheckBox {
                 id: timerRun
                 text: "periodic update"
-                style: whiteCheckboxStyle
             }
             CheckBox {
                 id: fillBelowCb
                 text: "fill below"
-                style: whiteCheckboxStyle
             }
             CheckBox {
                 id: fillAboveCb
                 text: "fill above"
-                style: whiteCheckboxStyle
             }
         }
     }

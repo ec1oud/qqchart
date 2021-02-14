@@ -17,9 +17,9 @@ void appendItems(QQmlListProperty<Sensor> *property, Sensor *item)
     // Do nothing. can't add to a directory using this method
 }
 
-int itemSize(QQmlListProperty<Sensor> *property) { return static_cast<QList<Sensor *> *>(property->data)->size(); }
+qsizetype itemSize(QQmlListProperty<Sensor> *property) { return static_cast<QList<Sensor *> *>(property->data)->size(); }
 
-Sensor *itemAt(QQmlListProperty<Sensor> *property, int index)
+Sensor *itemAt(QQmlListProperty<Sensor> *property, qsizetype index)
 {
     return static_cast<QList<Sensor *> *>(property->data)->at(index);
 }
@@ -284,6 +284,7 @@ bool LmSensors::init()
             hasPolicyFiles = true;
         else
             skipPolicyFiles = true;
+    Q_UNUSED(hasPolicyFiles);
     for (const QString &cf : curFreqs) {
         // prefer /sys/devices/system/cpu/cpu2/cpufreq/scaling_cur_freq over /sys/devices/system/cpu/cpufreq/policy2/scaling_cur_freq, iff both exist
         if (skipPolicyFiles && cf.contains(QLatin1String("policy")))
@@ -345,7 +346,7 @@ QList<QObject *> LmSensors::filtered(int t, const QString substring)
                 (substring.isEmpty() || item->label().contains(substring) ||
                  item->chipName().contains(substring) || item->adapter().contains(substring)))
             ret << item;
-//qDebug() << "found" << ret.count() << "of type" << type;
+//qDebug() << "found" << ret.count() << "of type" << t;
     return ret;
 }
 
@@ -442,7 +443,7 @@ void Sensor::getCPULoad(qreal &val)
         qint64 total_jiffies = 0, work_jiffies = 0;
 
         do {
-            list = in.readLine(1024).split(" ", QString::SkipEmptyParts);
+            list = in.readLine(1024).split(" ", Qt::SkipEmptyParts);
         } while (list.at(0) != "cpu");
 
         for (int x = 1; x < list.length(); x++)

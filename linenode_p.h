@@ -2,8 +2,33 @@
 #define LINENODE_H
 
 #include <QSGGeometryNode>
-#include <QtQuick/QSGSimpleMaterial>
+#include <QtQuick/QSGMaterial>
 #include <QColor>
+
+class LineMaterial : public QSGMaterial
+{
+public:
+    LineMaterial();
+
+    QSGMaterialType *type() const override;
+
+    QSGMaterialShader *createShader(QSGRendererInterface::RenderMode) const override;
+
+    int compare(const QSGMaterial *m) const override;
+
+    struct {
+        QColor color;
+        QColor warningMinColor;
+        QColor warningMaxColor;
+        float height = 100;
+        float lineWidth = 1;
+        float warningMinValue = -1000;
+        float warningMaxValue = 1000;
+        float fillDirection = 0;
+        float aa = 1;
+        QMatrix4x4 dataTransform;
+    } state;
+};
 
 class LineNode : public QSGGeometryNode
 {
@@ -11,6 +36,12 @@ public:
     LineNode();
 
     struct LineVertex {
+    // should this correspond?
+//    layout(location = 0) in vec4 pos;       // x, y, i, t; x and y are time and value, in real-world units
+//    layout(location = 1) in vec4 prevNext;  // time and value of the previous datapoint, and the next one
+    // and/or ?
+//    layout(location = 0) in float vT;
+//    layout(location = 1) in vec4 vColor;
         float x;        // time (assuming your x axis is that); first sample has x=0
         float y;        // original sample value
         float i;        // incrementing index
@@ -21,7 +52,7 @@ public:
         float nextY;
         inline void set(int ii, float tt, float xx, float yy, float px, float py, float nx, float ny) {
             x = xx; y = yy; i = ii; t = tt;
-    //qDebug() << "x" << xx << "y" << yy << "i" << ii << "t" << tt;
+//    qDebug() << "x" << xx << "y" << yy << "i" << ii << "t" << tt;
             prevX = px; prevY = py; nextX = nx; nextY = ny;
         }
     };
@@ -42,23 +73,9 @@ public:
     void setSpread(qreal v);
     void setWireframe(bool v);
 
-    struct LineMaterial
-    {
-        QColor color;
-        QColor warningMinColor;
-        QColor warningMaxColor;
-        float height;
-        float lineWidth;
-        float warningMinValue;
-        float warningMaxValue;
-        float fillDirection;
-        float aa;
-        QMatrix4x4 dataTransform;
-    };
-
 private:
     QSGGeometry m_geometry;
-    QSGSimpleMaterial<LineMaterial> *m_material;
+    LineMaterial *m_material;
     qreal m_minValue = 0;
     qreal m_maxValue = 1;
     bool m_wireframe;

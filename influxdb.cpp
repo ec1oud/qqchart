@@ -43,9 +43,9 @@ void appendItems(QQmlListProperty<InfluxValueSeries> *property, InfluxValueSerie
     // Do nothing; can't actually append
 }
 
-int itemSize(QQmlListProperty<InfluxValueSeries> *property) { return static_cast<QList<InfluxValueSeries *> *>(property->data)->size(); }
+qsizetype itemSize(QQmlListProperty<InfluxValueSeries> *property) { return static_cast<QList<InfluxValueSeries *> *>(property->data)->size(); }
 
-InfluxValueSeries *itemAt(QQmlListProperty<InfluxValueSeries> *property, int index)
+InfluxValueSeries *itemAt(QQmlListProperty<InfluxValueSeries> *property, qsizetype index)
 {
     return static_cast<QList<InfluxValueSeries *> *>(property->data)->at(index);
 }

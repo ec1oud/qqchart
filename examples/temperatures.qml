@@ -1,5 +1,5 @@
-import QtQuick 2.5
-import org.ecloud.charts 1.0
+import QtQuick
+import org.ecloud.charts
 
 Rectangle {
     width: 480

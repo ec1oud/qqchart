@@ -1,25 +1,32 @@
-#version 120
+#version 440
 
 // per-vertex givens
-attribute highp vec4 pos;               // x, y, i, t; x and y are time and value, in real-world units
-attribute highp vec4 prevNext;          // time and value of the previous datapoint, and the next one
-
-// constants passed in from LineNode
-uniform lowp float height;              // total height in pixels
-uniform lowp float lineWidth;           // in pixels
-uniform lowp float warningBelowMinimum; // change to warningMinColor if datapoint > warningBelowMinimum
-uniform lowp float warningAboveMaximum; // change to warningMaxColor if datapoint > warningAboveMaximum
-uniform lowp float fillDirection;       // -1 to fill above, +1 to fill below, 0 to stroke
-uniform lowp vec4 normalColor;          // color to stroke or fill, if data is within range
-uniform lowp vec4 warningMinColor;
-uniform lowp vec4 warningMaxColor;
-uniform highp mat2 dataScalingTransform;// transform to go from real-world units to pixels
-uniform highp vec2 dataOffset;          // offset in pixels, to locate the y axis and to put the latest sample at the right
-uniform highp mat4 qt_Matrix;           // Qt's usual transform to go from Item to Window coordinates
+layout(location = 0) in vec4 pos;       // x, y, i, t; x and y are time and value, in real-world units
+layout(location = 1) in vec4 prevNext;  // time and value of the previous datapoint, and the next one
+//layout(location = 2) in float t;
 
 // variables which will be passed through to the frag shader, and automatically interpolated between vertices
-varying lowp float vT;                  // distance: 0 is on the line; goes to +/-0.5 outwards across the stroke
-varying lowp vec4 vColor;               // color of the vertex
+layout(location = 0) out float vT;      // distance: 0 is on the line; goes to +/-0.5 outwards across the stroke
+layout(location = 1) out vec4 vColor;   // color of the vertex
+
+// constants passed in from LineNode
+layout(std140, binding = 0) uniform buf {
+    mat4 qt_Matrix;                     // Qt's usual transform to go from Item to Window coordinates
+    mat2 dataScalingTransform;          // transform to go from real-world units to pixels
+    vec4 normalColor;                   // color to stroke or fill, if data is within range
+    vec4 warningMinColor;
+    vec4 warningMaxColor;
+    vec2 dataOffset;                    // offset in pixels, to locate the y axis and to put the latest sample at the right
+    float qt_Opacity;
+    float height;                       // total height in pixels
+    float lineWidth;                    // in pixels
+    float warningBelowMinimum;          // change to warningMinColor if datapoint > warningBelowMinimum
+    float warningAboveMaximum;          // change to warningMaxColor if datapoint > warningAboveMaximum
+    float fillDirection;                // -1 to fill above, +1 to fill below, 0 to stroke
+    float aa;
+};
+
+out gl_PerVertex { vec4 gl_Position; };
 
 void main(void)
 {
