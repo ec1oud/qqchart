@@ -52,18 +52,19 @@ Window {
                 LabeledSensorGraph {
                     model: modelData
                     color: Qt.rgba(0.3 + index * 0.03, 0.2 + index * 0.17, 1, 1)
-                    labelLine: batteries.count + index + 2
+                    labelLine: batteries.count + index
                     lineWidth: 3
                     //visible: modelData.maxSampleValue > 0
                     hoverX: hoverCursor.hoverX - 4
                 }
             }
             Repeater {
-                model: LmSensors.filtered(Sensor.Temperature, "Core 0")
+                id: temperatures
+                model: LmSensors.filtered(Sensor.Temperature)
                 LabeledSensorGraph {
                     model: modelData
                     color: "#F85"
-                    labelLine: 0
+                    labelLine: batteries.count + fans.count + index
                     minValue: 25
                     maxValue: 85
                     hoverX: hoverCursor.hoverX - 4
@@ -74,7 +75,7 @@ Window {
                 LabeledSensorGraph {
                     model: modelData
                     color: "wheat"
-                    labelLine: batteries.count + 1
+                    labelLine: batteries.count + fans.count + temperatures.count
                     hoverX: hoverCursor.hoverX - 4
                 }
             }
@@ -83,7 +84,7 @@ Window {
                 LabeledSensorGraph {
                     model: modelData
                     color: "cyan"
-                    labelLine: batteries.count + fans.count + 2
+                    labelLine: batteries.count + fans.count + temperatures.count + 1
                     lineWidth: 2
                     hoverX: hoverCursor.hoverX - 4
                 }
@@ -93,7 +94,7 @@ Window {
                 LabeledSensorGraph {
                     model: modelData
                     color: "darkgreen"
-                    labelLine: batteries.count + fans.count + 3
+                    labelLine: batteries.count + fans.count + temperatures.count + 2
                     lineWidth: 1
                     hoverX: hoverCursor.hoverX - 4
                 }
@@ -118,13 +119,13 @@ Window {
             Repeater {
                 id: cpuFrequencyRepeater
                 model: LmSensors.filtered(Sensor.Frequency)
-                implicitHeight: count * 15.5
+                implicitHeight: (count + 1) * 13
                 LabeledSensorGraph {
-                    y: lineHeight * index
-                    height: lineHeight / 3
+                    y: 13 * index
+                    height: 13
                     model: modelData
                     warningMinColor: "saddlebrown"
-                    color: Qt.rgba(0, 0.2 + index * 0.07, 0.1, 1)
+                    color: Qt.rgba(0, 0.5 + index * 0.5 / cpuFrequencyRepeater.count, 0.1, 1)
                     warningMaxColor: "cyan"
                     lineWidth: 1
                 }
