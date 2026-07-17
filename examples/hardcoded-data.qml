@@ -13,8 +13,12 @@ Rectangle {
         anchors.margins: 20
         anchors.bottomMargin: 100
         antialiasing: aaCb.checked
+        joinStyle: joinCb.checked ? Qt.RoundJoin : Qt.BevelJoin
         timeScale: hZoomSlider.value
         color: "lightsteelblue"
+        stroke: fillCb.checked
+        fillBelow: fillBelowCb.checked
+        fillAbove: fillAboveCb.checked
         model: LineGraphModel {
             label: "example data"
         }
@@ -242,6 +246,11 @@ Rectangle {
             CheckBox {
                 id: aaCb
                 text: "antialiasing"
+                checked: true
+            }
+            CheckBox {
+                id: joinCb
+                text: checked ? "round" : "bevel"
                 checked: true
             }
             CheckBox {

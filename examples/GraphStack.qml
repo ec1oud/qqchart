@@ -5,7 +5,11 @@ import org.ecloud.charts 1.0
 Item {
     id: root
     property alias color: graph.color
+    property bool stroke: true
+    property bool fillBelow: false
+    property bool fillAbove: false
     property alias antialiasing: graph.antialiasing
+    property alias joinStyle: graph.joinStyle
     property real timeScale: 1
     property LineGraphModel model: null
 
@@ -25,12 +29,12 @@ Item {
         maxValue: 1 + offsetSlider.value
         lineWidth: widthSlider.value
         color: "lightsteelblue"
-        fillColorBelow: fillBelowCb.checked ? "#22FF2222" : "transparent"
-        fillColorAbove: fillAboveCb.checked ? "#222222FF" : "transparent"
+        fillColorBelow: root.fillBelow ? "#22FF2222" : "transparent"
+        fillColorAbove: root.fillAbove ? "#222222FF" : "transparent"
         warningMinColor: "yellow"
         warningMaxColor: "orange"
         wireframe: false
-        visible: fillCb.checked
+        visible: stroke
         opacity: 0.8
         timeSpan: 40 * root.timeScale
     }
@@ -43,8 +47,8 @@ Item {
         maxValue: 1 + offsetSlider.value
         lineWidth: widthSlider.value
         color: graph.visible ? "black" : "white"
-        fillColorBelow: fillBelowCb.checked ? "#F22" : "transparent"
-        fillColorAbove: fillAboveCb.checked ? "#22F" : "transparent"
+        fillColorBelow: root.fillBelow ? "#F22" : "transparent"
+        fillColorAbove: root.fillAbove ? "#22F" : "transparent"
         warningMinColor: "black"
         warningMaxColor: "black"
         wireframe: true
