@@ -1,6 +1,8 @@
 <RCC>
     <qresource prefix="/">
-        <file>shaders/LineNode.vert.qsb</file>
-        <file>shaders/LineNode.frag.qsb</file>
+        <file>shaders/LineNodeRound.vert.qsb</file>
+        <file>shaders/LineNodeRound.frag.qsb</file>
+        <file>shaders/LineNodeBevel.vert.qsb</file>
+        <file>shaders/LineNodeBevel.frag.qsb</file>
     </qresource>
 </RCC>

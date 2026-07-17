@@ -4,6 +4,7 @@
 #include <QSGGeometryNode>
 #include <QtQuick/QSGMaterial>
 #include <QColor>
+#include <Qt>
 
 class LineMaterial : public QSGMaterial
 {
@@ -15,6 +16,10 @@ public:
     QSGMaterialShader *createShader(QSGRendererInterface::RenderMode) const override;
 
     int compare(const QSGMaterial *m) const override;
+
+    // Qt::RoundJoin selects the round-cap/round-join shader; anything else selects the
+    // bevel (non-overlapping ribbon) shader. See LineGraph::joinStyle for the trade-offs.
+    Qt::PenJoinStyle joinStyle = Qt::RoundJoin;
 
     struct {
         QColor color;
@@ -72,6 +77,7 @@ public:
     void setFillDirection(qreal v);
     void setSpread(qreal v);
     void setWireframe(bool v);
+    void setJoinStyle(Qt::PenJoinStyle v);
 
 private:
     QSGGeometry m_geometry;

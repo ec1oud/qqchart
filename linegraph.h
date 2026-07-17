@@ -18,6 +18,7 @@ class LineGraph : public QQuickItem
     Q_PROPERTY(qreal maxValue READ maxValue WRITE setMaxValue NOTIFY maxValueChanged) // convenience
     Q_PROPERTY(qreal timeSpan READ timeSpan WRITE setTimeSpan NOTIFY timeSpanChanged) // in seconds
     Q_PROPERTY(bool wireframe READ wireframe WRITE setWireframe NOTIFY wireframeChanged)
+    Q_PROPERTY(Qt::PenJoinStyle joinStyle READ joinStyle WRITE setJoinStyle NOTIFY joinStyleChanged)
 
 public:
     LineGraph();
@@ -55,6 +56,9 @@ public:
     bool wireframe() const { return m_wireframe; }
     void setWireframe(bool wireframe);
 
+    Qt::PenJoinStyle joinStyle() const { return m_joinStyle; }
+    void setJoinStyle(Qt::PenJoinStyle joinStyle);
+
     Q_INVOKABLE QJSValue sampleNearestX(qreal x);
     Q_INVOKABLE qreal xAtTime(qreal time);
 
@@ -82,6 +86,7 @@ signals:
     void timeSpanChanged();
     void samplesChanged(); // the model has samplesChanged too, but this occurs at a max of once per frame
     void wireframeChanged();
+    void joinStyleChanged();
 
 protected:
     LineGraphModel *m_model = 0;
@@ -89,6 +94,7 @@ protected:
     bool m_geometryChanged = false;
     bool m_propertiesChanged = true;
     bool m_wireframe = false;
+    Qt::PenJoinStyle m_joinStyle = Qt::RoundJoin;
     QColor m_color = Qt::cyan;
     QColor m_fillColorBelow = Qt::transparent;
     QColor m_fillColorAbove = Qt::transparent;

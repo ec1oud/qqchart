@@ -7,9 +7,14 @@
 class LineShader : public QSGMaterialShader
 {
 public:
-    LineShader() : QSGMaterialShader() {
-        setShaderFileName(VertexStage, ":/shaders/LineNode.vert.qsb");
-        setShaderFileName(FragmentStage, ":/shaders/LineNode.frag.qsb");
+    LineShader(Qt::PenJoinStyle joinStyle) : QSGMaterialShader() {
+        // Round joins/caps use a per-segment capsule shader; everything else uses the
+        // bevel (non-overlapping ribbon) shader. Both read the same uniform block and
+        // vertex attributes, so only updateUniformData below is shared.
+        const QString base = joinStyle == Qt::RoundJoin ? QStringLiteral(":/shaders/LineNodeRound")
+                                                        : QStringLiteral(":/shaders/LineNodeBevel");
+        setShaderFileName(VertexStage, base + QStringLiteral(".vert.qsb"));
+        setShaderFileName(FragmentStage, base + QStringLiteral(".frag.qsb"));
     }
 
     bool updateUniformData(RenderState &state, QSGMaterial *newMaterial, QSGMaterial *oldMaterial) override;
@@ -83,14 +88,17 @@ LineMaterial::LineMaterial() : QSGMaterial()
 
 QSGMaterialType *LineMaterial::type() const
 {
-    static QSGMaterialType type;
-    return &type;
+    // Distinct types per shader, so the renderer picks the right pipeline (and doesn't
+    // batch a round-join node together with a bevel-join one).
+    static QSGMaterialType roundType;
+    static QSGMaterialType bevelType;
+    return joinStyle == Qt::RoundJoin ? &roundType : &bevelType;
 }
 
 QSGMaterialShader *LineMaterial::createShader(QSGRendererInterface::RenderMode rm) const
 {
     Q_UNUSED(rm);
-    return new LineShader;
+    return new LineShader(joinStyle);
 }
 
 int LineMaterial::compare(const QSGMaterial *m) const
@@ -156,13 +164,15 @@ void LineNode::updateGeometry(const QRectF &bounds, const QVector<LineVertex> *v
     // the raw vertices.
     const int verticesPerSample = 4;
     const bool filling = m_material->state.fillDirection != 0.f;
-    const bool indexed = !m_wireframe && !filling;
+    // Only the round-join shader wants standalone per-segment quads; the bevel shader (and
+    // fills) draw the continuous ribbon, and wireframe draws the raw vertices.
+    const bool indexed = m_material->joinStyle == Qt::RoundJoin && !m_wireframe && !filling;
     const int samples = v->size() / verticesPerSample;
     const int indexCount = indexed ? samples * 6 : 0;
 
     m_geometry.setDrawingMode(m_wireframe ? QSGGeometry::DrawLineStrip
-                                          : filling ? QSGGeometry::DrawTriangleStrip
-                                                    : QSGGeometry::DrawTriangles);
+                                          : indexed ? QSGGeometry::DrawTriangles       // round: per-segment quads
+                                                    : QSGGeometry::DrawTriangleStrip); // bevel stroke or fill: ribbon
     if (v->size()) {
         if (m_geometry.vertexCount() != v->size() || m_geometry.indexCount() != indexCount)
             m_geometry.allocate(v->size(), indexCount);
@@ -249,4 +259,15 @@ void LineNode::setSpread(qreal v)
 void LineNode::setWireframe(bool v)
 {
     m_wireframe = v;
+}
+
+void LineNode::setJoinStyle(Qt::PenJoinStyle v)
+{
+    if (m_material->joinStyle == v)
+        return;
+    m_material->joinStyle = v;
+    // Changes both the shader/pipeline (type()) and the geometry layout (indexed vs strip),
+    // so LineGraph flags both a property and a geometry change when this is set.
+    markDirty(QSGNode::DirtyMaterial);
+    markDirty(QSGNode::DirtyGeometry);
 }

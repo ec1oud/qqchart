@@ -179,6 +179,43 @@ void LineGraph::setWireframe(bool wireframe)
     emit wireframeChanged();
 }
 
+/*!
+    \qmlproperty enumeration LineGraph::joinStyle
+
+    How line segments are joined at each datapoint, and how the ends are capped.
+    This is a \c Qt::PenJoinStyle, but only two values are meaningfully distinct:
+
+    \value Qt.RoundJoin (the default) Each segment is drawn as a capsule with round
+        caps, and neighbouring capsules overlap into a round join. Joins stay full
+        width at any angle, so sharp spikes never pinch, and there is no miter limit.
+        Caveat: because the capsules overlap, a \e thick, \e translucent stroke blends
+        twice where they meet and shows a slightly denser blob at each datapoint. This
+        is invisible for opaque or thin strokes (the common case).
+
+    \value Qt.BevelJoin The line is drawn as a single, non-overlapping ribbon, so a
+        translucent stroke blends exactly once everywhere - no blobs. The trade-off is
+        that joins are beveled rather than truly round, so a very sharp spike can look
+        slightly clipped or thinned at its tip. Cheapest to render (no per-segment
+        overlap or extra pass).
+
+    Other \c Qt::PenJoinStyle values (\c MiterJoin, \c SvgMiterJoin) are treated as
+    \c BevelJoin.
+
+    Both styles are antialiased and stay a consistent width across a wide range of
+    line widths.
+*/
+void LineGraph::setJoinStyle(Qt::PenJoinStyle joinStyle)
+{
+    if (m_joinStyle == joinStyle)
+        return;
+
+    m_joinStyle = joinStyle;
+    m_propertiesChanged = true;
+    m_geometryChanged = true; // the geometry layout (indexed quads vs ribbon) depends on it
+    emit joinStyleChanged();
+    update();
+}
+
 void LineGraph::geometryChange(const QRectF &newGeometry, const QRectF &oldGeometry)
 {
     m_geometryChanged = true;
@@ -242,6 +279,7 @@ QSGNode *LineGraph::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
         n->line->setMinValue(m_model->minValue());
         n->line->setMaxValue(m_model->maxValue());
         n->line->setWireframe(m_wireframe);
+        n->line->setJoinStyle(m_joinStyle);
     }
     // aa: 1 = antialiased stroke, 0 = hard-edged stroke, -1 = wireframe (solid fill of the
     // whole expanded mesh so the triangles are visible)
