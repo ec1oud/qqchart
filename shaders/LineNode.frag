@@ -7,11 +7,10 @@ layout(location = 0) out vec4 fragColor;
 
 layout(std140, binding = 0) uniform buf {
     mat4 qt_Matrix;                     // Qt's usual transform to go from Item to Window coordinates
-    mat2 dataScalingTransform;          // transform to go from real-world units to pixels
+    vec4 dataScaleOffset;               // xy: scale from real-world units to pixels; zw: offset in pixels
     vec4 normalColor;                   // color to stroke or fill, if data is within range
     vec4 warningMinColor;
     vec4 warningMaxColor;
-    vec2 dataOffset;                    // offset in pixels, to locate the y axis and to put the latest sample at the right
     float qt_Opacity;
     float height;                       // total height in pixels
     float lineWidth;                    // in pixels

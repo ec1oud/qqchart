@@ -20,7 +20,7 @@ RESOURCES += graph.qrc
 
 LIBS += -lsensors
 
-QMAKE_CXXFLAGS += -std=c++14
+CONFIG += c++17
 
 OTHER_FILES += examples/*.qml org/ecloud/charts/qmldir
 

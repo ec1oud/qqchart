@@ -7,6 +7,7 @@
 *.la
 *.lai
 *.so
+*.so.*
 *.dll
 *.dylib
 
@@ -20,10 +21,14 @@
 *.qbs.user.*
 *.moc
 moc_*.cpp
+moc_predefs.h
 qrc_*.cpp
 ui_*.h
 Makefile*
 *build-*
+
+# QtCreator clangd
+.qtc_clangd/
 
 # QtCreator
 

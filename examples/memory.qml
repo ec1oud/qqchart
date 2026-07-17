@@ -1,6 +1,4 @@
-import QtQuick 2.5
-import QtQuick.Window 2.1
-import QtGraphicalEffects 1.0
+import QtQuick
 import org.ecloud.charts 1.0
 
 Window {
@@ -31,13 +29,13 @@ Window {
             }
         }
     }
-    DropShadow {
-        source: content
-        anchors.fill: content
-        horizontalOffset: 1
-        verticalOffset: 1
-        radius: 8.0
-        samples: 7
-        color: "#80000000"
-    }
+    // DropShadow {
+    //     source: content
+    //     anchors.fill: content
+    //     horizontalOffset: 1
+    //     verticalOffset: 1
+    //     radius: 8.0
+    //     samples: 7
+    //     color: "#80000000"
+    // }
 }

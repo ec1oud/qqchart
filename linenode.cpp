@@ -8,8 +8,8 @@ class LineShader : public QSGMaterialShader
 {
 public:
     LineShader() : QSGMaterialShader() {
-        setShaderFileName(VertexStage, "shaders/LineNode.vert.qsb");
-        setShaderFileName(FragmentStage, "shaders/LineNode.frag.qsb");
+        setShaderFileName(VertexStage, ":/shaders/LineNode.vert.qsb");
+        setShaderFileName(FragmentStage, ":/shaders/LineNode.frag.qsb");
     }
 
     bool updateUniformData(RenderState &state, QSGMaterial *newMaterial, QSGMaterial *oldMaterial) override;
@@ -30,14 +30,10 @@ static int uniformBufferAppendColor(QByteArray *buf, int offset, QColor c)
     memcpy(buf->data() + offset, cv, 16);
     return offset + 16;
 }
-static int uniformBufferAppendVec2(QByteArray *buf, int offset, QVector2D v)
+static int uniformBufferAppendVec4(QByteArray *buf, int offset, float x, float y, float z, float w)
 {
-    memcpy(buf->data() + offset, &v, 8);
-    return offset + 8;
-}
-static int uniformBufferAppendMatrix2x2(QByteArray *buf, int offset, const QMatrix2x2 &m)
-{
-    memcpy(buf->data() + offset, m.constData(), 16);
+    float v[4] = { x, y, z, w };
+    memcpy(buf->data() + offset, v, 16);
     return offset + 16;
 }
 static int uniformBufferAppendMatrix4x4(QByteArray *buf, int offset, const QMatrix4x4 &m)
@@ -49,17 +45,17 @@ static int uniformBufferAppendMatrix4x4(QByteArray *buf, int offset, const QMatr
 bool LineShader::updateUniformData(RenderState &state, QSGMaterial *newMaterial, QSGMaterial *)
 {
     QByteArray *buf = state.uniformData();
-    Q_ASSERT(buf->size() >= (16 + 4 + (4 * 3) + 2 + 7) * 4);
+    Q_ASSERT(buf->size() >= (16 + 4 + (4 * 3) + 7) * 4);
     LineMaterial *mat = static_cast<LineMaterial *>(newMaterial);
+    const QMatrix4x4 &dt = mat->state.dataTransform;
     int offset = 0;
-qDebug() << "incoming size" << buf->size() << "data transform" << mat->state.dataTransform; // never happens!
-//    offset = uniformBufferAppendMatrix4x4(buf, offset, mat->state.dataTransform); // wrong? should be item transform
     offset = uniformBufferAppendMatrix4x4(buf, offset, state.combinedMatrix());
-    offset = uniformBufferAppendMatrix2x2(buf, offset, mat->state.dataTransform.toGenericMatrix<2, 2>());
+    // dataScaleOffset: xy = the (diagonal) scale from real-world units to pixels,
+    // zw = the pixel offset (translation) stored in column 3 of dataTransform.
+    offset = uniformBufferAppendVec4(buf, offset, dt(0, 0), dt(1, 1), dt(0, 3), dt(1, 3));
     offset = uniformBufferAppendColor(buf, offset, mat->state.color);
     offset = uniformBufferAppendColor(buf, offset, mat->state.warningMinColor);
     offset = uniformBufferAppendColor(buf, offset, mat->state.warningMaxColor);
-    offset = uniformBufferAppendVec2(buf, offset, mat->state.dataTransform.column(3).toVector2D());
     offset = uniformBufferAppendFloat(buf, offset, state.opacity());
     offset = uniformBufferAppendFloat(buf, offset, mat->state.height);
     offset = uniformBufferAppendFloat(buf, offset, mat->state.lineWidth);
@@ -152,7 +148,6 @@ void LineNode::updateGeometry(const QRectF &bounds, const QVector<LineVertex> *v
     matrix.scale(timeScale, -vscale);
     matrix.translate(bounds.width() / timeScale - v->last().x, -m_maxValue);
     markDirty(QSGNode::DirtyMaterial);
-    qDebug() << parent() << v->size() << m_geometry.vertexCount() << timeScale << vscale << matrix << v->first().x << v->first().y << v->last().x << v->last().y;
 
     m_geometry.setDrawingMode(m_wireframe ? QSGGeometry::DrawLineStrip : QSGGeometry::DrawTriangleStrip);
     if (v->size()) {

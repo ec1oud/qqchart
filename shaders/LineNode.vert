@@ -12,11 +12,14 @@ layout(location = 1) out vec4 vColor;   // color of the vertex
 // constants passed in from LineNode
 layout(std140, binding = 0) uniform buf {
     mat4 qt_Matrix;                     // Qt's usual transform to go from Item to Window coordinates
-    mat2 dataScalingTransform;          // transform to go from real-world units to pixels
+    vec4 dataScaleOffset;               // xy: scale from real-world units to pixels; zw: offset in pixels,
+                                        // to locate the y axis and to put the latest sample at the right.
+                                        // (This used to be a mat2 + vec2, but Qt's OpenGL RHI backend
+                                        // mishandles the std140 column stride of a mat2 in a uniform block;
+                                        // the transform is always a pure scale, so a vec4 is enough.)
     vec4 normalColor;                   // color to stroke or fill, if data is within range
     vec4 warningMinColor;
     vec4 warningMaxColor;
-    vec2 dataOffset;                    // offset in pixels, to locate the y axis and to put the latest sample at the right
     float qt_Opacity;
     float height;                       // total height in pixels
     float lineWidth;                    // in pixels
@@ -32,15 +35,15 @@ void main(void)
 {
     float i = pos.z;                    // vertex index from 0 to 3 (there are 4 vertices per datapoint)
     float t = pos.w;                    // -1 for even (lower) vertices, +1 for odd (upper) vertices (redundant, since we could calculate it from i)
-    vec2 posPx = dataScalingTransform * pos.xy; // the data point, transformed to pixel units, in 2D (we don't need 3D)
+    vec2 posPx = dataScaleOffset.xy * pos.xy; // the data point, transformed to pixel units, in 2D (we don't need 3D)
     float oddMult = mod(i, 2.0);        // will be 1 if i is odd, 0 if it's even
     float evenMult = mod(i + 1.0, 2.0); // will be 0 if i is odd, 1 if it's even
     vec2 offset = vec2(0.);             // how much we will shift the vertex from its on-line position
 
     if (fillDirection == 0.) {
         // we are stroking: need to calculate the miter or knee
-        vec2 prev = dataScalingTransform * prevNext.xy;
-        vec2 next = dataScalingTransform * prevNext.zw;
+        vec2 prev = dataScaleOffset.xy * prevNext.xy;
+        vec2 next = dataScaleOffset.xy * prevNext.zw;
         vec2 lineToward = normalize(posPx - prev);
         vec2 lineAway = normalize(next - posPx);
         vec2 normal = vec2(lineAway.y, -lineAway.x);
@@ -68,7 +71,7 @@ void main(void)
         }
     }
 
-    posPx += dataOffset;
+    posPx += dataScaleOffset.zw;
 
     if (fillDirection != 0.) {
         // we are filling space above or below the line

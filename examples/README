@@ -1,1 +1,3 @@
-QML2_IMPORT_PATH=.. qml example.qml
+QML_IMPORT_PATH=.. qml example.qml
+
+(On Qt 5 the variable was called QML2_IMPORT_PATH.)
