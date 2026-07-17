@@ -17,8 +17,8 @@ Column {
         model: [
             { js: Qt.RoundJoin, c: "cyan",      lw: 10, label: "Qt.RoundJoin  opaque" },
             { js: Qt.BevelJoin, c: "cyan",      lw: 10, label: "Qt.BevelJoin  opaque" },
-            { js: Qt.RoundJoin, c: "#88ff2222", lw: 14, label: "Qt.RoundJoin  translucent (blobs at joins)" },
-            { js: Qt.BevelJoin, c: "#88ff2222", lw: 14, label: "Qt.BevelJoin  translucent (no blobs)" }
+            { js: Qt.RoundJoin, c: "#66ff2222", lw: 14, label: "Qt.RoundJoin  translucent (blobs at joins)" },
+            { js: Qt.BevelJoin, c: "#66ff2222", lw: 14, label: "Qt.BevelJoin  translucent (no blobs)" }
         ]
 
         Rectangle {
@@ -26,7 +26,9 @@ Column {
             height: parent.height / 4
             color: (index % 2) ? "#1c1c1c" : "#242424"
 
+            Text { color: "white"; x: 12; y: 6; text: modelData.label }
             LineGraph {
+                // opacity: 0.1
                 anchors.fill: parent
                 anchors.margins: 10
                 color: modelData.c
@@ -47,7 +49,6 @@ Column {
                     }
                 }
             }
-            Text { color: "white"; x: 12; y: 6; text: modelData.label }
         }
     }
 }
