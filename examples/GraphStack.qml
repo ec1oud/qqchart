@@ -72,6 +72,6 @@ Item {
         interval: 500
         repeat: true
         running: timerRun.checked
-        onTriggered: model.appendSample(root.newSample(++root.offset))
+        onTriggered: model.appendSampleMs(root.newSample(++root.offset)) // timestamp defaults to now
     }
 }

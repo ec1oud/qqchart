@@ -19,158 +19,161 @@ Rectangle {
             label: "example data"
         }
         Component.onCompleted: {
-            var time = new Date()
-            time = new Date(time.getTime() - 1000 * 30)
-            model.appendSample(0.3, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(0.5, time)
+            // hand-crafted time series; timestamps are in ms since the epoch,
+            // starting 30s ago, fed via appendSampleMs (which converts to the
+            // internal seconds axis - passing them to appendSample() would treat
+            // ms as seconds and blow past float precision on the x coordinate).
+            var time = Date.now() - 1000 * 30
+            model.appendSampleMs(0.3, time)
+            time += 1000
+            model.appendSampleMs(0.5, time)
 
             // upward spikes
-            time = new Date(time.getTime() + 50)
-            model.appendSample(0, time)
-            time = new Date(time.getTime() + 100)
-            model.appendSample(0, time)
-            time = new Date(time.getTime() + 50)
-            model.appendSample(1, time)
-            time = new Date(time.getTime() + 20)
-            model.appendSample(1, time)
-            time = new Date(time.getTime() + 50)
-            model.appendSample(0, time)
-            time = new Date(time.getTime() + 100)
-            model.appendSample(0, time)
+            time += 50
+            model.appendSampleMs(0, time)
+            time += 100
+            model.appendSampleMs(0, time)
+            time += 50
+            model.appendSampleMs(1, time)
+            time += 20
+            model.appendSampleMs(1, time)
+            time += 50
+            model.appendSampleMs(0, time)
+            time += 100
+            model.appendSampleMs(0, time)
 
-            time = new Date(time.getTime() + 50)
-            model.appendSample(0, time)
-            time = new Date(time.getTime() + 100)
-            model.appendSample(0, time)
-            time = new Date(time.getTime() + 50)
-            model.appendSample(1, time)
-            time = new Date(time.getTime() + 50)
-            model.appendSample(1, time)
-            time = new Date(time.getTime() + 50)
-            model.appendSample(0, time)
-            time = new Date(time.getTime() + 200)
-            model.appendSample(0, time)
+            time += 50
+            model.appendSampleMs(0, time)
+            time += 100
+            model.appendSampleMs(0, time)
+            time += 50
+            model.appendSampleMs(1, time)
+            time += 50
+            model.appendSampleMs(1, time)
+            time += 50
+            model.appendSampleMs(0, time)
+            time += 200
+            model.appendSampleMs(0, time)
 
             // downward spikes
-            time = new Date(time.getTime() + 50)
-            model.appendSample(1, time)
-            time = new Date(time.getTime() + 100)
-            model.appendSample(1, time)
+            time += 50
+            model.appendSampleMs(1, time)
+            time += 100
+            model.appendSampleMs(1, time)
 
-            time = new Date(time.getTime() + 50)
-            model.appendSample(0, time)
-            time = new Date(time.getTime() + 20)
-            model.appendSample(0, time)
-            time = new Date(time.getTime() + 50)
-            model.appendSample(1, time)
-            time = new Date(time.getTime() + 100)
-            model.appendSample(1, time)
+            time += 50
+            model.appendSampleMs(0, time)
+            time += 20
+            model.appendSampleMs(0, time)
+            time += 50
+            model.appendSampleMs(1, time)
+            time += 100
+            model.appendSampleMs(1, time)
 
-            time = new Date(time.getTime() + 50)
-            model.appendSample(0, time)
-            time = new Date(time.getTime() + 50)
-            model.appendSample(0, time)
-            time = new Date(time.getTime() + 50)
-            model.appendSample(1, time)
-            time = new Date(time.getTime() + 100)
-            model.appendSample(1, time)
+            time += 50
+            model.appendSampleMs(0, time)
+            time += 50
+            model.appendSampleMs(0, time)
+            time += 50
+            model.appendSampleMs(1, time)
+            time += 100
+            model.appendSampleMs(1, time)
 
 			// "square" waves
-            time = new Date(time.getTime() + 40)
-            model.appendSample(0, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(0, time)
-            time = new Date(time.getTime() + 40)
-            model.appendSample(1, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(1, time)
-            time = new Date(time.getTime() + 100)
-            model.appendSample(0, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(0, time)
-            time = new Date(time.getTime() + 100)
-            model.appendSample(1, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(1, time)
-            time = new Date(time.getTime() + 100)
-            model.appendSample(0, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(0, time)
-            time = new Date(time.getTime() + 100)
-            model.appendSample(1, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(1, time)
-            time = new Date(time.getTime() + 100)
-            model.appendSample(0, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(0, time)
-            time = new Date(time.getTime() + 100)
-            model.appendSample(1, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(0, time)
+            time += 40
+            model.appendSampleMs(0, time)
+            time += 1000
+            model.appendSampleMs(0, time)
+            time += 40
+            model.appendSampleMs(1, time)
+            time += 1000
+            model.appendSampleMs(1, time)
+            time += 100
+            model.appendSampleMs(0, time)
+            time += 1000
+            model.appendSampleMs(0, time)
+            time += 100
+            model.appendSampleMs(1, time)
+            time += 1000
+            model.appendSampleMs(1, time)
+            time += 100
+            model.appendSampleMs(0, time)
+            time += 1000
+            model.appendSampleMs(0, time)
+            time += 100
+            model.appendSampleMs(1, time)
+            time += 1000
+            model.appendSampleMs(1, time)
+            time += 100
+            model.appendSampleMs(0, time)
+            time += 1000
+            model.appendSampleMs(0, time)
+            time += 100
+            model.appendSampleMs(1, time)
+            time += 1000
+            model.appendSampleMs(0, time)
 
 			// backtrack
-            time = new Date(time.getTime() - 500)
-            model.appendSample(0.5, time)
-            time = new Date(time.getTime() + 700)
-            model.appendSample(0, time)
-            time = new Date(time.getTime() + 100)
-            model.appendSample(0.2, time)
-            time = new Date(time.getTime() + 100)
-            model.appendSample(0, time)
-            time = new Date(time.getTime() + 100)
-            model.appendSample(1, time)
-            time = new Date(time.getTime() + 1850)
-            model.appendSample(0, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(1, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(0.9, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(1.01, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(0.98, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(0.9, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(0.2, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(0.02, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(0, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(0.01, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(0.03, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(0.02, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(0.04, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(0.07, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(0.05, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(0.06, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(0.18, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(0.09, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(0.1, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(0.08, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(-0.06, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(0.04, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(0.02, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(0, time)
-            time = new Date(time.getTime() + 1000)
-            model.appendSample(0.1, time)
+            time -= 500
+            model.appendSampleMs(0.5, time)
+            time += 700
+            model.appendSampleMs(0, time)
+            time += 100
+            model.appendSampleMs(0.2, time)
+            time += 100
+            model.appendSampleMs(0, time)
+            time += 100
+            model.appendSampleMs(1, time)
+            time += 1850
+            model.appendSampleMs(0, time)
+            time += 1000
+            model.appendSampleMs(1, time)
+            time += 1000
+            model.appendSampleMs(0.9, time)
+            time += 1000
+            model.appendSampleMs(1.01, time)
+            time += 1000
+            model.appendSampleMs(0.98, time)
+            time += 1000
+            model.appendSampleMs(0.9, time)
+            time += 1000
+            model.appendSampleMs(0.2, time)
+            time += 1000
+            model.appendSampleMs(0.02, time)
+            time += 1000
+            model.appendSampleMs(0, time)
+            time += 1000
+            model.appendSampleMs(0.01, time)
+            time += 1000
+            model.appendSampleMs(0.03, time)
+            time += 1000
+            model.appendSampleMs(0.02, time)
+            time += 1000
+            model.appendSampleMs(0.04, time)
+            time += 1000
+            model.appendSampleMs(0.07, time)
+            time += 1000
+            model.appendSampleMs(0.05, time)
+            time += 1000
+            model.appendSampleMs(0.06, time)
+            time += 1000
+            model.appendSampleMs(0.18, time)
+            time += 1000
+            model.appendSampleMs(0.09, time)
+            time += 1000
+            model.appendSampleMs(0.1, time)
+            time += 1000
+            model.appendSampleMs(0.08, time)
+            time += 1000
+            model.appendSampleMs(-0.06, time)
+            time += 1000
+            model.appendSampleMs(0.04, time)
+            time += 1000
+            model.appendSampleMs(0.02, time)
+            time += 1000
+            model.appendSampleMs(0, time)
+            time += 1000
+            model.appendSampleMs(0.1, time)
         }
 
     }
