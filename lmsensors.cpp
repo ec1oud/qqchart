@@ -133,9 +133,17 @@ bool LmSensors::init()
             a = 0;
             while ((feature = sensors_get_features(chip, &a))) {
                 //                qDebug() << "  " << sensors_get_label(chip, feature) << "type" << feature->type;
-                Sensor *new_item = new Sensor();
-
+                // The "main" (input) subfeature is normally at (feature->type << 8),
+                // e.g. SENSORS_SUBFEATURE_TEMP_INPUT. POWER is the exception: type << 8
+                // is POWER_AVERAGE, and many power sensors only expose POWER_INPUT.
                 sub = sensors_get_subfeature(chip, feature, (sensors_subfeature_type)(((int)feature->type) << 8));
+                if (!sub && feature->type == SENSORS_FEATURE_POWER)
+                    sub = sensors_get_subfeature(chip, feature, SENSORS_SUBFEATURE_POWER_INPUT);
+                if (!sub)
+                    // no readable value subfeature (e.g. a bare pwm/beep feature): can't sample it
+                    continue;
+
+                Sensor *new_item = new Sensor();
 
                 new_item->m_index = m_sensors.count();
                 new_item->setLabel(QLatin1String(sensors_get_label(chip, feature)));
@@ -394,7 +402,7 @@ Sensor::Sensor(SensorType type, QObject *parent) : LineGraphModel(parent)
 bool Sensor::recordSample(qint64 timestamp)
 {
     qreal val = sample();
-    if (val == 65535)
+    if (val == 65535 || qIsNaN(val))
         return false;
     appendSampleMs(val, timestamp);
     return true;
@@ -506,7 +514,10 @@ qreal Sensor::sample()
         }
         break;
     default: // LM sensors
-        sensors_get_value(m_chip, m_subfeature->number, &val);
+        if (m_chip && m_subfeature)
+            sensors_get_value(m_chip, m_subfeature->number, &val);
+        else
+            return qQNaN();
         break;
     }
     val *= m_scale;

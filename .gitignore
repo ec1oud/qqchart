@@ -30,6 +30,9 @@ Makefile*
 # QtCreator clangd
 .qtc_clangd/
 
+# Claude Code (personal/local settings; share .claude/settings.json explicitly if wanted)
+.claude/settings.local.json
+
 # QtCreator
 
 *.autosave
