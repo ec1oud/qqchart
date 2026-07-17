@@ -1,6 +1,6 @@
 #version 440
 
-layout(location = 0) in float vT;
+layout(location = 0) in float vDist;    // signed perpendicular distance from the line centre, in pixels
 layout(location = 1) in vec4 vColor;
 
 layout(location = 0) out vec4 fragColor;
@@ -20,10 +20,21 @@ layout(std140, binding = 0) uniform buf {
     float aa;
 };
 
-#define PI 3.14159265358979323846
-
 void main(void)
 {
-    float tt = abs(aa - 1.0) + aa * cos(vT * PI);
-    fragColor = normalColor * tt;
+    float coverage;
+    if (fillDirection != 0.0 || aa < 0.0) {
+        // filled area under/over the curve, or wireframe: solid
+        coverage = 1.0;
+    } else {
+        // Analytic (box-filtered) coverage from the signed distance: fully opaque in the
+        // interior, ramping to 0 across a band centred on the nominal edge. aa selects the
+        // band width: ~0 gives a hard edge, 1 gives a 1px feather. This keeps the stroke a
+        // consistent flat-topped band at any width or angle, and thin (sub-pixel) strokes
+        // fade uniformly instead of breaking into dashes.
+        float halfWidth = lineWidth * 0.5;
+        float aaBand = mix(0.02, 1.0, aa);
+        coverage = clamp((halfWidth - abs(vDist)) / aaBand + 0.5, 0.0, 1.0);
+    }
+    fragColor = normalColor * (coverage * qt_Opacity);
 }

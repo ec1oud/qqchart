@@ -243,7 +243,9 @@ QSGNode *LineGraph::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
         n->line->setMaxValue(m_model->maxValue());
         n->line->setWireframe(m_wireframe);
     }
-    n->line->setSpread(antialiasing() && !m_wireframe ? 1 : 0);
+    // aa: 1 = antialiased stroke, 0 = hard-edged stroke, -1 = wireframe (solid fill of the
+    // whole expanded mesh so the triangles are visible)
+    n->line->setSpread(m_wireframe ? -1 : (antialiasing() ? 1 : 0));
 
     if ((m_geometryChanged || m_samplesChanged) && !m_model->vertices()->isEmpty())
         n->line->updateGeometry(rect, m_model->vertices(), width() / m_timeSpan);

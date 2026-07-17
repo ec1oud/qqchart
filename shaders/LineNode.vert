@@ -6,7 +6,7 @@ layout(location = 1) in vec4 prevNext;  // time and value of the previous datapo
 //layout(location = 2) in float t;
 
 // variables which will be passed through to the frag shader, and automatically interpolated between vertices
-layout(location = 0) out float vT;      // distance: 0 is on the line; goes to +/-0.5 outwards across the stroke
+layout(location = 0) out float vDist;   // signed perpendicular distance from the line centre, in pixels
 layout(location = 1) out vec4 vColor;   // color of the vertex
 
 // constants passed in from LineNode
@@ -40,6 +40,15 @@ void main(void)
     float evenMult = mod(i + 1.0, 2.0); // will be 0 if i is odd, 1 if it's even
     vec2 offset = vec2(0.);             // how much we will shift the vertex from its on-line position
 
+    // Expand the geometry half a line width PLUS a feather, so there is room for the
+    // antialiasing ramp just outside the nominal edge. The frag shader turns the
+    // interpolated perpendicular distance (vDist) into coverage, so the stroke reads as
+    // a flat-topped band with a 1px soft edge regardless of width or angle.
+    float halfLineWidth = lineWidth / 2.0;
+    float feather = 1.0;                // extra pixels each side for the AA ramp
+    float outer = halfLineWidth + feather;
+    vDist = 0.0;
+
     if (fillDirection == 0.) {
         // we are stroking: need to calculate the miter or knee
         vec2 prev = dataScaleOffset.xy * prevNext.xy;
@@ -49,16 +58,18 @@ void main(void)
         vec2 normal = vec2(lineAway.y, -lineAway.x);
         vec2 averageTangent = (prev == posPx) ? lineAway : normalize(lineToward + lineAway);
         vec2 miter = normalize(vec2(-averageTangent.y, averageTangent.x));
-        float halfLineWidth = lineWidth / 2.0;
-        float miterLength = halfLineWidth / dot(normal, miter);
+        float miterLength = outer / dot(normal, miter);
+        // Offsetting by miterLength along the miter puts the vertex exactly `outer`
+        // pixels from the segment centre, so the perpendicular distance is simply t*outer.
+        vDist = t * outer;
 
         if (dot(lineToward, lineAway) >= 0) {
             // angle is right or obtuse: OK to use ordinary miter
             offset = -t * miterLength * miter;
         } else {
             // angle is acute: make a beveled miter to avoid overshooting too far
-            vec2 upToCap = miter * halfLineWidth * t;
-            vec2 capDeviation = averageTangent * halfLineWidth;
+            vec2 upToCap = miter * outer * t;
+            vec2 capDeviation = averageTangent * outer;
             float innerMiterLimit = max(-lineWidth, min(posPx.x - prev.x, lineWidth)) * 8.;
             miterLength = max(-innerMiterLimit, min(miterLength, innerMiterLimit));
             if (lineToward.y > 0) {
@@ -85,7 +96,6 @@ void main(void)
     // transform to go from Item coordinates to Window coordinates (and in 3D)
     gl_Position = qt_Matrix * vec4(posPx + offset, 0, 1.0);
 
-    vT = t * 0.5;
     vColor = pos.y > warningAboveMaximum ? warningMaxColor :
              pos.y < warningBelowMinimum ? warningMinColor : normalColor;
 }
