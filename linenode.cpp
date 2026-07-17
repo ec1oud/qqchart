@@ -150,12 +150,32 @@ void LineNode::updateGeometry(const QRectF &bounds, const QVector<LineVertex> *v
     matrix.translate(bounds.width() / timeScale - v->last().x, -m_maxValue);
     markDirty(QSGNode::DirtyMaterial);
 
-    m_geometry.setDrawingMode(m_wireframe ? QSGGeometry::DrawLineStrip : QSGGeometry::DrawTriangleStrip);
+    // Stroking draws each datapoint's 4 vertices as a standalone quad (two triangles) via an
+    // index buffer, so the per-segment capsules in the shader don't get joined by spurious
+    // strip triangles. Filling still wants the continuous ribbon, and wireframe just shows
+    // the raw vertices.
+    const int verticesPerSample = 4;
+    const bool filling = m_material->state.fillDirection != 0.f;
+    const bool indexed = !m_wireframe && !filling;
+    const int samples = v->size() / verticesPerSample;
+    const int indexCount = indexed ? samples * 6 : 0;
+
+    m_geometry.setDrawingMode(m_wireframe ? QSGGeometry::DrawLineStrip
+                                          : filling ? QSGGeometry::DrawTriangleStrip
+                                                    : QSGGeometry::DrawTriangles);
     if (v->size()) {
-        if (m_geometry.vertexCount() != v->size())
-            m_geometry.allocate(v->size());
+        if (m_geometry.vertexCount() != v->size() || m_geometry.indexCount() != indexCount)
+            m_geometry.allocate(v->size(), indexCount);
         // TODO limit on left side to stay in bounds
         memcpy(m_geometry.vertexData(), v->constData(), sizeof(LineVertex) * v->size());
+        if (indexed) {
+            quint16 *idx = m_geometry.indexDataAsUShort();
+            for (int s = 0; s < samples; ++s) {
+                const quint16 b = quint16(s * verticesPerSample);
+                *idx++ = b;     *idx++ = b + 1; *idx++ = b + 2; // corners prev-, prev+, cur-
+                *idx++ = b + 2; *idx++ = b + 1; *idx++ = b + 3; // corners cur-, prev+, cur+
+            }
+        }
         markDirty(QSGNode::DirtyGeometry);
     }
 }

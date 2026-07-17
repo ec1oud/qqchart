@@ -1,7 +1,7 @@
 #version 440
 
-layout(location = 0) in float vDist;    // signed perpendicular distance from the line centre, in pixels
-layout(location = 1) in vec4 vColor;
+layout(location = 0) in vec4 vSeg;      // this segment in pixels: xy = start, zw = end
+layout(location = 1) in vec2 vPos;      // this fragment's position in pixels
 
 layout(location = 0) out vec4 fragColor;
 
@@ -27,14 +27,18 @@ void main(void)
         // filled area under/over the curve, or wireframe: solid
         coverage = 1.0;
     } else {
-        // Analytic (box-filtered) coverage from the signed distance: fully opaque in the
-        // interior, ramping to 0 across a band centred on the nominal edge. aa selects the
-        // band width: ~0 gives a hard edge, 1 gives a 1px feather. This keeps the stroke a
-        // consistent flat-topped band at any width or angle, and thin (sub-pixel) strokes
-        // fade uniformly instead of breaking into dashes.
+        // Distance from this fragment to the segment (a capsule): fully covered within
+        // halfWidth, with round caps at each end. Adjacent segments' caps overlap at the
+        // shared datapoint, giving a round join that can't pinch at sharp angles. aa selects
+        // the edge softness (~0 = hard, 1 = 1px feather); thin strokes fade uniformly.
+        vec2 a = vSeg.xy;
+        vec2 ba = vSeg.zw - a;
+        vec2 pa = vPos - a;
+        float h = clamp(dot(pa, ba) / max(dot(ba, ba), 1e-6), 0.0, 1.0);
+        float d = length(pa - ba * h);
         float halfWidth = lineWidth * 0.5;
         float aaBand = mix(0.02, 1.0, aa);
-        coverage = clamp((halfWidth - abs(vDist)) / aaBand + 0.5, 0.0, 1.0);
+        coverage = clamp((halfWidth - d) / aaBand + 0.5, 0.0, 1.0);
     }
     fragColor = normalColor * (coverage * qt_Opacity);
 }
