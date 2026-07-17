@@ -151,6 +151,7 @@ void InfluxQuery::setSampleInterval(int sampleInterval)
 
 void InfluxQuery::onAuthenticationRequired(QNetworkReply *reply, QAuthenticator *authenticator)
 {
+    Q_UNUSED(reply);
     authenticator->setUser(m_user);
     authenticator->setPassword(m_password);
 }

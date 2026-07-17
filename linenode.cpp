@@ -89,6 +89,7 @@ QSGMaterialType *LineMaterial::type() const
 
 QSGMaterialShader *LineMaterial::createShader(QSGRendererInterface::RenderMode rm) const
 {
+    Q_UNUSED(rm);
     return new LineShader;
 }
 
