@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import org.ecloud.charts 1.0
 
 Window {
@@ -29,13 +30,13 @@ Window {
             }
         }
     }
-    // DropShadow {
-    //     source: content
-    //     anchors.fill: content
-    //     horizontalOffset: 1
-    //     verticalOffset: 1
-    //     radius: 8.0
-    //     samples: 7
-    //     color: "#80000000"
-    // }
+    MultiEffect {
+        source: content
+        anchors.fill: content
+        shadowEnabled: true
+        shadowColor: "#80000000"
+        shadowHorizontalOffset: 1
+        shadowVerticalOffset: 1
+        shadowBlur: 0.3
+    }
 }
