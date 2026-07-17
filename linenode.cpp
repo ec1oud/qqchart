@@ -28,10 +28,15 @@ static int uniformBufferAppendFloat(QByteArray *buf, int offset, float f)
 }
 static int uniformBufferAppendColor(QByteArray *buf, int offset, QColor c)
 {
-    float cv[4] = { float(c.redF()),
-                    float(c.greenF()),
-                    float(c.blueF()),
-                    float(c.alphaF()) };
+    // Premultiplied alpha: the scene graph blends with (ONE, ONE_MINUS_SRC_ALPHA), and the
+    // frag shader scales the whole vec4 by coverage*qt_Opacity. So the colour's own alpha
+    // has to be baked into the RGB here, otherwise it wouldn't attenuate the colour at all
+    // (only qt_Opacity would appear to "work").
+    float a = float(c.alphaF());
+    float cv[4] = { float(c.redF()) * a,
+                    float(c.greenF()) * a,
+                    float(c.blueF()) * a,
+                    a };
     memcpy(buf->data() + offset, cv, 16);
     return offset + 16;
 }
